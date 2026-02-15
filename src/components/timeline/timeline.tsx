@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-function Timeline({ videoRef, currentTime, duration, onSeek }: any) {
+export function Timeline({ videoRef, currentTime, duration, onSeek }: any) {
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [hoverTime, setHoverTime] = useState<number | null>(null);

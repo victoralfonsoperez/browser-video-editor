@@ -1,42 +1,87 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* ── Layout ────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #111114;
+  color: #e0e0e0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.editor-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* ── Header ─────────────────────────────────────────────────────────── */
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 46px;
+  background: #18181c;
+  border-bottom: 1px solid #2a2a2e;
+  flex-shrink: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.editor-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.card {
-  padding: 2em;
+/* ── Open button ────────────────────────────────────────────────────── */
+.open-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: #c8f55a;
+  color: #111;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background 0.15s;
 }
 
-.read-the-docs {
-  color: #888;
+.open-btn:hover {
+  background: #d8ff70;
+}
+
+/* ── Main video area ─────────────────────────────────────────────────── */
+.editor-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d0d0f;
+  overflow: hidden;
+}
+
+.editor-video {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
+.editor-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: #444;
+  font-size: 14px;
+}
+
+/* ── Footer / Timeline ─────────────────────────────────────────────── */
+.editor-footer {
+  flex-shrink: 0;
+  padding: 8px 12px 10px;
+  background: #18181c;
+  border-top: 1px solid #2a2a2e;
 }

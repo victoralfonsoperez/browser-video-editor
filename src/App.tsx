@@ -55,7 +55,7 @@ function App() {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h1>Video Editor</h1>
+      <h1 className="text-3xl font-bold underline">Video Editor</h1>
       
       {!videoFile ? (
         <div>

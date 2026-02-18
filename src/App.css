@@ -1,9 +1,10 @@
-/* ── Layout ────────────────────────────────────────────────────────── */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+@import "tailwindcss";
 
-body {
-  background: #111114;
-  color: #e0e0e0;
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
 }
 
 .editor-layout {

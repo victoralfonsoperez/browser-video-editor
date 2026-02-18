@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import VideoPlayer from './components/videoplayer/videoplayer';
 import Timeline from './components/timeline/timeline';
+import './App.css';
 
 function App() {
-  const [videoFile, setVideoFile] = useState(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoURL, setVideoURL] = useState<string | undefined>(undefined);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -12,84 +13,70 @@ function App() {
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
     if (!file || !file.type.startsWith('video/')) return;
-    
-    if (file.size > 500 * 1024 * 1024) {
-      alert('File too large (max 500MB)');
-      return;
-    }
-
+    if (file.size > 500 * 1024 * 1024) { alert('File too large (max 500MB)'); return; }
     if (videoURL) URL.revokeObjectURL(videoURL);
-
-    const url = URL.createObjectURL(file);
     setVideoFile(file);
-    setVideoURL(url);
+    setVideoURL(URL.createObjectURL(file));
   };
 
-  // Handle seek from timeline
   const handleTimelineSeek = (newTime: number) => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
-    }
+    if (videoRef.current) { videoRef.current.currentTime = newTime; setCurrentTime(newTime); }
   };
 
-  // Update current time from video
   const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-    }
+    if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
   };
 
-  // Update duration when metadata loads
   const handleLoadedMetadata = (value: number) => {
-    if (value) {
-      setDuration(value);
-    }
+    if (value) setDuration(value);
   };
 
-  useEffect(() => {
-    return () => {
-      if (videoURL) URL.revokeObjectURL(videoURL);
-    };
-  }, [videoURL]);
+  useEffect(() => { return () => { if (videoURL) URL.revokeObjectURL(videoURL); }; }, [videoURL]);
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1 className="text-3xl font-bold underline">Video Editor</h1>
-      
-      {!videoFile ? (
-        <div>
-          <input 
-            type="file" 
-            accept="video/*"
-            onChange={handleFileChange}
-          />
+    <div className="min-h-screen bg-[#111114] text-[#e0e0e0] p-5">
+      <div className="mx-auto max-w-4xl">
+        {/* Header */}
+        <div className="mb-5 flex items-center justify-between">
+          <h1 className="text-xl font-bold uppercase tracking-widest text-[#ccc]">Video Editor</h1>
+          {videoFile && (
+            <button
+              onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); }}
+              className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+            >
+              Load Different Video
+            </button>
+          )}
         </div>
-      ) : (
-        <>
-          {/* Video Player */}
-          <VideoPlayer ref={videoRef} videoURL={videoURL} videoFile={videoFile} handleTimeUpdate={handleTimeUpdate} handleLoadMetadata={handleLoadedMetadata} currentTime={currentTime} />
 
-          {/* Timeline */}
-          <Timeline
-            currentTime={currentTime}
-            duration={duration}
-            onSeek={handleTimelineSeek}
-            videoRef={videoRef}
-          />
-
-          {videoURL ? <button 
-            onClick={() => {
-              URL.revokeObjectURL(videoURL);
-              setVideoFile(null);
-              setVideoURL(undefined);
-            }}
-            style={{ marginTop: '20px' }}
-          >
-            Load Different Video
-          </button> : null}
-        </>
-      )}
+        {!videoFile ? (
+          /* Upload prompt */
+          <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-[#333] bg-[#1a1a1e] py-20 text-[#555]">
+            <p className="text-base">Open a video file to get started</p>
+            <label className="cursor-pointer rounded bg-[#c8f55a] px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#111] hover:bg-[#d8ff70] transition-colors">
+              Choose File
+              <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
+            </label>
+          </div>
+        ) : (
+          <>
+            <VideoPlayer
+              ref={videoRef}
+              videoURL={videoURL}
+              videoFile={videoFile}
+              handleTimeUpdate={handleTimeUpdate}
+              handleLoadMetadata={handleLoadedMetadata}
+              currentTime={currentTime}
+            />
+            <Timeline
+              currentTime={currentTime}
+              duration={duration}
+              onSeek={handleTimelineSeek}
+              videoRef={videoRef}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }

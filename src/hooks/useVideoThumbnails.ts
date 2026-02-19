@@ -5,15 +5,17 @@ export interface Thumbnail {
   dataUrl: string
 }
 
-const THUMB_WIDTH = 80
-const THUMB_HEIGHT = 45
+export const THUMB_WIDTH = 80
+export const THUMB_HEIGHT = 45
 
 export function useVideoThumbnails() {
   const [thumbnails, setThumbnails] = useState<Thumbnail[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
 
   const generateThumbnails = useCallback(
-    async (video: HTMLVideoElement, intervalSeconds = 2) => {
+    async (video: HTMLVideoElement, count: number) => {
+      if (count < 1) return
+
       setIsGenerating(true)
       setThumbnails([])
 
@@ -23,10 +25,10 @@ export function useVideoThumbnails() {
       const ctx = canvas.getContext('2d')!
 
       const duration = video.duration
-      const times: number[] = []
-      for (let t = 0; t < duration; t += intervalSeconds) {
-        times.push(t)
-      }
+      const times: number[] = Array.from(
+        { length: count },
+        (_, i) => (i / count) * duration
+      )
 
       const results: Thumbnail[] = []
 

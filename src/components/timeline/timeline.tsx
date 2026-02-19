@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useVideoThumbnails } from '../../hooks/useVideoThumbnails';
+import { useVideoThumbnails, THUMB_WIDTH } from '../../hooks/useVideoThumbnails';
 import type { useTrimMarkers } from '../../hooks/useTrimMarkers';
 
 type TrimMarkers = ReturnType<typeof useTrimMarkers>;
@@ -19,9 +19,18 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const { thumbnails, isGenerating, generateThumbnails } = useVideoThumbnails();
 
+  const generate = useCallback(() => {
+    if (!videoRef?.current || duration <= 0 || isGenerating) return;
+    const width = timelineRef.current?.getBoundingClientRect().width ?? 0;
+    if (width <= 0) return;
+    const count = Math.max(1, Math.floor(width / THUMB_WIDTH));
+    generateThumbnails(videoRef.current, count);
+  }, [videoRef, duration, isGenerating, generateThumbnails]);
+
+  // Generate on first load
   useEffect(() => {
-    if (videoRef?.current && duration > 0 && thumbnails.length === 0 && !isGenerating) {
-      generateThumbnails(videoRef.current, 2);
+    if (duration > 0 && thumbnails.length === 0 && !isGenerating) {
+      generate();
     }
   }, [duration]);
 
@@ -139,7 +148,8 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
               <img
                 key={thumb.time}
                 src={thumb.dataUrl}
-                className="h-full w-20 shrink-0 object-cover opacity-85 hover:opacity-100 transition-opacity duration-150"
+                className="h-full shrink-0 object-cover opacity-85 hover:opacity-100 transition-opacity duration-150"
+                style={{ width: THUMB_WIDTH }}
                 alt={`t=${thumb.time}s`}
                 title={formatTime(thumb.time)}
               />

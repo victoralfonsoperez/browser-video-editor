@@ -36,6 +36,7 @@ function App() {
     if (value) setDuration(value);
   };
 
+  // Seek to clip's in-point and load its in/out markers back into the timeline for editing
   const handleSeekToClip = (clip: Clip) => {
     handleTimelineSeek(clip.inPoint);
     trim.setIn(clip.inPoint);
@@ -92,6 +93,8 @@ function App() {
               onAddClip={trim.addClip}
               onRemoveClip={trim.removeClip}
               onSeekToClip={handleSeekToClip}
+              onUpdateClip={trim.updateClip}
+              onReorderClips={trim.reorderClips}
             />
           </>
         )}

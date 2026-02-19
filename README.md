@@ -1,61 +1,94 @@
 # Browser Video Editor
 
-A browser-based video clip editor for creating and exporting clips from video files. Built with React and powered by client-side video processing.
+A browser-based video clip editor for creating and exporting clips from video files. Built with React and powered by client-side video processing — no server required.
 
 ## 🎯 Project Overview
 
 This tool allows users to:
-- Upload video files locally
-- Visualize videos with an interactive timeline
-- Create multiple clips from a single video
+- Upload video files locally (drag & drop or file picker)
+- Visualize videos with an interactive timeline and thumbnail previews
+- Create and manage multiple clips from a single video
 - Preview clips in real-time
 - Export clips as downloadable video files
 
-All processing happens directly in the browser - no server required!
+All processing happens directly in the browser.
 
-## ✨ Features (Planned)
+## ✨ Features
 
-### MVP Features
+### Implemented
 - ✅ Local file upload with drag & drop
 - ✅ Multi-format video playback (MP4, WebM, MOV)
-- ✅ Interactive timeline with thumbnail previews
-- ✅ Trim tools (set in/out points)
-- ✅ Multiple clips from single video
+- ✅ Interactive timeline with thumbnail strip generation
+- ✅ Draggable trim markers (in/out points)
+- ✅ Multiple clip management via clip list
 - ✅ In-browser clip preview
-- ✅ Export clips as video files
 
-### Future Enhancements
+### Planned
+- Clip export as video files (FFmpeg.wasm)
 - Audio waveform visualization
 - Transitions between clips
 - Text overlays and titles
 - Video filters and effects
-- Multi-track editing
-- Cloud storage integration
-- Collaborative editing features
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18+ with TypeScript
-- **Build Tool**: Vite
-- **Video Processing**: FFmpeg.wasm
-- **UI Components**: Radix UI / shadcn/ui
-- **State Management**: Zustand
-- **Styling**: Tailwind CSS
-- **Canvas API**: For thumbnail generation
-- **Web Workers**: For performance optimization
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + TypeScript |
+| Build Tool | Vite 7 |
+| Styling | Tailwind CSS v4 (via `@tailwindcss/vite`) |
+| Testing | Vitest + Testing Library |
+| Linting | ESLint 9 + typescript-eslint |
+| Video / Canvas | HTML5 Video API + Canvas API |
+| Node Version | 22 (see `.nvmrc`) |
+
+> **Note:** Tailwind CSS v4 is integrated as a Vite plugin — no separate `tailwind.config` file needed.
+
+## 📁 Folder Structure
+```
+browser-video-editor/
+├── public/                     # Static assets
+├── src/
+│   ├── components/
+│   │   ├── cliplist/
+│   │   │   └── ClipList.tsx        # Clip management panel
+│   │   ├── timeline/
+│   │   │   ├── timeline.tsx        # Interactive video timeline
+│   │   │   └── timeline.spec.tsx   # Timeline unit tests
+│   │   ├── videoplayer/            # Video playback component
+│   │   ├── videouploader/
+│   │   │   └── videouploader.tsx   # File upload / drag & drop
+│   │   ├── VideoTimeline.tsx       # Legacy timeline (being refactored)
+│   │   └── VideoTimeline.css
+│   ├── hooks/
+│   │   ├── useTrimMarkers.ts       # Draggable in/out point logic
+│   │   └── useVideoThumbnails.ts   # Canvas-based thumbnail generation
+│   ├── assets/
+│   ├── App.tsx
+│   ├── main.tsx
+│   ├── index.css                   # Tailwind base import
+│   └── test-setup.ts
+├── index.html
+├── vite.config.ts
+├── tsconfig.json
+└── package.json
+```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ and npm
+- Node.js 22+ (see `.nvmrc`)
+- npm
 
 ### Installation
 ```bash
 # Clone the repository
 git clone https://github.com/victoralfonsoperez/browser-video-editor.git
 
-# Navigate to project directory
 cd browser-video-editor
+
+# Use the correct Node version (if using nvm)
+nvm use
 
 # Install dependencies
 npm install
@@ -64,67 +97,29 @@ npm install
 npm run dev
 ```
 
-### Building for Production
+### Available Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the dev server |
+| `npm run build` | Type-check and build for production |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run tests with Vitest |
+
+## 🧪 Testing
+
+Tests use **Vitest** with **@testing-library/react**. Test files live alongside their components using the `.spec.tsx` convention.
 ```bash
-npm run build
+npm run test
 ```
-
-## 📚 Documentation
-
-Detailed documentation will be added as the project progresses:
-- User Guide
-- API Reference
-- Contributing Guidelines
-- Architecture Overview
-
-## 🤝 Contributing
-
-Contributions are welcome! This is an open-source side project. Please feel free to:
-- Report bugs
-- Suggest features
-- Submit pull requests
-
-## 📝 License
-
-MIT License - feel free to use this project for learning or commercial purposes.
-
-## 🎓 Learning Resources
-
-Key resources for building this project:
-- [HTML5 Video API](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement)
-- [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
-- [FFmpeg.wasm Documentation](https://ffmpegwasm.netlify.app/)
-- [Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
 
 ## 📊 Project Status
 
-**Current Phase**: Planning & Setup  
-**Progress**: 0% Complete  
-**Started**: February 2026  
-**Target Completion**: April-May 2026
-
----
-
-**Note**: This project is under active development. Features and timelines may change as development progresses.
-
-## 💡 Technical Considerations
-
-### Browser Compatibility
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-### Performance Targets
-- Support videos up to 2GB
-- Thumbnail generation < 5s for 10min video
-- Export speed: ~1x video duration
-- Responsive UI (60fps timeline scrubbing)
-
-### File Format Support
-- **Primary**: MP4 (H.264/AAC)
-- **Secondary**: WebM (VP8/VP9), MOV
-- **Codec dependent**: AVI, MKV
+**Current Phase:** 3 of 6 — Clip Creation Interface (~50% complete)  
+**Overall Progress:** ~40%  
+**Started:** February 2026  
+**Target Completion:** May–June 2026
 
 ---
 

@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import VideoPlayer from './components/videoplayer/videoplayer';
 import Timeline from './components/timeline/timeline';
+import { ClipList } from './components/cliplist/ClipList';
+import { useTrimMarkers } from './hooks/useTrimMarkers';
+import type { Clip } from './hooks/useTrimMarkers';
 import './App.css';
 
 function App() {
@@ -9,6 +12,7 @@ function App() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const trim = useTrimMarkers(duration);
 
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
@@ -17,6 +21,7 @@ function App() {
     if (videoURL) URL.revokeObjectURL(videoURL);
     setVideoFile(file);
     setVideoURL(URL.createObjectURL(file));
+    trim.clearMarkers();
   };
 
   const handleTimelineSeek = (newTime: number) => {
@@ -29,6 +34,12 @@ function App() {
 
   const handleLoadedMetadata = (value: number) => {
     if (value) setDuration(value);
+  };
+
+  const handleSeekToClip = (clip: Clip) => {
+    handleTimelineSeek(clip.inPoint);
+    trim.setIn(clip.inPoint);
+    trim.setOut(clip.outPoint);
   };
 
   useEffect(() => { return () => { if (videoURL) URL.revokeObjectURL(videoURL); }; }, [videoURL]);
@@ -50,7 +61,6 @@ function App() {
         </div>
 
         {!videoFile ? (
-          /* Upload prompt */
           <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-[#333] bg-[#1a1a1e] py-20 text-[#555]">
             <p className="text-base">Open a video file to get started</p>
             <label className="cursor-pointer rounded bg-[#c8f55a] px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#111] hover:bg-[#d8ff70] transition-colors">
@@ -73,6 +83,15 @@ function App() {
               duration={duration}
               onSeek={handleTimelineSeek}
               videoRef={videoRef}
+              trim={trim}
+            />
+            <ClipList
+              clips={trim.clips}
+              inPoint={trim.inPoint}
+              outPoint={trim.outPoint}
+              onAddClip={trim.addClip}
+              onRemoveClip={trim.removeClip}
+              onSeekToClip={handleSeekToClip}
             />
           </>
         )}

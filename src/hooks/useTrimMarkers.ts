@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 export interface Clip {
   id: string;
@@ -28,19 +28,41 @@ export function useTrimMarkers(duration: number) {
     setOutPoint(null);
   }, []);
 
-  const addClip = useCallback((name: string) => {
-    if (inPoint === null || outPoint === null) return;
-    const clip: Clip = {
-      id: crypto.randomUUID(),
-      name,
-      inPoint,
-      outPoint,
-    };
-    setClips((prev) => [...prev, clip]);
-  }, [inPoint, outPoint]);
+  const addClip = useCallback(
+    (name: string) => {
+      if (inPoint === null || outPoint === null) return;
+      const clip: Clip = {
+        id: crypto.randomUUID(),
+        name,
+        inPoint,
+        outPoint,
+      };
+      setClips((prev) => [...prev, clip]);
+    },
+    [inPoint, outPoint],
+  );
 
   const removeClip = useCallback((id: string) => {
     setClips((prev) => prev.filter((c) => c.id !== id));
+  }, []);
+
+  /** Patch any fields on an existing clip (name, inPoint, outPoint). */
+  const updateClip = useCallback(
+    (id: string, patch: Partial<Pick<Clip, 'name' | 'inPoint' | 'outPoint'>>) => {
+      setClips((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+    },
+    [],
+  );
+
+  /** Move a clip from fromIndex to toIndex. */
+  const reorderClips = useCallback((fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    setClips((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
   }, []);
 
   // Keyboard shortcuts: I = set in, O = set out
@@ -57,5 +79,17 @@ export function useTrimMarkers(duration: number) {
     [setIn, setOut],
   );
 
-  return { inPoint, outPoint, clips, setIn, setOut, clearMarkers, addClip, removeClip, bindKeyboard };
+  return {
+    inPoint,
+    outPoint,
+    clips,
+    setIn,
+    setOut,
+    clearMarkers,
+    addClip,
+    removeClip,
+    updateClip,
+    reorderClips,
+    bindKeyboard,
+  };
 }

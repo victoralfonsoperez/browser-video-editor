@@ -4,7 +4,6 @@ import Timeline from './components/timeline/timeline';
 import { ClipList } from './components/cliplist/ClipList';
 import { useTrimMarkers } from './hooks/useTrimMarkers';
 import type { Clip } from './hooks/useTrimMarkers';
-import './App.css';
 
 function App() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -36,7 +35,6 @@ function App() {
     if (value) setDuration(value);
   };
 
-  // Seek to clip's in-point and load its in/out markers back into the timeline for editing
   const handleSeekToClip = (clip: Clip) => {
     handleTimelineSeek(clip.inPoint);
     trim.setIn(clip.inPoint);
@@ -48,7 +46,6 @@ function App() {
   return (
     <div className="min-h-screen bg-[#111114] text-[#e0e0e0] p-5">
       <div className="mx-auto max-w-4xl">
-        {/* Header */}
         <div className="mb-5 flex items-center justify-between">
           <h1 className="text-xl font-bold uppercase tracking-widest text-[#ccc]">Video Editor</h1>
           {videoFile && (

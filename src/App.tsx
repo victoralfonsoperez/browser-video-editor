@@ -4,6 +4,7 @@ import Timeline from './components/timeline/timeline';
 import { ClipList } from './components/cliplist/ClipList';
 import { useTrimMarkers } from './hooks/useTrimMarkers';
 import { useClipThumbnail } from './hooks/useClipThumbnail';
+import { ClipPreviewModal } from './components/clippreview/ClipPreviewModal';
 import type { Clip } from './hooks/useTrimMarkers';
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
   const [videoURL, setVideoURL] = useState<string | undefined>(undefined);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [previewClip, setPreviewClip] = useState<Clip | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trim = useTrimMarkers(duration);
   const captureFrame = useClipThumbnail();
@@ -102,10 +104,20 @@ function App() {
               onSeekToClip={handleSeekToClip}
               onUpdateClip={trim.updateClip}
               onReorderClips={trim.reorderClips}
+              onPreviewClip={setPreviewClip}
             />
           </>
         )}
       </div>
+
+      {/* Clip preview modal */}
+      {previewClip && videoURL && (
+        <ClipPreviewModal
+          clip={previewClip}
+          videoURL={videoURL}
+          onClose={() => setPreviewClip(null)}
+        />
+      )}
     </div>
   );
 }

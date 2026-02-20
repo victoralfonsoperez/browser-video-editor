@@ -8,6 +8,7 @@ interface ClipListProps {
   onAddClip: (name: string) => void;
   onRemoveClip: (id: string) => void;
   onSeekToClip: (clip: Clip) => void;
+  onPreviewClip: (clip: Clip) => void;
   onUpdateClip: (id: string, patch: Partial<Pick<Clip, 'name' | 'inPoint' | 'outPoint'>>) => void;
   onReorderClips: (fromIndex: number, toIndex: number) => void;
 }
@@ -18,8 +19,6 @@ function formatTime(seconds: number) {
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
-
-// ─── Individual clip row ───────────────────────────────────────────────────────
 
 interface ClipRowProps {
   clip: Clip;
@@ -32,23 +31,15 @@ interface ClipRowProps {
   onDrop: (targetIndex: number) => void;
   onRemove: () => void;
   onSeek: () => void;
+  onPreview: () => void;
   onRename: (name: string) => void;
   onEditPoints: () => void;
 }
 
 function ClipRow({
-  clip,
-  index,
-  isDragOver,
-  dragOverSide,
-  onDragStart,
-  onDragEnter,
-  onDragEnd,
-  onDrop,
-  onRemove,
-  onSeek,
-  onRename,
-  onEditPoints,
+  clip, index, isDragOver, dragOverSide,
+  onDragStart, onDragEnter, onDragEnd, onDrop,
+  onRemove, onSeek, onPreview, onRename, onEditPoints,
 }: ClipRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(clip.name);
@@ -80,18 +71,12 @@ function ClipRow({
         onDragEnter(index, side);
       }}
       onDragEnd={onDragEnd}
-      onDrop={(e) => {
-        e.preventDefault();
-        onDrop(index);
-      }}
+      onDrop={(e) => { e.preventDefault(); onDrop(index); }}
       className={[
         'relative flex items-center gap-2 rounded border bg-[#111] px-2 py-2 transition-colors group select-none',
-        isDragOver
-          ? 'border-[#c8f55a]/60 bg-[#c8f55a]/5'
-          : 'border-[#2a2a2e] hover:border-[#444]',
+        isDragOver ? 'border-[#c8f55a]/60 bg-[#c8f55a]/5' : 'border-[#2a2a2e] hover:border-[#444]',
       ].join(' ')}
     >
-      {/* Drop indicator line */}
       {isDragOver && dragOverSide === 'top' && (
         <div className="pointer-events-none absolute -top-px left-0 right-0 h-0.5 rounded-full bg-[#c8f55a]" />
       )}
@@ -99,31 +84,22 @@ function ClipRow({
         <div className="pointer-events-none absolute -bottom-px left-0 right-0 h-0.5 rounded-full bg-[#c8f55a]" />
       )}
 
-      {/* Drag handle */}
-      <span
-        className="cursor-grab text-[#444] hover:text-[#888] transition-colors text-base leading-none active:cursor-grabbing shrink-0"
-        title="Drag to reorder"
-      >
-        ⠿
-      </span>
-
-      {/* Index */}
+      <span className="cursor-grab text-[#444] hover:text-[#888] transition-colors text-base leading-none active:cursor-grabbing shrink-0" title="Drag to reorder">⠿</span>
       <span className="text-[10px] text-[#555] font-mono w-4 shrink-0">{index + 1}</span>
 
-      {/* Thumbnail */}
-      <div className="shrink-0 w-[56px] h-[32px] rounded overflow-hidden bg-[#222] border border-[#333]">
+      {/* Thumbnail — click to preview */}
+      <div
+        className="shrink-0 w-[56px] h-[32px] rounded overflow-hidden bg-[#222] border border-[#333] cursor-pointer hover:border-[#c8f55a]/60 transition-colors"
+        onClick={onPreview}
+        title="Preview clip"
+      >
         {clip.thumbnailDataUrl ? (
-          <img
-            src={clip.thumbnailDataUrl}
-            alt={`Thumbnail for ${clip.name}`}
-            className="w-full h-full object-cover"
-          />
+          <img src={clip.thumbnailDataUrl} alt={`Thumbnail for ${clip.name}`} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-[#444] text-[10px]">▶</div>
         )}
       </div>
 
-      {/* Name — click to edit */}
       <div className="flex-1 min-w-0">
         {isEditing ? (
           <input
@@ -133,71 +109,35 @@ function ClipRow({
             onBlur={commitRename}
             onKeyDown={(e) => {
               if (e.key === 'Enter') commitRename();
-              if (e.key === 'Escape') {
-                setEditValue(clip.name);
-                setIsEditing(false);
-              }
+              if (e.key === 'Escape') { setEditValue(clip.name); setIsEditing(false); }
             }}
             className="w-full rounded border border-[#c8f55a]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-sm text-[#ccc] outline-none focus:border-[#c8f55a]"
           />
         ) : (
-          <button
-            onClick={startEdit}
-            className="block w-full text-left text-sm text-[#ccc] truncate hover:text-white transition-colors cursor-text"
-            title="Click to rename"
-          >
+          <button onClick={startEdit} className="block w-full text-left text-sm text-[#ccc] truncate hover:text-white transition-colors cursor-text" title="Click to rename">
             {clip.name}
           </button>
         )}
       </div>
 
-      {/* Timecodes */}
       <span className="font-mono text-xs text-[#c8f55a] shrink-0">{formatTime(clip.inPoint)}</span>
       <span className="text-[#555] text-xs shrink-0">→</span>
       <span className="font-mono text-xs text-[#f55a5a] shrink-0">{formatTime(clip.outPoint)}</span>
-      <span className="font-mono text-xs text-[#777] shrink-0">
-        {formatTime(clipDuration)}
-      </span>
+      <span className="font-mono text-xs text-[#777] shrink-0">{formatTime(clipDuration)}</span>
 
-      {/* Actions — visible on hover */}
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button
-          onClick={onSeek}
-          className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
-          title="Seek to in-point"
-        >
-          ▶
-        </button>
-        <button
-          onClick={onEditPoints}
-          className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
-          title="Load in/out points into timeline for editing"
-        >
-          ✎
-        </button>
-        <button
-          onClick={onRemove}
-          className="rounded px-1.5 py-0.5 text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
-          title="Remove clip"
-        >
-          ✕
-        </button>
+        <button onClick={onPreview} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Preview clip">⬛▶</button>
+        <button onClick={onSeek} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Seek to in-point">▶</button>
+        <button onClick={onEditPoints} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Load in/out points into timeline for editing">✎</button>
+        <button onClick={onRemove} className="rounded px-1.5 py-0.5 text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Remove clip">✕</button>
       </div>
     </div>
   );
 }
 
-// ─── ClipList container ────────────────────────────────────────────────────────
-
 export function ClipList({
-  clips,
-  inPoint,
-  outPoint,
-  onAddClip,
-  onRemoveClip,
-  onSeekToClip,
-  onUpdateClip,
-  onReorderClips,
+  clips, inPoint, outPoint,
+  onAddClip, onRemoveClip, onSeekToClip, onPreviewClip, onUpdateClip, onReorderClips,
 }: ClipListProps) {
   const [clipName, setClipName] = useState('');
   const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
@@ -215,9 +155,7 @@ export function ClipList({
 
   const handleDrop = (targetIndex: number) => {
     if (dragFromIndex === null) return;
-    // Calculate final destination accounting for drop side
     let to = dragOverSide === 'bottom' ? targetIndex + 1 : targetIndex;
-    // Adjust for the gap left when the dragged item is removed
     if (to > dragFromIndex) to -= 1;
     onReorderClips(dragFromIndex, to);
     setDragFromIndex(null);
@@ -235,7 +173,6 @@ export function ClipList({
     <div className="w-full max-w-4xl mx-auto mt-4 rounded-md border border-[#333] bg-[#1a1a1e] p-3">
       <div className="text-[11px] uppercase tracking-wider text-[#888] mb-3">Clip Definition</div>
 
-      {/* In/Out display */}
       <div className="flex gap-3 mb-3">
         <div className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2">
           <div className="text-[10px] uppercase text-[#555] mb-0.5">In Point</div>
@@ -257,7 +194,6 @@ export function ClipList({
         </div>
       </div>
 
-      {/* Add clip row */}
       <div className="flex gap-2 mb-4">
         <input
           type="text"
@@ -277,7 +213,6 @@ export function ClipList({
         </button>
       </div>
 
-      {/* Clip list */}
       {clips.length === 0 ? (
         <div className="text-center text-xs text-[#444] py-4">
           Set in/out points and add clips — they'll appear here
@@ -292,14 +227,12 @@ export function ClipList({
               isDragOver={dragOverIndex === i}
               dragOverSide={dragOverIndex === i ? dragOverSide : null}
               onDragStart={(idx) => setDragFromIndex(idx)}
-              onDragEnter={(idx, side) => {
-                setDragOverIndex(idx);
-                setDragOverSide(side);
-              }}
+              onDragEnter={(idx, side) => { setDragOverIndex(idx); setDragOverSide(side); }}
               onDragEnd={handleDragEnd}
               onDrop={handleDrop}
               onRemove={() => onRemoveClip(clip.id)}
               onSeek={() => onSeekToClip(clip)}
+              onPreview={() => onPreviewClip(clip)}
               onRename={(name) => onUpdateClip(clip.id, { name })}
               onEditPoints={() => onSeekToClip(clip)}
             />

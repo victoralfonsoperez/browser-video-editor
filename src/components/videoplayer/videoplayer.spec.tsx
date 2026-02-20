@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import VideoPlayer from './videoplayer';
@@ -177,11 +177,13 @@ describe('VideoPlayer', () => {
       expect(window.HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(1);
     });
 
-    it('prevents default on Space to avoid page scroll', () => {
+    it('prevents default on Space to avoid page scroll', async () => {
       renderVideoPlayer();
       const event = new KeyboardEvent('keydown', { code: 'Space', bubbles: true, cancelable: true });
       const spy = vi.spyOn(event, 'preventDefault');
-      window.dispatchEvent(event);
+      await act(async () => {
+        window.dispatchEvent(event);
+      });
       expect(spy).toHaveBeenCalled();
     });
 

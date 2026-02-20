@@ -5,6 +5,7 @@ export interface Clip {
   name: string;
   inPoint: number;
   outPoint: number;
+  thumbnailDataUrl?: string;
 }
 
 export function useTrimMarkers(duration: number) {
@@ -14,7 +15,6 @@ export function useTrimMarkers(duration: number) {
 
   const setIn = useCallback((time: number) => {
     setInPoint(time);
-    // If outPoint is now before inPoint, clear it
     setOutPoint((prev) => (prev !== null && prev <= time ? null : prev));
   }, []);
 
@@ -29,13 +29,14 @@ export function useTrimMarkers(duration: number) {
   }, []);
 
   const addClip = useCallback(
-    (name: string) => {
+    (name: string, thumbnailDataUrl?: string) => {
       if (inPoint === null || outPoint === null) return;
       const clip: Clip = {
         id: crypto.randomUUID(),
         name,
         inPoint,
         outPoint,
+        thumbnailDataUrl,
       };
       setClips((prev) => [...prev, clip]);
     },

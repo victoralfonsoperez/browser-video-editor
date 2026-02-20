@@ -1,10 +1,13 @@
 import { useState, useRef } from 'react';
 import type { Clip } from '../../hooks/useTrimMarkers';
+import type { UseFFmpegReturn } from '../../hooks/useFFmpeg';
 
 interface ClipListProps {
   clips: Clip[];
   inPoint: number | null;
   outPoint: number | null;
+  videoFile: File | null;
+  ffmpeg: UseFFmpegReturn;
   onAddClip: (name: string) => void;
   onRemoveClip: (id: string) => void;
   onSeekToClip: (clip: Clip) => void;
@@ -25,6 +28,8 @@ interface ClipRowProps {
   index: number;
   isDragOver: boolean;
   dragOverSide: 'top' | 'bottom' | null;
+  videoFile: File | null;
+  ffmpeg: UseFFmpegReturn;
   onDragStart: (index: number) => void;
   onDragEnter: (index: number, side: 'top' | 'bottom') => void;
   onDragEnd: () => void;
@@ -38,6 +43,7 @@ interface ClipRowProps {
 
 function ClipRow({
   clip, index, isDragOver, dragOverSide,
+  videoFile, ffmpeg,
   onDragStart, onDragEnter, onDragEnd, onDrop,
   onRemove, onSeek, onPreview, onRename, onEditPoints,
 }: ClipRowProps) {
@@ -60,6 +66,14 @@ function ClipRow({
 
   const clipDuration = clip.outPoint - clip.inPoint;
 
+  const isThisExporting = ffmpeg.exportingClipId === clip.id;
+  const isAnyExporting = ffmpeg.status === 'loading' || ffmpeg.status === 'processing';
+  const canExport = !!videoFile && !isAnyExporting;
+
+  const handleExport = () => {
+    if (videoFile) ffmpeg.exportClip(videoFile, clip);
+  };
+
   return (
     <div
       draggable
@@ -73,7 +87,7 @@ function ClipRow({
       onDragEnd={onDragEnd}
       onDrop={(e) => { e.preventDefault(); onDrop(index); }}
       className={[
-        'relative flex items-center gap-2 rounded border bg-[#111] px-2 py-2 transition-colors group select-none',
+        'relative flex flex-col rounded border bg-[#111] px-2 py-2 transition-colors group select-none',
         isDragOver ? 'border-[#c8f55a]/60 bg-[#c8f55a]/5' : 'border-[#2a2a2e] hover:border-[#444]',
       ].join(' ')}
     >
@@ -84,59 +98,85 @@ function ClipRow({
         <div className="pointer-events-none absolute -bottom-px left-0 right-0 h-0.5 rounded-full bg-[#c8f55a]" />
       )}
 
-      <span className="cursor-grab text-[#444] hover:text-[#888] transition-colors text-base leading-none active:cursor-grabbing shrink-0" title="Drag to reorder">⠿</span>
-      <span className="text-[10px] text-[#555] font-mono w-4 shrink-0">{index + 1}</span>
+      <div className="flex items-center gap-2">
+        <span className="cursor-grab text-[#444] hover:text-[#888] transition-colors text-base leading-none active:cursor-grabbing shrink-0" title="Drag to reorder">⠿</span>
+        <span className="text-[10px] text-[#555] font-mono w-4 shrink-0">{index + 1}</span>
 
-      {/* Thumbnail — click to preview */}
-      <div
-        className="shrink-0 w-[56px] h-[32px] rounded overflow-hidden bg-[#222] border border-[#333] cursor-pointer hover:border-[#c8f55a]/60 transition-colors"
-        onClick={onPreview}
-        title="Preview clip"
-      >
-        {clip.thumbnailDataUrl ? (
-          <img src={clip.thumbnailDataUrl} alt={`Thumbnail for ${clip.name}`} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#444] text-[10px]">▶</div>
-        )}
-      </div>
+        {/* Thumbnail */}
+        <div
+          className="shrink-0 w-[56px] h-[32px] rounded overflow-hidden bg-[#222] border border-[#333] cursor-pointer hover:border-[#c8f55a]/60 transition-colors"
+          onClick={onPreview}
+          title="Preview clip"
+        >
+          {clip.thumbnailDataUrl ? (
+            <img src={clip.thumbnailDataUrl} alt={`Thumbnail for ${clip.name}`} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-[#444] text-[10px]">▶</div>
+          )}
+        </div>
 
-      <div className="flex-1 min-w-0">
-        {isEditing ? (
-          <input
-            ref={inputRef}
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={commitRename}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') commitRename();
-              if (e.key === 'Escape') { setEditValue(clip.name); setIsEditing(false); }
-            }}
-            className="w-full rounded border border-[#c8f55a]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-sm text-[#ccc] outline-none focus:border-[#c8f55a]"
-          />
-        ) : (
-          <button onClick={startEdit} className="block w-full text-left text-sm text-[#ccc] truncate hover:text-white transition-colors cursor-text" title="Click to rename">
-            {clip.name}
+        <div className="flex-1 min-w-0">
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') commitRename();
+                if (e.key === 'Escape') { setEditValue(clip.name); setIsEditing(false); }
+              }}
+              className="w-full rounded border border-[#c8f55a]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-sm text-[#ccc] outline-none focus:border-[#c8f55a]"
+            />
+          ) : (
+            <button onClick={startEdit} className="block w-full text-left text-sm text-[#ccc] truncate hover:text-white transition-colors cursor-text" title="Click to rename">
+              {clip.name}
+            </button>
+          )}
+        </div>
+
+        <span className="font-mono text-xs text-[#c8f55a] shrink-0">{formatTime(clip.inPoint)}</span>
+        <span className="text-[#555] text-xs shrink-0">→</span>
+        <span className="font-mono text-xs text-[#f55a5a] shrink-0">{formatTime(clip.outPoint)}</span>
+        <span className="font-mono text-xs text-[#777] shrink-0">{formatTime(clipDuration)}</span>
+
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <button onClick={onPreview} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Preview clip">⬛▶</button>
+          <button onClick={onSeek} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Seek to in-point">▶</button>
+          <button onClick={onEditPoints} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Load in/out points into timeline for editing">✎</button>
+          <button
+            onClick={handleExport}
+            disabled={!canExport}
+            className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Export this clip"
+          >
+            {isThisExporting ? `${Math.round(ffmpeg.progress * 100)}%` : '⬇'}
           </button>
-        )}
+          <button onClick={onRemove} className="rounded px-1.5 py-0.5 text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Remove clip">✕</button>
+        </div>
       </div>
 
-      <span className="font-mono text-xs text-[#c8f55a] shrink-0">{formatTime(clip.inPoint)}</span>
-      <span className="text-[#555] text-xs shrink-0">→</span>
-      <span className="font-mono text-xs text-[#f55a5a] shrink-0">{formatTime(clip.outPoint)}</span>
-      <span className="font-mono text-xs text-[#777] shrink-0">{formatTime(clipDuration)}</span>
+      {/* Inline progress bar for the active export */}
+      {isThisExporting && (
+        <div className="mt-1.5 h-0.5 w-full rounded-full bg-[#2a2a2e] overflow-hidden">
+          <div
+            className="h-full rounded-full bg-[#c8f55a] transition-all duration-200"
+            style={{ width: `${Math.round(ffmpeg.progress * 100)}%` }}
+          />
+        </div>
+      )}
 
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button onClick={onPreview} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Preview clip">⬛▶</button>
-        <button onClick={onSeek} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Seek to in-point">▶</button>
-        <button onClick={onEditPoints} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Load in/out points into timeline for editing">✎</button>
-        <button onClick={onRemove} className="rounded px-1.5 py-0.5 text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Remove clip">✕</button>
-      </div>
+      {/* Per-clip error */}
+      {ffmpeg.exportingClipId === null && ffmpeg.status === 'error' && ffmpeg.error && (
+        <p className="mt-1 text-[10px] text-[#f55a5a]">Export error: {ffmpeg.error}</p>
+      )}
     </div>
   );
 }
 
 export function ClipList({
   clips, inPoint, outPoint,
+  videoFile, ffmpeg,
   onAddClip, onRemoveClip, onSeekToClip, onPreviewClip, onUpdateClip, onReorderClips,
 }: ClipListProps) {
   const [clipName, setClipName] = useState('');
@@ -226,6 +266,8 @@ export function ClipList({
               index={i}
               isDragOver={dragOverIndex === i}
               dragOverSide={dragOverIndex === i ? dragOverSide : null}
+              videoFile={videoFile}
+              ffmpeg={ffmpeg}
               onDragStart={(idx) => setDragFromIndex(idx)}
               onDragEnter={(idx, side) => { setDragOverIndex(idx); setDragOverSide(side); }}
               onDragEnd={handleDragEnd}
@@ -245,7 +287,8 @@ export function ClipList({
         <kbd className="rounded bg-[#222] px-1 py-px text-[#666]">I</kbd> set in ·{' '}
         <kbd className="rounded bg-[#222] px-1 py-px text-[#666]">O</kbd> set out · drag{' '}
         <span className="text-[#666]">⠿</span> to reorder · click name to rename ·{' '}
-        <span className="text-[#666]">✎</span> loads clip back into timeline
+        <span className="text-[#666]">✎</span> loads clip back into timeline ·{' '}
+        <span className="text-[#666]">⬇</span> exports clip
       </p>
     </div>
   );

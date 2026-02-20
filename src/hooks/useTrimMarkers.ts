@@ -39,6 +39,9 @@ export function useTrimMarkers(duration: number) {
         thumbnailDataUrl,
       };
       setClips((prev) => [...prev, clip]);
+      // Auto-reset markers so the user is immediately ready to mark the next clip
+      setInPoint(null);
+      setOutPoint(null);
     },
     [inPoint, outPoint],
   );

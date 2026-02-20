@@ -3,6 +3,7 @@ import VideoPlayer from './components/videoplayer/videoplayer';
 import Timeline from './components/timeline/timeline';
 import { ClipList } from './components/cliplist/ClipList';
 import { useTrimMarkers } from './hooks/useTrimMarkers';
+import { useClipThumbnail } from './hooks/useClipThumbnail';
 import type { Clip } from './hooks/useTrimMarkers';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
   const [duration, setDuration] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trim = useTrimMarkers(duration);
+  const captureFrame = useClipThumbnail();
 
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
@@ -39,6 +41,14 @@ function App() {
     handleTimelineSeek(clip.inPoint);
     trim.setIn(clip.inPoint);
     trim.setOut(clip.outPoint);
+  };
+
+  const handleAddClip = async (name: string) => {
+    let thumbnailDataUrl: string | undefined;
+    if (videoRef.current && trim.inPoint !== null) {
+      thumbnailDataUrl = await captureFrame(videoRef.current, trim.inPoint);
+    }
+    trim.addClip(name, thumbnailDataUrl);
   };
 
   useEffect(() => { return () => { if (videoURL) URL.revokeObjectURL(videoURL); }; }, [videoURL]);
@@ -87,7 +97,7 @@ function App() {
               clips={trim.clips}
               inPoint={trim.inPoint}
               outPoint={trim.outPoint}
-              onAddClip={trim.addClip}
+              onAddClip={handleAddClip}
               onRemoveClip={trim.removeClip}
               onSeekToClip={handleSeekToClip}
               onUpdateClip={trim.updateClip}

@@ -110,6 +110,19 @@ function ClipRow({
       {/* Index */}
       <span className="text-[10px] text-[#555] font-mono w-4 shrink-0">{index + 1}</span>
 
+      {/* Thumbnail */}
+      <div className="shrink-0 w-[56px] h-[32px] rounded overflow-hidden bg-[#222] border border-[#333]">
+        {clip.thumbnailDataUrl ? (
+          <img
+            src={clip.thumbnailDataUrl}
+            alt={`Thumbnail for ${clip.name}`}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-[#444] text-[10px]">▶</div>
+        )}
+      </div>
+
       {/* Name — click to edit */}
       <div className="flex-1 min-w-0">
         {isEditing ? (
@@ -142,7 +155,7 @@ function ClipRow({
       <span className="font-mono text-xs text-[#c8f55a] shrink-0">{formatTime(clip.inPoint)}</span>
       <span className="text-[#555] text-xs shrink-0">→</span>
       <span className="font-mono text-xs text-[#f55a5a] shrink-0">{formatTime(clip.outPoint)}</span>
-      <span className="font-mono text-xs text-[#555] shrink-0 hidden sm:inline">
+      <span className="font-mono text-xs text-[#777] shrink-0">
         {formatTime(clipDuration)}
       </span>
 

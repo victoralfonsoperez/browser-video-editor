@@ -13,6 +13,18 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    headers: {
+      // Required for SharedArrayBuffer used by FFmpeg.wasm
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+  },
+  // Treat .wasm files as static assets so Vite resolves them correctly via import.meta.url
+  assetsInclude: ['**/*.wasm'],
+  optimizeDeps: {
+    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@ffmpeg/core'],
+  },
   test: {
     environment: 'jsdom',
     globals: true,

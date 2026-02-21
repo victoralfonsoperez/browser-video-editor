@@ -3,36 +3,29 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useFFmpeg } from './useFFmpeg';
 import type { Clip } from './useTrimMarkers';
 
-// Mock @ffmpeg/ffmpeg and @ffmpeg/util so WASM never loads in jsdom
-vi.mock('@ffmpeg/ffmpeg', () => {
-  const on = vi.fn();
-  const load = vi.fn().mockResolvedValue(undefined);
-  const writeFile = vi.fn().mockResolvedValue(undefined);
-  const exec = vi.fn().mockResolvedValue(0);
-  const readFile = vi.fn().mockResolvedValue(new Uint8Array([0, 1, 2]));
-  const deleteFile = vi.fn().mockResolvedValue(undefined);
+vi.mock('./ffmpeg-urls', () => ({
+  coreURL: 'mock-core-url',
+  wasmURL: 'mock-wasm-url',
+}));
 
+// Use `function` syntax — vitest requires this for class constructor mocks
+vi.mock('@ffmpeg/ffmpeg', () => {
   return {
-    FFmpeg: vi.fn().mockImplementation(() => ({
-      loaded: false,
-      on,
-      load,
-      writeFile,
-      exec,
-      readFile,
-      deleteFile,
-    })),
+    FFmpeg: vi.fn().mockImplementation(function (this: any) {
+      this.loaded = false;
+      this.on = vi.fn();
+      this.load = vi.fn().mockResolvedValue(undefined);
+      this.writeFile = vi.fn().mockResolvedValue(undefined);
+      this.exec = vi.fn().mockResolvedValue(0);
+      this.readFile = vi.fn().mockResolvedValue(new Uint8Array([0, 1, 2]));
+      this.deleteFile = vi.fn().mockResolvedValue(undefined);
+    }),
   };
 });
 
 vi.mock('@ffmpeg/util', () => ({
   fetchFile: vi.fn().mockResolvedValue(new Uint8Array([0, 1, 2])),
-  toBlobURL: vi.fn().mockResolvedValue('blob:mock'),
 }));
-
-// Minimal mock for URL and anchor click
-global.URL.createObjectURL = vi.fn().mockReturnValue('blob:output');
-global.URL.revokeObjectURL = vi.fn();
 
 const mockClip: Clip = {
   id: 'clip-1',
@@ -44,17 +37,23 @@ const mockClip: Clip = {
 
 const mockFile = new File(['video'], 'test.mp4', { type: 'video/mp4' });
 
+let anchorClickMock = vi.fn();
+
 beforeEach(() => {
   vi.clearAllMocks();
+
+  anchorClickMock = vi.fn();
+
   global.URL.createObjectURL = vi.fn().mockReturnValue('blob:output');
   global.URL.revokeObjectURL = vi.fn();
 
-  // Mock anchor click
-  const click = vi.fn();
-  vi.spyOn(document, 'createElement').mockImplementation((tag) => {
-    if (tag === 'a') return { href: '', download: '', click } as unknown as HTMLAnchorElement;
-    return document.createElement(tag);
-  });
+  // Patch createElement directly on the instance — avoids spy recursion
+  const realCreateElement = HTMLDocument.prototype.createElement.bind(document);
+  document.createElement = function (tag: string, ...args: any[]) {
+    const el = realCreateElement(tag, ...args);
+    if (tag === 'a') el.click = anchorClickMock;
+    return el;
+  } as typeof document.createElement;
 });
 
 describe('useFFmpeg', () => {
@@ -66,14 +65,13 @@ describe('useFFmpeg', () => {
     expect(result.current.exportingClipId).toBeNull();
   });
 
-  it('sets exportingClipId while processing', async () => {
+  it('clears exportingClipId after export completes', async () => {
     const { result } = renderHook(() => useFFmpeg());
 
     await act(async () => {
       await result.current.exportClip(mockFile, mockClip);
     });
 
-    // After completion exportingClipId is cleared
     expect(result.current.exportingClipId).toBeNull();
   });
 
@@ -90,34 +88,28 @@ describe('useFFmpeg', () => {
   });
 
   it('triggers a file download with the correct filename', async () => {
-    const clickMock = vi.fn();
-    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
-      if (tag === 'a') return { href: '', download: '', click: clickMock } as unknown as HTMLAnchorElement;
-      return document.createElement(tag);
-    });
-
     const { result } = renderHook(() => useFFmpeg());
 
     await act(async () => {
       await result.current.exportClip(mockFile, mockClip);
     });
 
-    expect(clickMock).toHaveBeenCalledTimes(1);
+    expect(anchorClickMock).toHaveBeenCalledTimes(1);
     expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:output');
   });
 
   it('sets error status when ffmpeg.exec throws', async () => {
     const { FFmpeg } = await import('@ffmpeg/ffmpeg');
-    vi.mocked(FFmpeg).mockImplementationOnce(() => ({
-      loaded: false,
-      on: vi.fn(),
-      load: vi.fn().mockResolvedValue(undefined),
-      writeFile: vi.fn().mockResolvedValue(undefined),
-      exec: vi.fn().mockRejectedValue(new Error('ffmpeg crashed')),
-      readFile: vi.fn(),
-      deleteFile: vi.fn(),
-    }));
+    vi.mocked(FFmpeg).mockImplementationOnce(function (this: any) {
+      this.loaded = false;
+      this.on = vi.fn();
+      this.load = vi.fn().mockResolvedValue(undefined);
+      this.writeFile = vi.fn().mockResolvedValue(undefined);
+      this.exec = vi.fn().mockRejectedValue(new Error('ffmpeg crashed'));
+      this.readFile = vi.fn();
+      this.deleteFile = vi.fn();
+    });
 
     const { result } = renderHook(() => useFFmpeg());
 
@@ -133,14 +125,10 @@ describe('useFFmpeg', () => {
   it('does not start a second export while one is in progress', async () => {
     const { result } = renderHook(() => useFFmpeg());
 
-    // Simulate processing state already active
     await act(async () => {
-      // Start first export but don't await inside act to check guard
       result.current.exportClip(mockFile, mockClip);
     });
 
-    // Calling again immediately — status check inside hook should block it
-    // This just validates no crash / double-write occurs
     await act(async () => {
       await result.current.exportClip(mockFile, { ...mockClip, id: 'clip-2' });
     });

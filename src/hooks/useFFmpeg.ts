@@ -1,11 +1,8 @@
 import { useRef, useState, useCallback } from 'react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
+import { coreURL, wasmURL } from './ffmpeg-urls';
 import type { Clip } from './useTrimMarkers';
-
-// Vite ?url imports — bundled as static assets, resolved at build time
-import coreURL from '@ffmpeg/core?url';
-import wasmURL from '@ffmpeg/core/wasm?url';
 
 export type FFmpegStatus = 'idle' | 'loading' | 'processing' | 'done' | 'error';
 

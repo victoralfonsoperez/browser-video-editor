@@ -150,19 +150,29 @@ function ClipRow({
             className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             title="Export this clip"
           >
-            {isThisExporting ? `${Math.round(ffmpeg.progress * 100)}%` : '⬇'}
+            {isThisExporting
+              ? ffmpeg.status === 'loading'
+                ? 'Loading…'
+                : `${Math.round(ffmpeg.progress * 100)}%`
+              : '⬇'}
           </button>
           <button onClick={onRemove} className="rounded px-1.5 py-0.5 text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Remove clip">✕</button>
         </div>
       </div>
 
-      {/* Inline progress bar for the active export */}
+      {/* Inline status bar for the active export */}
       {isThisExporting && (
-        <div className="mt-1.5 h-0.5 w-full rounded-full bg-[#2a2a2e] overflow-hidden">
-          <div
-            className="h-full rounded-full bg-[#c8f55a] transition-all duration-200"
-            style={{ width: `${Math.round(ffmpeg.progress * 100)}%` }}
-          />
+        <div className="mt-1.5 flex items-center gap-2">
+          {ffmpeg.status === 'loading' ? (
+            <p className="text-[10px] text-[#888] animate-pulse">Loading FFmpeg (first export only)…</p>
+          ) : (
+            <div className="h-0.5 flex-1 rounded-full bg-[#2a2a2e] overflow-hidden">
+              <div
+                className="h-full rounded-full bg-[#c8f55a] transition-all duration-200"
+                style={{ width: `${Math.round(ffmpeg.progress * 100)}%` }}
+              />
+            </div>
+          )}
         </div>
       )}
 

@@ -20,6 +20,11 @@ export default defineConfig({
       'Cross-Origin-Embedder-Policy': 'require-corp',
     },
   },
+  // Treat .wasm files as static assets so Vite resolves them correctly via import.meta.url
+  assetsInclude: ['**/*.wasm'],
+  optimizeDeps: {
+    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', '@ffmpeg/core'],
+  },
   test: {
     environment: 'jsdom',
     globals: true,

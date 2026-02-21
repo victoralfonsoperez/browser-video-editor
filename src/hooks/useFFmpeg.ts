@@ -1,10 +1,11 @@
 import { useRef, useState, useCallback } from 'react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { fetchFile } from '@ffmpeg/util';
 import type { Clip } from './useTrimMarkers';
 
-const FFMPEG_CORE_VERSION = '0.12.6';
-const FFMPEG_CORE_BASE = `https://unpkg.com/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm`;
+// Vite ?url imports — bundled as static assets, resolved at build time
+import coreURL from '@ffmpeg/core?url';
+import wasmURL from '@ffmpeg/core/wasm?url';
 
 export type FFmpegStatus = 'idle' | 'loading' | 'processing' | 'done' | 'error';
 
@@ -29,11 +30,13 @@ export function useFFmpeg(): UseFFmpegReturn {
     const ffmpeg = new FFmpeg();
     ffmpegRef.current = ffmpeg;
 
-    setStatus('loading');
-    await ffmpeg.load({
-      coreURL: await toBlobURL(`${FFMPEG_CORE_BASE}/ffmpeg-core.js`, 'text/javascript'),
-      wasmURL: await toBlobURL(`${FFMPEG_CORE_BASE}/ffmpeg-core.wasm`, 'application/wasm'),
+    // Register progress listener BEFORE load so exec events are captured from the start
+    ffmpeg.on('progress', ({ progress: p }) => {
+      setProgress(Math.max(0, Math.min(1, p)));
     });
+
+    setStatus('loading');
+    await ffmpeg.load({ coreURL, wasmURL });
 
     return ffmpeg;
   }, []);
@@ -47,10 +50,6 @@ export function useFFmpeg(): UseFFmpegReturn {
 
     try {
       const ffmpeg = await loadFFmpeg();
-
-      ffmpeg.on('progress', ({ progress: p }) => {
-        setProgress(Math.max(0, Math.min(1, p)));
-      });
 
       setStatus('processing');
 
@@ -70,7 +69,7 @@ export function useFFmpeg(): UseFFmpegReturn {
       ]);
 
       const data = await ffmpeg.readFile(outputName);
-      const blob = new Blob([data], { type: videoFile.type || 'video/mp4' });
+      const blob = new Blob([data as BlobPart], { type: videoFile.type || 'video/mp4' });
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement('a');
@@ -79,7 +78,6 @@ export function useFFmpeg(): UseFFmpegReturn {
       a.click();
       URL.revokeObjectURL(url);
 
-      // Clean up virtual FS
       await ffmpeg.deleteFile(inputName);
       await ffmpeg.deleteFile(outputName);
 

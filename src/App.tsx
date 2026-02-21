@@ -4,6 +4,7 @@ import Timeline from './components/timeline/timeline';
 import { ClipList } from './components/cliplist/ClipList';
 import { useTrimMarkers } from './hooks/useTrimMarkers';
 import { useClipThumbnail } from './hooks/useClipThumbnail';
+import { useFFmpeg } from './hooks/useFFmpeg';
 import { ClipPreviewModal } from './components/clippreview/ClipPreviewModal';
 import type { Clip } from './hooks/useTrimMarkers';
 
@@ -16,6 +17,7 @@ function App() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trim = useTrimMarkers(duration);
   const captureFrame = useClipThumbnail();
+  const ffmpeg = useFFmpeg();
 
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
@@ -99,6 +101,8 @@ function App() {
               clips={trim.clips}
               inPoint={trim.inPoint}
               outPoint={trim.outPoint}
+              videoFile={videoFile}
+              ffmpeg={ffmpeg}
               onAddClip={handleAddClip}
               onRemoveClip={trim.removeClip}
               onSeekToClip={handleSeekToClip}
@@ -110,7 +114,6 @@ function App() {
         )}
       </div>
 
-      {/* Clip preview modal */}
       {previewClip && videoURL && (
         <ClipPreviewModal
           clip={previewClip}

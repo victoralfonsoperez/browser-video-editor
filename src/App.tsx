@@ -5,7 +5,9 @@ import { ClipList } from './components/cliplist/ClipList';
 import { useTrimMarkers } from './hooks/useTrimMarkers';
 import { useClipThumbnail } from './hooks/useClipThumbnail';
 import { useFFmpeg } from './hooks/useFFmpeg';
+import { useExportQueue } from './hooks/useExportQueue';
 import { ClipPreviewModal } from './components/clippreview/ClipPreviewModal';
+import { ExportQueueOverlay } from './components/exportqueue/ExportQueueOverlay';
 import type { Clip } from './hooks/useTrimMarkers';
 
 function App() {
@@ -18,6 +20,7 @@ function App() {
   const trim = useTrimMarkers(duration);
   const captureFrame = useClipThumbnail();
   const ffmpeg = useFFmpeg();
+  const exportQueue = useExportQueue(videoFile, ffmpeg);
 
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
@@ -109,6 +112,7 @@ function App() {
               onUpdateClip={trim.updateClip}
               onReorderClips={trim.reorderClips}
               onPreviewClip={setPreviewClip}
+              onEnqueueClip={exportQueue.enqueue}
             />
           </>
         )}
@@ -121,6 +125,17 @@ function App() {
           onClose={() => setPreviewClip(null)}
         />
       )}
+
+      <ExportQueueOverlay
+        queue={exportQueue.queue}
+        isRunning={exportQueue.isRunning}
+        isStarted={exportQueue.isStarted}
+        onStart={exportQueue.start}
+        onPause={exportQueue.pause}
+        onRemove={exportQueue.remove}
+        onReorder={exportQueue.reorder}
+        onClear={exportQueue.clear}
+      />
     </div>
   );
 }

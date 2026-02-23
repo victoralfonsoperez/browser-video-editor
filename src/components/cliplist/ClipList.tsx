@@ -14,6 +14,7 @@ interface ClipListProps {
   onPreviewClip: (clip: Clip) => void;
   onUpdateClip: (id: string, patch: Partial<Pick<Clip, 'name' | 'inPoint' | 'outPoint'>>) => void;
   onReorderClips: (fromIndex: number, toIndex: number) => void;
+  onEnqueueClip: (clip: Clip) => void;
 }
 
 function formatTime(seconds: number) {
@@ -39,13 +40,14 @@ interface ClipRowProps {
   onPreview: () => void;
   onRename: (name: string) => void;
   onEditPoints: () => void;
+  onEnqueue: () => void;
 }
 
 function ClipRow({
   clip, index, isDragOver, dragOverSide,
   videoFile, ffmpeg,
   onDragStart, onDragEnter, onDragEnd, onDrop,
-  onRemove, onSeek, onPreview, onRename, onEditPoints,
+  onRemove, onSeek, onPreview, onRename, onEditPoints, onEnqueue,
 }: ClipRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(clip.name);
@@ -148,13 +150,21 @@ function ClipRow({
             onClick={handleExport}
             disabled={!canExport}
             className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-            title="Export this clip"
+            title="Export this clip instantly"
           >
             {isThisExporting
               ? ffmpeg.status === 'loading'
                 ? 'Loading…'
                 : `${Math.round(ffmpeg.progress * 100)}%`
               : '⬇'}
+          </button>
+          <button
+            onClick={onEnqueue}
+            disabled={!videoFile}
+            className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-bold"
+            title="Add to export queue"
+          >
+            +
           </button>
           <button onClick={onRemove} className="rounded px-1.5 py-0.5 text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Remove clip">✕</button>
         </div>
@@ -188,6 +198,7 @@ export function ClipList({
   clips, inPoint, outPoint,
   videoFile, ffmpeg,
   onAddClip, onRemoveClip, onSeekToClip, onPreviewClip, onUpdateClip, onReorderClips,
+  onEnqueueClip,
 }: ClipListProps) {
   const [clipName, setClipName] = useState('');
   const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
@@ -295,6 +306,7 @@ export function ClipList({
               onPreview={() => onPreviewClip(clip)}
               onRename={(name) => onUpdateClip(clip.id, { name })}
               onEditPoints={() => onSeekToClip(clip)}
+              onEnqueue={() => onEnqueueClip(clip)}
             />
           ))}
         </div>
@@ -319,7 +331,6 @@ export function ClipList({
             </button>
           </div>
 
-          {/* Progress bar for Export All */}
           {isExportingAll && ffmpeg.status === 'processing' && (
             <div className="h-0.5 w-full rounded-full bg-[#2a2a2e] overflow-hidden">
               <div
@@ -329,12 +340,10 @@ export function ClipList({
             </div>
           )}
 
-          {/* Loading message for Export All */}
           {isExportingAll && ffmpeg.status === 'loading' && (
             <p className="text-[10px] text-[#888] animate-pulse">Loading FFmpeg (first export only)…</p>
           )}
 
-          {/* Error for Export All */}
           {!isAnyExporting && ffmpeg.status === 'error' && ffmpeg.error && ffmpeg.exportingClipId === null && (
             <p className="text-[10px] text-[#f55a5a]">Export error: {ffmpeg.error}</p>
           )}
@@ -347,7 +356,8 @@ export function ClipList({
         <kbd className="rounded bg-[#222] px-1 py-px text-[#666]">O</kbd> set out · drag{' '}
         <span className="text-[#666]">⠿</span> to reorder · click name to rename ·{' '}
         <span className="text-[#666]">✎</span> loads clip back into timeline ·{' '}
-        <span className="text-[#666]">⬇</span> exports clip ·{' '}
+        <span className="text-[#666]">⬇</span> instant export ·{' '}
+        <span className="text-[#666]">+</span> add to queue ·{' '}
         <span className="text-[#666]">⬇ Export All</span> merges all clips into one file
       </p>
     </div>

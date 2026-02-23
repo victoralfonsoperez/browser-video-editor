@@ -35,12 +35,21 @@ const mockClip: Clip = {
   thumbnailDataUrl: undefined,
 };
 
+const mockClip2: Clip = {
+  id: 'clip-2',
+  name: 'Second Clip',
+  inPoint: 20,
+  outPoint: 30,
+  thumbnailDataUrl: undefined,
+};
+
 const mockFile = new File(['video'], 'test.mp4', { type: 'video/mp4' });
 
 let anchorClickMock = vi.fn();
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.useFakeTimers();
 
   anchorClickMock = vi.fn();
 
@@ -56,7 +65,7 @@ beforeEach(() => {
   } as typeof document.createElement;
 });
 
-describe('useFFmpeg', () => {
+describe('useFFmpeg — exportClip', () => {
   it('starts with idle status', () => {
     const { result } = renderHook(() => useFFmpeg());
     expect(result.current.status).toBe('idle');
@@ -85,6 +94,21 @@ describe('useFFmpeg', () => {
     expect(result.current.status).toBe('done');
     expect(result.current.progress).toBe(1);
     expect(result.current.error).toBeNull();
+  });
+
+  it('resets to idle after the delay', async () => {
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      await result.current.exportClip(mockFile, mockClip);
+    });
+
+    expect(result.current.status).toBe('done');
+
+    act(() => { vi.advanceTimersByTime(2000); });
+
+    expect(result.current.status).toBe('idle');
+    expect(result.current.progress).toBe(0);
   });
 
   it('triggers a file download with the correct filename', async () => {
@@ -131,6 +155,118 @@ describe('useFFmpeg', () => {
 
     await act(async () => {
       await result.current.exportClip(mockFile, { ...mockClip, id: 'clip-2' });
+    });
+
+    expect(result.current.error).toBeNull();
+  });
+});
+
+describe('useFFmpeg — exportAllClips', () => {
+  it('does nothing when clips array is empty', async () => {
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      await result.current.exportAllClips(mockFile, []);
+    });
+
+    expect(result.current.status).toBe('idle');
+    expect(anchorClickMock).not.toHaveBeenCalled();
+  });
+
+  it('reaches done status after exporting all clips', async () => {
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      await result.current.exportAllClips(mockFile, [mockClip, mockClip2]);
+    });
+
+    expect(result.current.status).toBe('done');
+    expect(result.current.progress).toBe(1);
+    expect(result.current.error).toBeNull();
+  });
+
+  it('resets to idle after the delay', async () => {
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      await result.current.exportAllClips(mockFile, [mockClip]);
+    });
+
+    expect(result.current.status).toBe('done');
+
+    act(() => { vi.advanceTimersByTime(2000); });
+
+    expect(result.current.status).toBe('idle');
+    expect(result.current.progress).toBe(0);
+  });
+
+  it('triggers a single file download for output.mp4', async () => {
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      await result.current.exportAllClips(mockFile, [mockClip, mockClip2]);
+    });
+
+    expect(anchorClickMock).toHaveBeenCalledTimes(1);
+    expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:output');
+  });
+
+  it('calls exec once per clip plus once for the concat', async () => {
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    const execMock = vi.fn().mockResolvedValue(0);
+    vi.mocked(FFmpeg).mockImplementationOnce(function (this: any) {
+      this.loaded = false;
+      this.on = vi.fn();
+      this.load = vi.fn().mockResolvedValue(undefined);
+      this.writeFile = vi.fn().mockResolvedValue(undefined);
+      this.exec = execMock;
+      this.readFile = vi.fn().mockResolvedValue(new Uint8Array([0, 1, 2]));
+      this.deleteFile = vi.fn().mockResolvedValue(undefined);
+    });
+
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      await result.current.exportAllClips(mockFile, [mockClip, mockClip2]);
+    });
+
+    // 2 clips + 1 concat = 3 exec calls
+    expect(execMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('sets error status when exec throws during concat', async () => {
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    vi.mocked(FFmpeg).mockImplementationOnce(function (this: any) {
+      this.loaded = false;
+      this.on = vi.fn();
+      this.load = vi.fn().mockResolvedValue(undefined);
+      this.writeFile = vi.fn().mockResolvedValue(undefined);
+      this.exec = vi.fn().mockRejectedValue(new Error('concat failed'));
+      this.readFile = vi.fn();
+      this.deleteFile = vi.fn().mockResolvedValue(undefined);
+    });
+
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      await result.current.exportAllClips(mockFile, [mockClip]);
+    });
+
+    expect(result.current.status).toBe('error');
+    expect(result.current.error).toBe('concat failed');
+    expect(result.current.exportingClipId).toBeNull();
+  });
+
+  it('does not start exportAllClips while another export is in progress', async () => {
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      result.current.exportAllClips(mockFile, [mockClip]);
+    });
+
+    await act(async () => {
+      await result.current.exportAllClips(mockFile, [mockClip2]);
     });
 
     expect(result.current.error).toBeNull();

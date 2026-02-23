@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Clip } from './useTrimMarkers';
 import type { UseFFmpegReturn } from './useFFmpeg';
 
@@ -30,7 +30,8 @@ export function useExportQueue(
 ): UseExportQueueReturn {
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [isStarted, setIsStarted] = useState(false);
-  const isRunningRef = useRef(false);
+  // Tracked as state (not a ref) so the processor effect re-runs when it clears
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const isRunning = queue.some((item) => item.status === 'processing');
 
@@ -38,25 +39,21 @@ export function useExportQueue(
   useEffect(() => {
     setQueue([]);
     setIsStarted(false);
-    isRunningRef.current = false;
+    setIsProcessing(false);
   }, [videoFile]);
 
   const enqueue = useCallback((clip: Clip) => {
-    const item: QueueItem = {
-      queueId: crypto.randomUUID(),
-      clip,
-      status: 'pending',
-    };
-    setQueue((prev) => [...prev, item]);
+    setQueue((prev) => [
+      ...prev,
+      { queueId: crypto.randomUUID(), clip, status: 'pending' },
+    ]);
   }, []);
 
   const remove = useCallback((queueId: string) => {
     setQueue((prev) =>
-      prev.filter((item) => {
-        if (item.queueId !== queueId) return true;
-        // Can't remove an item that's currently processing
-        return item.status === 'processing';
-      }),
+      prev.filter((item) =>
+        item.queueId !== queueId || item.status === 'processing',
+      ),
     );
   }, []);
 
@@ -79,10 +76,10 @@ export function useExportQueue(
     setQueue((prev) => prev.filter((item) => item.status === 'processing'));
   }, []);
 
-  // Sequential processor — only runs when isStarted is true
+  // Sequential processor — re-runs whenever queue, isStarted, or isProcessing changes
   useEffect(() => {
     if (!isStarted) return;
-    if (isRunningRef.current) return;
+    if (isProcessing) return;
     if (!videoFile) return;
 
     const nextPending = queue.find((item) => item.status === 'pending');
@@ -90,33 +87,36 @@ export function useExportQueue(
 
     if (ffmpeg.status === 'loading' || ffmpeg.status === 'processing') return;
 
-    isRunningRef.current = true;
-
     const { queueId, clip } = nextPending;
 
+    setIsProcessing(true);
     setQueue((prev) =>
       prev.map((item) =>
         item.queueId === queueId ? { ...item, status: 'processing' } : item,
       ),
     );
 
-    ffmpeg.exportClip(videoFile, clip).then(() => {
-      setQueue((prev) =>
-        prev.map((item) =>
-          item.queueId === queueId ? { ...item, status: 'done' } : item,
-        ),
-      );
-    }).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Export failed';
-      setQueue((prev) =>
-        prev.map((item) =>
-          item.queueId === queueId ? { ...item, status: 'error', error: message } : item,
-        ),
-      );
-    }).finally(() => {
-      isRunningRef.current = false;
-    });
-  }, [queue, isStarted, videoFile, ffmpeg]);
+    ffmpeg.exportClip(videoFile, clip)
+      .then(() => {
+        setQueue((prev) =>
+          prev.map((item) =>
+            item.queueId === queueId ? { ...item, status: 'done' } : item,
+          ),
+        );
+      })
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : 'Export failed';
+        setQueue((prev) =>
+          prev.map((item) =>
+            item.queueId === queueId ? { ...item, status: 'error', error: message } : item,
+          ),
+        );
+      })
+      .finally(() => {
+        // Clearing isProcessing triggers a re-render → effect fires again → picks up next item
+        setIsProcessing(false);
+      });
+  }, [queue, isStarted, isProcessing, videoFile, ffmpeg]);
 
   return { queue, isRunning, isStarted, enqueue, remove, reorder, start, pause, clear };
 }

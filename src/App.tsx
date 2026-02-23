@@ -130,6 +130,7 @@ function App() {
         queue={exportQueue.queue}
         isRunning={exportQueue.isRunning}
         isStarted={exportQueue.isStarted}
+        ffmpegProgress={ffmpeg.progress}
         onStart={exportQueue.start}
         onPause={exportQueue.pause}
         onRemove={exportQueue.remove}

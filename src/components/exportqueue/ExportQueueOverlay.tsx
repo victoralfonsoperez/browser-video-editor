@@ -5,6 +5,8 @@ interface ExportQueueOverlayProps {
   queue: QueueItem[];
   isRunning: boolean;
   isStarted: boolean;
+  /** Current FFmpeg progress (0–1) — passed down from useFFmpeg */
+  ffmpegProgress: number;
   onStart: () => void;
   onPause: () => void;
   onRemove: (queueId: string) => void;
@@ -26,10 +28,22 @@ function formatTime(seconds: number) {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+function ProgressBar({ progress, className = '' }: { progress: number; className?: string }) {
+  return (
+    <div className={`h-0.5 w-full rounded-full bg-[#2a2a2e] overflow-hidden ${className}`}>
+      <div
+        className="h-full rounded-full bg-[#c8f55a] transition-[width] duration-500 ease-out"
+        style={{ width: `${Math.round(Math.max(0, Math.min(1, progress)) * 100)}%` }}
+      />
+    </div>
+  );
+}
+
 export function ExportQueueOverlay({
   queue,
   isRunning,
   isStarted,
+  ffmpegProgress,
   onStart,
   onPause,
   onRemove,
@@ -48,6 +62,11 @@ export function ExportQueueOverlay({
   if (totalCount === 0) return null;
 
   const allFinished = doneCount === totalCount;
+
+  // Overall progress: each finished item = 1 full unit, active item = its ffmpegProgress fraction
+  const overallProgress = totalCount > 0
+    ? (doneCount + (isRunning ? ffmpegProgress : 0)) / totalCount
+    : 0;
 
   const handleDrop = (targetIndex: number) => {
     if (dragFrom === null) return;
@@ -76,9 +95,8 @@ export function ExportQueueOverlay({
         </div>
 
         <div className="flex items-center gap-1">
-          {/* Start / Pause button */}
           {!allFinished && (
-            isStarted && !allFinished ? (
+            isStarted ? (
               <button
                 onClick={onPause}
                 disabled={isRunning}
@@ -159,7 +177,7 @@ export function ExportQueueOverlay({
                 onDragEnd={() => { setDragFrom(null); setDragOver(null); setDragSide(null); }}
                 onDrop={(e) => { e.preventDefault(); handleDrop(i); }}
                 className={[
-                  'relative flex items-center gap-2 px-3 py-2 border-b border-[#1e1e1e] last:border-0 group transition-colors',
+                  'relative flex flex-col px-3 py-2 border-b border-[#1e1e1e] last:border-0 group transition-colors',
                   isPending ? 'hover:bg-[#1a1a1e] cursor-grab active:cursor-grabbing' : '',
                   isDragTarget ? 'bg-[#c8f55a]/5' : '',
                 ].join(' ')}
@@ -171,30 +189,39 @@ export function ExportQueueOverlay({
                   <div className="pointer-events-none absolute -bottom-px left-0 right-0 h-0.5 bg-[#c8f55a] rounded-full" />
                 )}
 
-                <span className="text-xs w-4 text-center shrink-0">
-                  <StatusIcon status={item.status} />
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs w-4 text-center shrink-0">
+                    <StatusIcon status={item.status} />
+                  </span>
 
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-[#ccc] truncate">{item.clip.name}</p>
-                  {isProcessing && (
-                    <p className="text-[10px] text-[#888] animate-pulse">Exporting…</p>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-[#ccc] truncate">{item.clip.name}</p>
+                    {isPending && (
+                      <p className="text-[10px] text-[#555]">
+                        {formatTime(item.clip.inPoint)} → {formatTime(item.clip.outPoint)}
+                      </p>
+                    )}
+                    {isProcessing && (
+                      <p className="text-[10px] text-[#888] font-mono">
+                        {Math.round(ffmpegProgress * 100)}%
+                      </p>
+                    )}
+                  </div>
+
                   {isPending && (
-                    <p className="text-[10px] text-[#555]">
-                      {formatTime(item.clip.inPoint)} → {formatTime(item.clip.outPoint)}
-                    </p>
+                    <button
+                      onClick={() => onRemove(item.queueId)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity rounded px-1 py-0.5 text-[10px] text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
+                      title="Remove from queue"
+                    >
+                      ✕
+                    </button>
                   )}
                 </div>
 
-                {isPending && (
-                  <button
-                    onClick={() => onRemove(item.queueId)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity rounded px-1 py-0.5 text-[10px] text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
-                    title="Remove from queue"
-                  >
-                    ✕
-                  </button>
+                {/* Per-row progress bar — only while this item is processing */}
+                {isProcessing && (
+                  <ProgressBar progress={ffmpegProgress} className="mt-1.5" />
                 )}
               </div>
             );
@@ -202,14 +229,29 @@ export function ExportQueueOverlay({
         </div>
       )}
 
+      {/* Overall progress bar — always visible at the bottom while running */}
+      {isRunning && (
+        <div className="px-3 py-2 border-t border-[#2a2a2e] bg-[#0e0e10]">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-[#555]">Overall</span>
+            <span className="text-[10px] text-[#888] font-mono">
+              {Math.round(overallProgress * 100)}%
+            </span>
+          </div>
+          <ProgressBar progress={overallProgress} />
+        </div>
+      )}
+
       {/* Collapsed summary */}
       {collapsed && (
         <div className="px-3 py-1.5 text-[10px] text-[#555]">
-          {pendingCount > 0
-            ? `${pendingCount} pending · ${isRunning ? 'running' : isStarted ? 'started' : 'not started'}`
-            : allFinished
-              ? 'All done'
-              : 'Idle'}
+          {isRunning
+            ? `${Math.round(overallProgress * 100)}% · ${doneCount}/${totalCount} done`
+            : pendingCount > 0
+              ? `${pendingCount} pending · ${isStarted ? 'started' : 'not started'}`
+              : allFinished
+                ? 'All done'
+                : 'Idle'}
         </div>
       )}
     </div>

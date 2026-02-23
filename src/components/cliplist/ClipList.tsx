@@ -24,6 +24,17 @@ function formatTime(seconds: number) {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+function ProgressBar({ progress }: { progress: number }) {
+  return (
+    <div className="h-0.5 flex-1 rounded-full bg-[#2a2a2e] overflow-hidden">
+      <div
+        className="h-full rounded-full bg-[#c8f55a] transition-[width] duration-500 ease-out"
+        style={{ width: `${Math.round(Math.max(0, Math.min(1, progress)) * 100)}%` }}
+      />
+    </div>
+  );
+}
+
 interface ClipRowProps {
   clip: Clip;
   index: number;
@@ -67,7 +78,6 @@ function ClipRow({
   };
 
   const clipDuration = clip.outPoint - clip.inPoint;
-
   const isThisExporting = ffmpeg.exportingClipId === clip.id;
   const isAnyExporting = ffmpeg.status === 'loading' || ffmpeg.status === 'processing';
   const canExport = !!videoFile && !isAnyExporting;
@@ -104,7 +114,6 @@ function ClipRow({
         <span className="cursor-grab text-[#444] hover:text-[#888] transition-colors text-base leading-none active:cursor-grabbing shrink-0" title="Drag to reorder">⠿</span>
         <span className="text-[10px] text-[#555] font-mono w-4 shrink-0">{index + 1}</span>
 
-        {/* Thumbnail */}
         <div
           className="shrink-0 w-[56px] h-[32px] rounded overflow-hidden bg-[#222] border border-[#333] cursor-pointer hover:border-[#c8f55a]/60 transition-colors"
           onClick={onPreview}
@@ -161,7 +170,7 @@ function ClipRow({
           <button
             onClick={onEnqueue}
             disabled={!videoFile}
-            className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-bold"
+            className="rounded px-1.5 py-0.5 text-xs font-bold text-[#888] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             title="Add to export queue"
           >
             +
@@ -170,18 +179,13 @@ function ClipRow({
         </div>
       </div>
 
-      {/* Inline status bar for the active per-clip export */}
+      {/* Progress bar + loading message for active per-clip export */}
       {isThisExporting && (
         <div className="mt-1.5 flex items-center gap-2">
           {ffmpeg.status === 'loading' ? (
             <p className="text-[10px] text-[#888] animate-pulse">Loading FFmpeg (first export only)…</p>
           ) : (
-            <div className="h-0.5 flex-1 rounded-full bg-[#2a2a2e] overflow-hidden">
-              <div
-                className="h-full rounded-full bg-[#c8f55a] transition-all duration-200"
-                style={{ width: `${Math.round(ffmpeg.progress * 100)}%` }}
-              />
-            </div>
+            <ProgressBar progress={ffmpeg.progress} />
           )}
         </div>
       )}
@@ -312,29 +316,27 @@ export function ClipList({
         </div>
       )}
 
-      {/* Export All row — only shown when there are clips */}
+      {/* Export All — only shown when there are clips */}
       {clips.length > 0 && (
         <div className="mt-3 flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleExportAll}
-              disabled={!canExportAll}
-              className="flex-1 rounded border border-[#c8f55a]/30 bg-[#1e2a0e] px-4 py-2 text-sm font-medium text-[#c8f55a] hover:bg-[#c8f55a]/10 hover:border-[#c8f55a]/60 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              {isExportingAll
-                ? ffmpeg.status === 'loading'
-                  ? 'Loading FFmpeg…'
-                  : `Exporting… ${Math.round(ffmpeg.progress * 100)}%`
-                : ffmpeg.status === 'done' && ffmpeg.exportingClipId === null
-                  ? '✓ Done'
-                  : `⬇ Export All (${clips.length} clip${clips.length === 1 ? '' : 's'})`}
-            </button>
-          </div>
+          <button
+            onClick={handleExportAll}
+            disabled={!canExportAll}
+            className="w-full rounded border border-[#c8f55a]/30 bg-[#1e2a0e] px-4 py-2 text-sm font-medium text-[#c8f55a] hover:bg-[#c8f55a]/10 hover:border-[#c8f55a]/60 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            {isExportingAll
+              ? ffmpeg.status === 'loading'
+                ? 'Loading FFmpeg…'
+                : `Exporting… ${Math.round(ffmpeg.progress * 100)}%`
+              : ffmpeg.status === 'done' && ffmpeg.exportingClipId === null
+                ? '✓ Done'
+                : `⬇ Export All (${clips.length} clip${clips.length === 1 ? '' : 's'})`}
+          </button>
 
           {isExportingAll && ffmpeg.status === 'processing' && (
             <div className="h-0.5 w-full rounded-full bg-[#2a2a2e] overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#c8f55a] transition-all duration-200"
+                className="h-full rounded-full bg-[#c8f55a] transition-[width] duration-500 ease-out"
                 style={{ width: `${Math.round(ffmpeg.progress * 100)}%` }}
               />
             </div>

@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Clip } from './useTrimMarkers';
 import type { UseFFmpegReturn } from './useFFmpeg';
+import type { ExportOptions } from '../types/exportOptions';
+import { DEFAULT_EXPORT_OPTIONS } from '../types/exportOptions';
 
 export type QueueItemStatus = 'pending' | 'processing' | 'done' | 'error';
 
@@ -8,6 +10,7 @@ export interface QueueItem {
   /** Unique per queue entry — different from clip.id so duplicates are allowed */
   queueId: string;
   clip: Clip;
+  options: ExportOptions;
   status: QueueItemStatus;
   error?: string;
 }
@@ -16,7 +19,7 @@ export interface UseExportQueueReturn {
   queue: QueueItem[];
   isRunning: boolean;
   isStarted: boolean;
-  enqueue: (clip: Clip) => void;
+  enqueue: (clip: Clip, options?: ExportOptions) => void;
   remove: (queueId: string) => void;
   reorder: (fromIndex: number, toIndex: number) => void;
   start: () => void;
@@ -30,7 +33,6 @@ export function useExportQueue(
 ): UseExportQueueReturn {
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [isStarted, setIsStarted] = useState(false);
-  // Tracked as state (not a ref) so the processor effect re-runs when it clears
   const [isProcessing, setIsProcessing] = useState(false);
 
   const isRunning = queue.some((item) => item.status === 'processing');
@@ -42,10 +44,10 @@ export function useExportQueue(
     setIsProcessing(false);
   }, [videoFile]);
 
-  const enqueue = useCallback((clip: Clip) => {
+  const enqueue = useCallback((clip: Clip, options: ExportOptions = DEFAULT_EXPORT_OPTIONS) => {
     setQueue((prev) => [
       ...prev,
-      { queueId: crypto.randomUUID(), clip, status: 'pending' },
+      { queueId: crypto.randomUUID(), clip, options, status: 'pending' },
     ]);
   }, []);
 
@@ -76,7 +78,7 @@ export function useExportQueue(
     setQueue((prev) => prev.filter((item) => item.status === 'processing'));
   }, []);
 
-  // Sequential processor — re-runs whenever queue, isStarted, or isProcessing changes
+  // Sequential processor
   useEffect(() => {
     if (!isStarted) return;
     if (isProcessing) return;
@@ -87,7 +89,7 @@ export function useExportQueue(
 
     if (ffmpeg.status === 'loading' || ffmpeg.status === 'processing') return;
 
-    const { queueId, clip } = nextPending;
+    const { queueId, clip, options } = nextPending;
 
     setIsProcessing(true);
     setQueue((prev) =>
@@ -96,7 +98,7 @@ export function useExportQueue(
       ),
     );
 
-    ffmpeg.exportClip(videoFile, clip)
+    ffmpeg.exportClip(videoFile, clip, options)
       .then(() => {
         setQueue((prev) =>
           prev.map((item) =>
@@ -113,7 +115,6 @@ export function useExportQueue(
         );
       })
       .finally(() => {
-        // Clearing isProcessing triggers a re-render → effect fires again → picks up next item
         setIsProcessing(false);
       });
   }, [queue, isStarted, isProcessing, videoFile, ffmpeg]);

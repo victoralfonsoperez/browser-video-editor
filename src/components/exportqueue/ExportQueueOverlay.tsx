@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import type { QueueItem } from '../../hooks/useExportQueue';
+import { FORMAT_LABELS, QUALITY_LABELS } from '../../types/exportOptions';
 
 interface ExportQueueOverlayProps {
   queue: QueueItem[];
   isRunning: boolean;
   isStarted: boolean;
-  /** Current FFmpeg progress (0–1) — passed down from useFFmpeg */
   ffmpegProgress: number;
   onStart: () => void;
   onPause: () => void;
@@ -63,7 +63,6 @@ export function ExportQueueOverlay({
 
   const allFinished = doneCount === totalCount;
 
-  // Overall progress: each finished item = 1 full unit, active item = its ffmpegProgress fraction
   const overallProgress = totalCount > 0
     ? (doneCount + (isRunning ? ffmpegProgress : 0)) / totalCount
     : 0;
@@ -144,6 +143,7 @@ export function ExportQueueOverlay({
             const isProcessing = item.status === 'processing';
             const isFinished = item.status === 'done' || item.status === 'error';
             const isDragTarget = dragOver === i;
+            const optionsBadge = `${FORMAT_LABELS[item.options.format]} · ${QUALITY_LABELS[item.options.quality]}`;
 
             if (isFinished) {
               return (
@@ -158,6 +158,7 @@ export function ExportQueueOverlay({
                     {item.clip.name}
                     {item.status === 'error' && item.error ? ` — ${item.error}` : ''}
                   </span>
+                  <span className="text-[9px] text-[#444] font-mono shrink-0">{optionsBadge}</span>
                 </div>
               );
             }
@@ -208,6 +209,9 @@ export function ExportQueueOverlay({
                     )}
                   </div>
 
+                  {/* Options badge */}
+                  <span className="text-[9px] text-[#555] font-mono shrink-0">{optionsBadge}</span>
+
                   {isPending && (
                     <button
                       onClick={() => onRemove(item.queueId)}
@@ -219,7 +223,6 @@ export function ExportQueueOverlay({
                   )}
                 </div>
 
-                {/* Per-row progress bar — only while this item is processing */}
                 {isProcessing && (
                   <ProgressBar progress={ffmpegProgress} className="mt-1.5" />
                 )}
@@ -229,7 +232,7 @@ export function ExportQueueOverlay({
         </div>
       )}
 
-      {/* Overall progress bar — always visible at the bottom while running */}
+      {/* Overall progress bar */}
       {isRunning && (
         <div className="px-3 py-2 border-t border-[#2a2a2e] bg-[#0e0e10]">
           <div className="flex items-center justify-between mb-1">

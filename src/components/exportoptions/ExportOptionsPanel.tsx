@@ -1,52 +1,45 @@
-import type {
-  OutputFormat,
-  QualityPreset,
-  Resolution,
-  ExportOptions,
-} from '../../types/exportOptions';
+import type { ExportOptions, ExportFormat, ExportQuality, ExportResolution } from '../../types/exportOptions';
 import {
-  FORMAT_LABELS,
-  QUALITY_LABELS,
-  RESOLUTION_LABELS,
+  FORMAT_LABELS, QUALITY_LABELS, RESOLUTION_LABELS,
 } from '../../types/exportOptions';
 
 interface ExportOptionsPanelProps {
-  value: ExportOptions;
+  options: ExportOptions;
   onChange: (next: ExportOptions) => void;
-  /** When true, renders compact layout for the per-clip popover. */
-  compact?: boolean;
+  /** When true, renders in compact inline mode (no outer card chrome) */
+  inline?: boolean;
 }
 
-const FORMATS: OutputFormat[] = ['mp4', 'webm', 'mov', 'gif'];
-const QUALITIES: QualityPreset[] = ['low', 'medium', 'high'];
-const RESOLUTIONS: Resolution[] = ['original', '1080p', '720p', '480p'];
+const FORMATS: ExportFormat[] = ['mp4', 'webm', 'mov', 'gif'];
+const QUALITIES: ExportQuality[] = ['low', 'medium', 'high'];
+const RESOLUTIONS: ExportResolution[] = ['original', '1080p', '720p', '480p'];
 
-function SegmentedControl<T extends string>({
+function OptionGroup<T extends string>({
   label,
   options,
-  labels,
   value,
+  labels,
   onChange,
 }: {
   label: string;
   options: T[];
-  labels: Record<T, string>;
   value: T;
+  labels: Record<T, string>;
   onChange: (v: T) => void;
 }) {
   return (
     <div className="flex flex-col gap-1">
       <span className="text-[10px] uppercase tracking-wider text-[#555]">{label}</span>
-      <div className="flex rounded border border-[#2a2a2e] overflow-hidden">
+      <div className="flex gap-1 flex-wrap">
         {options.map((opt) => (
           <button
             key={opt}
             onClick={() => onChange(opt)}
             className={[
-              'flex-1 py-1 text-[11px] transition-colors cursor-pointer',
+              'rounded px-2 py-0.5 text-xs transition-colors cursor-pointer border',
               value === opt
-                ? 'bg-[#c8f55a] text-[#111] font-semibold'
-                : 'bg-[#1a1a1e] text-[#777] hover:text-[#ccc] hover:bg-[#2a2a2e]',
+                ? 'border-[#c8f55a]/60 bg-[#c8f55a]/10 text-[#c8f55a]'
+                : 'border-[#333] bg-[#111] text-[#888] hover:border-[#555] hover:text-[#ccc]',
             ].join(' ')}
           >
             {labels[opt]}
@@ -57,38 +50,49 @@ function SegmentedControl<T extends string>({
   );
 }
 
-export function ExportOptionsPanel({ value, onChange, compact = false }: ExportOptionsPanelProps) {
-  const set = <K extends keyof ExportOptions>(key: K, val: ExportOptions[K]) =>
-    onChange({ ...value, [key]: val });
+export function ExportOptionsPanel({ options, onChange, inline = false }: ExportOptionsPanelProps) {
+  const set = <K extends keyof ExportOptions>(key: K, value: ExportOptions[K]) =>
+    onChange({ ...options, [key]: value });
 
-  return (
-    <div className={`flex flex-col gap-${compact ? '2' : '3'} ${compact ? 'p-2 rounded border border-[#2a2a2e] bg-[#111] w-56' : ''}`}>
-      <SegmentedControl
+  const content = (
+    <div className="flex flex-col gap-3">
+      <OptionGroup
         label="Format"
         options={FORMATS}
+        value={options.format}
         labels={FORMAT_LABELS}
-        value={value.format}
         onChange={(v) => set('format', v)}
       />
-      <SegmentedControl
+      <OptionGroup
         label="Quality"
         options={QUALITIES}
+        value={options.quality}
         labels={QUALITY_LABELS}
-        value={value.quality}
         onChange={(v) => set('quality', v)}
       />
-      <SegmentedControl
+      <OptionGroup
         label="Resolution"
         options={RESOLUTIONS}
+        value={options.resolution}
         labels={RESOLUTION_LABELS}
-        value={value.resolution}
         onChange={(v) => set('resolution', v)}
       />
-      {value.format === 'gif' && (
-        <p className="text-[10px] text-[#f5a623] leading-tight">
-          GIF has no audio. You will be asked to confirm before export.
+      {options.format === 'gif' && (
+        <p className="text-[10px] text-[#f5a623] leading-snug">
+          ⚠ GIF has no audio. You'll be warned before each GIF export.
         </p>
       )}
+    </div>
+  );
+
+  if (inline) return content;
+
+  return (
+    <div className="rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl shadow-black/60">
+      <p className="text-[11px] uppercase tracking-wider text-[#888] font-medium mb-3">
+        Export Settings
+      </p>
+      {content}
     </div>
   );
 }

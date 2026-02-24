@@ -2,7 +2,10 @@ import { useRef, useState, useCallback } from 'react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { coreURL, wasmURL } from './ffmpeg-urls';
+import { buildFFmpegArgs } from '../utils/buildFFmpegArgs';
+import { DEFAULT_EXPORT_OPTIONS } from '../types/exportOptions';
 import type { Clip } from './useTrimMarkers';
+import type { ExportOptions } from '../types/exportOptions';
 
 export type FFmpegStatus = 'idle' | 'loading' | 'processing' | 'done' | 'error';
 
@@ -10,8 +13,8 @@ export interface UseFFmpegReturn {
   status: FFmpegStatus;
   progress: number;
   error: string | null;
-  exportClip: (videoFile: File, clip: Clip) => Promise<void>;
-  exportAllClips: (videoFile: File, clips: Clip[]) => Promise<void>;
+  exportClip: (videoFile: File, clip: Clip, options?: ExportOptions) => Promise<void>;
+  exportAllClips: (videoFile: File, clips: Clip[], options?: ExportOptions) => Promise<void>;
   exportingClipId: string | null;
 }
 
@@ -48,7 +51,11 @@ export function useFFmpeg(): UseFFmpegReturn {
     }, RESET_DELAY_MS);
   }, []);
 
-  const exportClip = useCallback(async (videoFile: File, clip: Clip): Promise<void> => {
+  const exportClip = useCallback(async (
+    videoFile: File,
+    clip: Clip,
+    options: ExportOptions = DEFAULT_EXPORT_OPTIONS,
+  ): Promise<void> => {
     if (status === 'loading' || status === 'processing') return;
 
     setError(null);
@@ -57,36 +64,38 @@ export function useFFmpeg(): UseFFmpegReturn {
 
     try {
       const ffmpeg = await loadFFmpeg();
-
       setStatus('processing');
 
-      const ext = videoFile.name.split('.').pop() ?? 'mp4';
-      const inputName = `input.${ext}`;
-      const outputName = `${clip.name.replace(/[^a-z0-9_-]/gi, '_')}.${ext}`;
+      const sourceExt = videoFile.name.split('.').pop() ?? 'mp4';
+      const argSet = buildFFmpegArgs(clip.name, clip.inPoint, clip.outPoint, sourceExt, options);
 
-      await ffmpeg.writeFile(inputName, await fetchFile(videoFile));
+      await ffmpeg.writeFile(argSet.inputName, await fetchFile(videoFile));
 
-      await ffmpeg.exec([
-        '-ss', String(clip.inPoint),
-        '-to', String(clip.outPoint),
-        '-i', inputName,
-        '-c', 'copy',
-        '-avoid_negative_ts', 'make_zero',
-        outputName,
-      ]);
+      // GIF: two-pass
+      if (argSet.paletteArgs && argSet.paletteName) {
+        await ffmpeg.exec(argSet.paletteArgs);
+      }
+      await ffmpeg.exec(argSet.encodeArgs);
 
-      const data = await ffmpeg.readFile(outputName);
-      const blob = new Blob([data as BlobPart], { type: videoFile.type || 'video/mp4' });
+      const mimeType = options.format === 'gif'
+        ? 'image/gif'
+        : options.format === 'webm'
+          ? 'video/webm'
+          : 'video/mp4';
+
+      const data = await ffmpeg.readFile(argSet.outputName);
+      const blob = new Blob([data as BlobPart], { type: mimeType });
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement('a');
       a.href = url;
-      a.download = outputName;
+      a.download = argSet.outputName;
       a.click();
       URL.revokeObjectURL(url);
 
-      await ffmpeg.deleteFile(inputName);
-      await ffmpeg.deleteFile(outputName);
+      await ffmpeg.deleteFile(argSet.inputName);
+      await ffmpeg.deleteFile(argSet.outputName);
+      if (argSet.paletteName) await ffmpeg.deleteFile(argSet.paletteName);
 
       setStatus('done');
       setProgress(1);
@@ -100,7 +109,11 @@ export function useFFmpeg(): UseFFmpegReturn {
     }
   }, [status, loadFFmpeg, scheduleReset]);
 
-  const exportAllClips = useCallback(async (videoFile: File, clips: Clip[]): Promise<void> => {
+  const exportAllClips = useCallback(async (
+    videoFile: File,
+    clips: Clip[],
+    options: ExportOptions = DEFAULT_EXPORT_OPTIONS,
+  ): Promise<void> => {
     if (status === 'loading' || status === 'processing') return;
     if (clips.length === 0) return;
 
@@ -110,65 +123,73 @@ export function useFFmpeg(): UseFFmpegReturn {
 
     try {
       const ffmpeg = await loadFFmpeg();
-
       setStatus('processing');
 
-      const ext = videoFile.name.split('.').pop() ?? 'mp4';
-      const inputName = `input.${ext}`;
+      const sourceExt = videoFile.name.split('.').pop() ?? 'mp4';
 
-      await ffmpeg.writeFile(inputName, await fetchFile(videoFile));
+      await ffmpeg.writeFile(`input.${sourceExt}`, await fetchFile(videoFile));
 
-      // Trim each clip into a numbered segment
       const segmentNames: string[] = [];
+
       for (let i = 0; i < clips.length; i++) {
         const clip = clips[i];
-        const segName = `segment_${i}.${ext}`;
-        segmentNames.push(segName);
-
-        // Report rough per-clip progress while FFmpeg's own progress fires
         setProgress(i / clips.length);
 
+        const argSet = buildFFmpegArgs(clip.name, clip.inPoint, clip.outPoint, sourceExt, options);
+
+        // GIF: two-pass per segment
+        if (argSet.paletteArgs && argSet.paletteName) {
+          await ffmpeg.exec(argSet.paletteArgs);
+        }
+        await ffmpeg.exec(argSet.encodeArgs);
+
+        segmentNames.push(argSet.outputName);
+        if (argSet.paletteName) await ffmpeg.deleteFile(argSet.paletteName);
+      }
+
+      // Concatenation — GIFs can't be concat'd via ffmpeg concat demuxer, so skip for GIF
+      if (options.format === 'gif') {
+        // Download each GIF individually (no audio concat for GIF)
+        for (const seg of segmentNames) {
+          const data = await ffmpeg.readFile(seg);
+          const blob = new Blob([data as BlobPart], { type: 'image/gif' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = seg;
+          a.click();
+          URL.revokeObjectURL(url);
+          await ffmpeg.deleteFile(seg);
+        }
+      } else {
+        const concatList = segmentNames.map((n) => `file '${n}'`).join('\n');
+        await ffmpeg.writeFile('concat_list.txt', new TextEncoder().encode(concatList));
+
+        const outputName = `output.${options.format}`;
         await ffmpeg.exec([
-          '-ss', String(clip.inPoint),
-          '-to', String(clip.outPoint),
-          '-i', inputName,
+          '-f', 'concat',
+          '-safe', '0',
+          '-i', 'concat_list.txt',
           '-c', 'copy',
-          '-avoid_negative_ts', 'make_zero',
-          segName,
+          outputName,
         ]);
+
+        const mimeType = options.format === 'webm' ? 'video/webm' : 'video/mp4';
+        const data = await ffmpeg.readFile(outputName);
+        const blob = new Blob([data as BlobPart], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = outputName;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        await ffmpeg.deleteFile('concat_list.txt');
+        for (const seg of segmentNames) await ffmpeg.deleteFile(seg);
+        await ffmpeg.deleteFile(outputName);
       }
 
-      // Build concat list file
-      const concatList = segmentNames.map((n) => `file '${n}'`).join('\n');
-      const encoder = new TextEncoder();
-      await ffmpeg.writeFile('concat_list.txt', encoder.encode(concatList));
-
-      const outputName = 'output.mp4';
-      await ffmpeg.exec([
-        '-f', 'concat',
-        '-safe', '0',
-        '-i', 'concat_list.txt',
-        '-c', 'copy',
-        outputName,
-      ]);
-
-      const data = await ffmpeg.readFile(outputName);
-      const blob = new Blob([data as BlobPart], { type: 'video/mp4' });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = outputName;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      // Cleanup
-      await ffmpeg.deleteFile(inputName);
-      await ffmpeg.deleteFile('concat_list.txt');
-      for (const seg of segmentNames) {
-        await ffmpeg.deleteFile(seg);
-      }
-      await ffmpeg.deleteFile(outputName);
+      await ffmpeg.deleteFile(`input.${sourceExt}`);
 
       setStatus('done');
       setProgress(1);

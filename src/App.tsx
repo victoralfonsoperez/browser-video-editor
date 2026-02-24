@@ -8,7 +8,9 @@ import { useFFmpeg } from './hooks/useFFmpeg';
 import { useExportQueue } from './hooks/useExportQueue';
 import { ClipPreviewModal } from './components/clippreview/ClipPreviewModal';
 import { ExportQueueOverlay } from './components/exportqueue/ExportQueueOverlay';
-import { extractGoogleDriveFileId, buildGoogleDriveDownloadUrl } from './utils/googleDrive';
+import { ExportOptionsPanel } from './components/exportoptions/ExportOptionsPanel';
+import type { ExportOptions } from './types/exportOptions';
+import { DEFAULT_EXPORT_OPTIONS, FORMAT_LABELS, QUALITY_LABELS } from './types/exportOptions';
 import type { Clip } from './hooks/useTrimMarkers';
 
 function App() {
@@ -17,43 +19,22 @@ function App() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [previewClip, setPreviewClip] = useState<Clip | null>(null);
-  const [driveInput, setDriveInput] = useState('');
-  const [driveError, setDriveError] = useState<string | null>(null);
+  const [globalOptions, setGlobalOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
+  const [showGlobalSettings, setShowGlobalSettings] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trim = useTrimMarkers(duration);
   const captureFrame = useClipThumbnail();
   const ffmpeg = useFFmpeg();
   const exportQueue = useExportQueue(videoFile, ffmpeg);
 
-  const loadVideo = (file: File | null, url: string) => {
-    if (videoURL) URL.revokeObjectURL(videoURL);
-    setVideoFile(file);
-    setVideoURL(url);
-    trim.clearMarkers();
-  };
-
   const handleFileChange = (event: any) => {
     const file = event.target.files[0];
     if (!file || !file.type.startsWith('video/')) return;
     if (file.size > 500 * 1024 * 1024) { alert('File too large (max 500MB)'); return; }
-    loadVideo(file, URL.createObjectURL(file));
-  };
-
-  const handleDriveSubmit = () => {
-    setDriveError(null);
-    const trimmed = driveInput.trim();
-    if (!trimmed) return;
-
-    const fileId = extractGoogleDriveFileId(trimmed);
-    if (!fileId) {
-      setDriveError("Could not find a valid file ID in that URL. Make sure it's a Google Drive share link.");
-      return;
-    }
-
-    const downloadUrl = buildGoogleDriveDownloadUrl(fileId);
-    // Pass null for File — the app will use the URL directly.
-    // Full fetching/proxying will be wired up when the proxy layer is added.
-    loadVideo(null, downloadUrl);
+    if (videoURL) URL.revokeObjectURL(videoURL);
+    setVideoFile(file);
+    setVideoURL(URL.createObjectURL(file));
+    trim.clearMarkers();
   };
 
   const handleTimelineSeek = (newTime: number) => {
@@ -89,50 +70,57 @@ function App() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-5 flex items-center justify-between">
           <h1 className="text-xl font-bold uppercase tracking-widest text-[#ccc]">Video Editor</h1>
-          {(videoFile || videoURL) && (
-            <button
-              onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setDriveInput(''); setDriveError(null); }}
-              className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
-            >
-              Load Different Video
-            </button>
-          )}
+
+          <div className="flex items-center gap-2">
+            {/* Global export settings */}
+            <div className="relative">
+              <button
+                onClick={() => setShowGlobalSettings((s) => !s)}
+                className={[
+                  'flex items-center gap-1.5 rounded border px-3 py-1.5 text-sm transition-colors cursor-pointer',
+                  showGlobalSettings
+                    ? 'border-[#c8f55a]/60 bg-[#c8f55a]/10 text-[#c8f55a]'
+                    : 'border-[#444] bg-[#2a2a2e] text-[#ccc] hover:bg-[#3a3a3e]',
+                ].join(' ')}
+                title="Global export settings"
+              >
+                <span>⚙</span>
+                <span className="text-xs font-mono text-[#888]">
+                  {FORMAT_LABELS[globalOptions.format]} · {QUALITY_LABELS[globalOptions.quality]}
+                </span>
+              </button>
+
+              {showGlobalSettings && (
+                <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl">
+                  <p className="mb-3 text-[10px] uppercase tracking-wider text-[#888]">
+                    Default Export Settings
+                  </p>
+                  <ExportOptionsPanel options={globalOptions} onChange={setGlobalOptions} />
+                  <p className="mt-2 text-[10px] text-[#555]">
+                    Applied to new clips and Export All. Individual clips can override these.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {videoFile && (
+              <button
+                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); }}
+                className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+              >
+                Load Different Video
+              </button>
+            )}
+          </div>
         </div>
 
-        {!videoFile && !videoURL ? (
+        {!videoFile ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-[#333] bg-[#1a1a1e] py-20 text-[#555]">
             <p className="text-base">Open a video file to get started</p>
             <label className="cursor-pointer rounded bg-[#c8f55a] px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#111] hover:bg-[#d8ff70] transition-colors">
               Choose File
               <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
             </label>
-
-            <div className="mt-2 flex w-full max-w-sm flex-col items-center gap-2">
-              <div className="flex w-full items-center gap-2 text-xs text-[#444]">
-                <div className="h-px flex-1 bg-[#333]" />
-                <span>or load from Google Drive</span>
-                <div className="h-px flex-1 bg-[#333]" />
-              </div>
-              <div className="flex w-full gap-2">
-                <input
-                  type="url"
-                  placeholder="Paste Google Drive share link..."
-                  value={driveInput}
-                  onChange={(e) => { setDriveInput(e.target.value); setDriveError(null); }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleDriveSubmit()}
-                  className="flex-1 rounded border border-[#333] bg-[#111114] px-3 py-2 text-sm text-[#ccc] placeholder-[#444] outline-none focus:border-[#555] transition-colors"
-                />
-                <button
-                  onClick={handleDriveSubmit}
-                  className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-2 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
-                >
-                  Load
-                </button>
-              </div>
-              {driveError && (
-                <p className="w-full text-xs text-red-400">{driveError}</p>
-              )}
-            </div>
           </div>
         ) : (
           <>
@@ -157,6 +145,7 @@ function App() {
               outPoint={trim.outPoint}
               videoFile={videoFile}
               ffmpeg={ffmpeg}
+              globalOptions={globalOptions}
               onAddClip={handleAddClip}
               onRemoveClip={trim.removeClip}
               onSeekToClip={handleSeekToClip}
@@ -188,6 +177,14 @@ function App() {
         onReorder={exportQueue.reorder}
         onClear={exportQueue.clear}
       />
+
+      {/* Close global settings when clicking outside */}
+      {showGlobalSettings && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowGlobalSettings(false)}
+        />
+      )}
     </div>
   );
 }

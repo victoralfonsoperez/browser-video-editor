@@ -2,9 +2,9 @@ import { useRef, useState, useCallback } from 'react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import { coreURL, wasmURL } from './ffmpeg-urls';
-import { buildExportCommand, DEFAULT_EXPORT_OPTIONS } from '../types/exportOptions';
-import type { ExportOptions } from '../types/exportOptions';
 import type { Clip } from './useTrimMarkers';
+import type { ExportOptions } from '../types/exportOptions';
+import { DEFAULT_EXPORT_OPTIONS } from '../types/exportOptions';
 
 export type FFmpegStatus = 'idle' | 'loading' | 'processing' | 'done' | 'error';
 
@@ -19,6 +19,90 @@ export interface UseFFmpegReturn {
 
 const RESET_DELAY_MS = 2000;
 
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+function resolutionFilter(resolution: ExportOptions['resolution']): string | null {
+  switch (resolution) {
+    case '1080p': return 'scale=-2:1080';
+    case '720p':  return 'scale=-2:720';
+    case '480p':  return 'scale=-2:480';
+    default:      return null;
+  }
+}
+
+/**
+ * Build the encode flags for a given format + quality.
+ * Returns an array of FFmpeg args (no input/output filenames).
+ */
+function buildEncodeArgs(options: ExportOptions, hasScaleFilter: boolean): string[] {
+  const { format, quality, resolution } = options;
+  const scaleFilter = resolutionFilter(resolution);
+
+  // CRF values per quality tier
+  const h264Crf  = quality === 'high' ? '18' : quality === 'medium' ? '23' : '28';
+  const vp9Crf   = quality === 'high' ? '20' : quality === 'medium' ? '33' : '45';
+
+  switch (format) {
+    case 'mp4':
+    case 'mov': {
+      const args = ['-c:v', 'libx264', '-crf', h264Crf, '-preset', 'fast', '-c:a', 'aac'];
+      if (scaleFilter) args.push('-vf', scaleFilter);
+      return args;
+    }
+    case 'webm': {
+      const args = ['-c:v', 'libvpx-vp9', '-crf', vp9Crf, '-b:v', '0', '-c:a', 'libopus'];
+      if (scaleFilter) args.push('-vf', scaleFilter);
+      return args;
+    }
+    case 'gif': {
+      // GIF uses a two-pass palette approach — caller must use buildGifArgs instead.
+      // This branch is a fallback that should not normally be reached.
+      return ['-vf', scaleFilter ? `${scaleFilter},palettegen` : 'palettegen'];
+    }
+  }
+}
+
+/**
+ * Run a two-pass GIF export for a single trimmed segment.
+ * Pass 1: generate a palette PNG.
+ * Pass 2: use the palette to encode the GIF.
+ */
+async function exportGif(
+  ffmpeg: FFmpeg,
+  inputName: string,
+  outputName: string,
+  inPoint: number,
+  outPoint: number,
+  resolution: ExportOptions['resolution'],
+): Promise<void> {
+  const paletteName = 'palette.png';
+  const scaleFilter = resolutionFilter(resolution);
+  const baseFilter = scaleFilter ? `${scaleFilter},` : '';
+
+  // Pass 1 — palette
+  await ffmpeg.exec([
+    '-ss', String(inPoint),
+    '-to', String(outPoint),
+    '-i', inputName,
+    '-vf', `${baseFilter}palettegen=stats_mode=diff`,
+    '-y', paletteName,
+  ]);
+
+  // Pass 2 — encode GIF
+  await ffmpeg.exec([
+    '-ss', String(inPoint),
+    '-to', String(outPoint),
+    '-i', inputName,
+    '-i', paletteName,
+    '-filter_complex', `${baseFilter}paletteuse=dither=bayer`,
+    '-y', outputName,
+  ]);
+
+  await ffmpeg.deleteFile(paletteName);
+}
+
+// ─── hook ────────────────────────────────────────────────────────────────────
+
 export function useFFmpeg(): UseFFmpegReturn {
   const ffmpegRef = useRef<FFmpeg | null>(null);
   const [status, setStatus] = useState<FFmpegStatus>('idle');
@@ -28,13 +112,17 @@ export function useFFmpeg(): UseFFmpegReturn {
 
   const loadFFmpeg = useCallback(async (): Promise<FFmpeg> => {
     if (ffmpegRef.current?.loaded) return ffmpegRef.current;
+
     const ffmpeg = new FFmpeg();
     ffmpegRef.current = ffmpeg;
+
     ffmpeg.on('progress', ({ progress: p }) => {
       setProgress(Math.max(0, Math.min(1, p)));
     });
+
     setStatus('loading');
     await ffmpeg.load({ coreURL, wasmURL });
+
     return ffmpeg;
   }, []);
 
@@ -46,52 +134,62 @@ export function useFFmpeg(): UseFFmpegReturn {
     }, RESET_DELAY_MS);
   }, []);
 
-  const runCommand = useCallback(async (
-    ffmpeg: FFmpeg,
-    inputName: string,
-    outputName: string,
-    clip: Clip,
-    options: ExportOptions,
-  ): Promise<void> => {
-    const cmd = buildExportCommand(inputName, outputName, clip.inPoint, clip.outPoint, options);
-    if (cmd.kind === 'gif') {
-      await ffmpeg.exec(cmd.paletteArgs);
-      await ffmpeg.exec(cmd.renderArgs);
-      try { await ffmpeg.deleteFile('__palette.png'); } catch { /* ignore */ }
-    } else {
-      await ffmpeg.exec(cmd.args);
-    }
-  }, []);
-
   const exportClip = useCallback(async (
     videoFile: File,
     clip: Clip,
     options: ExportOptions = DEFAULT_EXPORT_OPTIONS,
   ): Promise<void> => {
     if (status === 'loading' || status === 'processing') return;
+
     setError(null);
     setProgress(0);
     setExportingClipId(clip.id);
+
     try {
       const ffmpeg = await loadFFmpeg();
       setStatus('processing');
-      const ext = options.format;
+
       const inputExt = videoFile.name.split('.').pop() ?? 'mp4';
       const inputName = `input.${inputExt}`;
-      const outputName = `${clip.name.replace(/[^a-z0-9_-]/gi, '_')}.${ext}`;
+      const outputExt = options.format === 'mov' ? 'mov'
+        : options.format === 'webm' ? 'webm'
+        : options.format === 'gif'  ? 'gif'
+        : 'mp4';
+      const safeName = clip.name.replace(/[^a-z0-9_-]/gi, '_');
+      const outputName = `${safeName}.${outputExt}`;
+
       await ffmpeg.writeFile(inputName, await fetchFile(videoFile));
-      await runCommand(ffmpeg, inputName, outputName, clip, options);
-      const mimeType = ext === 'gif' ? 'image/gif' : ext === 'webm' ? 'video/webm' : 'video/mp4';
+
+      if (options.format === 'gif') {
+        await exportGif(ffmpeg, inputName, outputName, clip.inPoint, clip.outPoint, options.resolution);
+      } else {
+        const encodeArgs = buildEncodeArgs(options, false);
+        await ffmpeg.exec([
+          '-ss', String(clip.inPoint),
+          '-to', String(clip.outPoint),
+          '-i', inputName,
+          ...encodeArgs,
+          '-avoid_negative_ts', 'make_zero',
+          outputName,
+        ]);
+      }
+
       const data = await ffmpeg.readFile(outputName);
+      const mimeType = options.format === 'webm' ? 'video/webm'
+        : options.format === 'gif' ? 'image/gif'
+        : 'video/mp4';
       const blob = new Blob([data as BlobPart], { type: mimeType });
       const url = URL.createObjectURL(blob);
+
       const a = document.createElement('a');
       a.href = url;
       a.download = outputName;
       a.click();
       URL.revokeObjectURL(url);
+
       await ffmpeg.deleteFile(inputName);
       await ffmpeg.deleteFile(outputName);
+
       setStatus('done');
       setProgress(1);
       scheduleReset();
@@ -102,7 +200,7 @@ export function useFFmpeg(): UseFFmpegReturn {
     } finally {
       setExportingClipId(null);
     }
-  }, [status, loadFFmpeg, runCommand, scheduleReset]);
+  }, [status, loadFFmpeg, scheduleReset]);
 
   const exportAllClips = useCallback(async (
     videoFile: File,
@@ -111,55 +209,78 @@ export function useFFmpeg(): UseFFmpegReturn {
   ): Promise<void> => {
     if (status === 'loading' || status === 'processing') return;
     if (clips.length === 0) return;
+
     setError(null);
     setProgress(0);
     setExportingClipId('__all__');
+
     try {
       const ffmpeg = await loadFFmpeg();
       setStatus('processing');
+
       const inputExt = videoFile.name.split('.').pop() ?? 'mp4';
       const inputName = `input.${inputExt}`;
+      const outputExt = options.format === 'mov' ? 'mov'
+        : options.format === 'webm' ? 'webm'
+        : options.format === 'gif'  ? 'gif'
+        : 'mp4';
+
       await ffmpeg.writeFile(inputName, await fetchFile(videoFile));
-      const ext = options.format;
+
       const segmentNames: string[] = [];
+
       for (let i = 0; i < clips.length; i++) {
         const clip = clips[i];
-        const segName = `segment_${i}.${ext}`;
+        const segName = `segment_${i}.${outputExt}`;
         segmentNames.push(segName);
         setProgress(i / clips.length);
-        await runCommand(ffmpeg, inputName, segName, clip, options);
-      }
-      if (ext === 'gif') {
-        for (let i = 0; i < segmentNames.length; i++) {
-          const data = await ffmpeg.readFile(segmentNames[i]);
-          const blob = new Blob([data as BlobPart], { type: 'image/gif' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = segmentNames[i];
-          a.click();
-          URL.revokeObjectURL(url);
-          await ffmpeg.deleteFile(segmentNames[i]);
+
+        if (options.format === 'gif') {
+          await exportGif(ffmpeg, inputName, segName, clip.inPoint, clip.outPoint, options.resolution);
+        } else {
+          const encodeArgs = buildEncodeArgs(options, false);
+          await ffmpeg.exec([
+            '-ss', String(clip.inPoint),
+            '-to', String(clip.outPoint),
+            '-i', inputName,
+            ...encodeArgs,
+            '-avoid_negative_ts', 'make_zero',
+            segName,
+          ]);
         }
-      } else {
-        const concatList = segmentNames.map((n) => `file '${n}'`).join('\n');
-        await ffmpeg.writeFile('concat_list.txt', new TextEncoder().encode(concatList));
-        const outputName = `output.${ext}`;
-        await ffmpeg.exec(['-f', 'concat', '-safe', '0', '-i', 'concat_list.txt', '-c', 'copy', outputName]);
-        const mimeType = ext === 'webm' ? 'video/webm' : 'video/mp4';
-        const data = await ffmpeg.readFile(outputName);
-        const blob = new Blob([data as BlobPart], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = outputName;
-        a.click();
-        URL.revokeObjectURL(url);
-        await ffmpeg.deleteFile('concat_list.txt');
-        await ffmpeg.deleteFile(outputName);
-        for (const seg of segmentNames) await ffmpeg.deleteFile(seg);
       }
+
+      // Concat — GIF segments are concatenated with the concat demuxer too
+      const concatList = segmentNames.map((n) => `file '${n}'`).join('\n');
+      await ffmpeg.writeFile('concat_list.txt', new TextEncoder().encode(concatList));
+
+      const outputName = `output.${outputExt}`;
+      await ffmpeg.exec([
+        '-f', 'concat',
+        '-safe', '0',
+        '-i', 'concat_list.txt',
+        '-c', 'copy',
+        outputName,
+      ]);
+
+      const data = await ffmpeg.readFile(outputName);
+      const mimeType = options.format === 'webm' ? 'video/webm'
+        : options.format === 'gif' ? 'image/gif'
+        : 'video/mp4';
+      const blob = new Blob([data as BlobPart], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = outputName;
+      a.click();
+      URL.revokeObjectURL(url);
+
       await ffmpeg.deleteFile(inputName);
+      await ffmpeg.deleteFile('concat_list.txt');
+      for (const seg of segmentNames) await ffmpeg.deleteFile(seg);
+      await ffmpeg.deleteFile(outputName);
+
       setStatus('done');
       setProgress(1);
       scheduleReset();
@@ -170,7 +291,7 @@ export function useFFmpeg(): UseFFmpegReturn {
     } finally {
       setExportingClipId(null);
     }
-  }, [status, loadFFmpeg, runCommand, scheduleReset]);
+  }, [status, loadFFmpeg, scheduleReset]);
 
   return { status, progress, error, exportClip, exportAllClips, exportingClipId };
 }

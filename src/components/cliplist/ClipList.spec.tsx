@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ClipList } from './ClipList';
 import type { Clip } from '../../hooks/useTrimMarkers';
 import type { UseFFmpegReturn } from '../../hooks/useFFmpeg';
+import { DEFAULT_EXPORT_OPTIONS } from '../../types/exportOptions';
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -34,6 +35,7 @@ const baseProps = {
   outPoint: null,
   videoFile: null,
   ffmpeg: makeFFmpeg(),
+  globalOptions: DEFAULT_EXPORT_OPTIONS,
   onAddClip: vi.fn(),
   onRemoveClip: vi.fn(),
   onSeekToClip: vi.fn(),
@@ -143,7 +145,7 @@ describe('ClipList — clip rows', () => {
     const onEnqueueClip = vi.fn();
     render(<ClipList {...baseProps} clips={clips} videoFile={mockFile} onEnqueueClip={onEnqueueClip} />);
     await userEvent.click(screen.getAllByTitle('Add to export queue')[0]);
-    expect(onEnqueueClip).toHaveBeenCalledWith(clips[0]);
+    expect(onEnqueueClip).toHaveBeenCalledWith(clips[0], DEFAULT_EXPORT_OPTIONS);
   });
 
   it('+ queue button is disabled when videoFile is null', () => {
@@ -196,7 +198,7 @@ describe('ClipList — per-clip export', () => {
     const ffmpeg = makeFFmpeg({ exportClip });
     render(<ClipList {...baseProps} clips={[clip]} videoFile={mockFile} ffmpeg={ffmpeg} />);
     await userEvent.click(screen.getByTitle('Export this clip instantly'));
-    expect(exportClip).toHaveBeenCalledWith(mockFile, clip);
+    expect(exportClip).toHaveBeenCalledWith(mockFile, clip, DEFAULT_EXPORT_OPTIONS);
   });
 
   it('disables the ⬇ button while an export is in progress', () => {
@@ -240,7 +242,7 @@ describe('ClipList — Export All', () => {
     const ffmpeg = makeFFmpeg({ exportAllClips });
     render(<ClipList {...baseProps} clips={clips} videoFile={mockFile} ffmpeg={ffmpeg} />);
     await userEvent.click(screen.getByRole('button', { name: /export all/i }));
-    expect(exportAllClips).toHaveBeenCalledWith(mockFile, clips);
+    expect(exportAllClips).toHaveBeenCalledWith(mockFile, clips, DEFAULT_EXPORT_OPTIONS);
   });
 
   it('disables Export All while another export is running', () => {

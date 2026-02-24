@@ -138,12 +138,15 @@ describe('useExportQueue', () => {
     expect(result.current.queue).toHaveLength(0);
   });
 
-  it('clears queue and resets isStarted when videoFile changes', () => {
+  it('clears queue and resets isStarted when videoFile changes', async () => {
     let videoFile: File | null = mockFile;
-    const ffmpeg = makeFFmpeg();
+    // Use a never-resolving exportClip so no async state updates leak out
+    // after the act() block — we only care about the queue/isStarted reset here.
+    const exportClip = vi.fn().mockReturnValue(new Promise(() => {}));
+    const ffmpeg = makeFFmpeg({ exportClip });
     const { result, rerender } = renderHook(() => useExportQueue(videoFile, ffmpeg));
 
-    act(() => {
+    await act(async () => {
       result.current.enqueue(makeClip('c1'));
       result.current.start();
     });
@@ -152,7 +155,7 @@ describe('useExportQueue', () => {
     expect(result.current.isStarted).toBe(true);
 
     videoFile = new File(['other'], 'other.mp4', { type: 'video/mp4' });
-    rerender();
+    await act(async () => { rerender(); });
 
     expect(result.current.queue).toHaveLength(0);
     expect(result.current.isStarted).toBe(false);

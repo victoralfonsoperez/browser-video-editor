@@ -1,11 +1,11 @@
-export type OutputFormat = 'mp4' | 'webm' | 'mov' | 'gif';
-export type QualityPreset = 'low' | 'medium' | 'high';
-export type Resolution = 'original' | '1080p' | '720p' | '480p';
+export type ExportFormat = 'mp4' | 'webm' | 'mov' | 'gif';
+export type ExportQuality = 'low' | 'medium' | 'high';
+export type ExportResolution = 'original' | '1080p' | '720p' | '480p';
 
 export interface ExportOptions {
-  format: OutputFormat;
-  quality: QualityPreset;
-  resolution: Resolution;
+  format: ExportFormat;
+  quality: ExportQuality;
+  resolution: ExportResolution;
 }
 
 export const DEFAULT_EXPORT_OPTIONS: ExportOptions = {
@@ -14,40 +14,46 @@ export const DEFAULT_EXPORT_OPTIONS: ExportOptions = {
   resolution: 'original',
 };
 
-export const FORMAT_LABELS: Record<OutputFormat, string> = {
+export const FORMAT_LABELS: Record<ExportFormat, string> = {
   mp4: 'MP4',
   webm: 'WebM',
   mov: 'MOV',
   gif: 'GIF',
 };
 
-export const QUALITY_LABELS: Record<QualityPreset, string> = {
+export const QUALITY_LABELS: Record<ExportQuality, string> = {
   low: 'Low',
   medium: 'Medium',
   high: 'High',
 };
 
-export const RESOLUTION_LABELS: Record<Resolution, string> = {
+export const RESOLUTION_LABELS: Record<ExportResolution, string> = {
   original: 'Original',
   '1080p': '1080p',
   '720p': '720p',
   '480p': '480p',
 };
 
-/** Height in pixels for each resolution cap. */
-export const RESOLUTION_HEIGHT: Record<Resolution, number | null> = {
-  original: null,
-  '1080p': 1080,
-  '720p': 720,
-  '480p': 480,
-};
+/** Returns the output file extension for a given format. */
+export function formatToExtension(format: ExportFormat): string {
+  return format; // all format values are already valid extensions
+}
 
-/**
- * CRF (Constant Rate Factor) values per quality preset for H.264 / VP9.
- * Lower = better quality / larger file.
- */
-export const H264_CRF: Record<QualityPreset, number> = { low: 35, medium: 23, high: 18 };
-export const VP9_CRF: Record<QualityPreset, number> = { low: 45, medium: 33, high: 24 };
+/** CRF value for libx264 quality mapping */
+export const H264_CRF: Record<ExportQuality, number> = { low: 32, medium: 23, high: 18 };
+/** CRF value for libvpx-vp9 quality mapping */
+export const WEBM_CRF: Record<ExportQuality, number> = { low: 40, medium: 33, high: 24 };
 
-/** GIF fps per quality preset. */
-export const GIF_FPS: Record<QualityPreset, number> = { low: 10, medium: 15, high: 24 };
+/** GIF palette size per quality */
+export const GIF_COLORS: Record<ExportQuality, number> = { low: 64, medium: 128, high: 256 };
+
+/** Scale filter for a given resolution (null = keep original) */
+export function resolutionToScaleFilter(resolution: ExportResolution): string | null {
+  const map: Record<ExportResolution, string | null> = {
+    original: null,
+    '1080p': 'scale=-2:1080',
+    '720p': 'scale=-2:720',
+    '480p': 'scale=-2:480',
+  };
+  return map[resolution];
+}

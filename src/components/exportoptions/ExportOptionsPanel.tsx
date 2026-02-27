@@ -1,4 +1,5 @@
 import type { ExportOptions, ExportFormat, ExportQuality, ExportResolution } from '../../types/exportOptions';
+import { ExportOptionsStrings } from '../../constants/ui';
 import {
   FORMAT_LABELS,
   QUALITY_LABELS,
@@ -54,21 +55,21 @@ export function ExportOptionsPanel({ options, onChange }: ExportOptionsPanelProp
   return (
     <div className="flex flex-col gap-3">
       <OptionGroup<ExportFormat>
-        label="Format"
+        label={ExportOptionsStrings.labelFormat}
         value={options.format}
         choices={formats}
         labels={FORMAT_LABELS}
         onChange={(format) => onChange({ ...options, format })}
       />
       <OptionGroup<ExportQuality>
-        label="Quality"
+        label={ExportOptionsStrings.labelQuality}
         value={options.quality}
         choices={qualities}
         labels={QUALITY_LABELS}
         onChange={(quality) => onChange({ ...options, quality })}
       />
       <OptionGroup<ExportResolution>
-        label="Resolution"
+        label={ExportOptionsStrings.labelResolution}
         value={options.resolution}
         choices={resolutions}
         labels={RESOLUTION_LABELS}
@@ -76,7 +77,7 @@ export function ExportOptionsPanel({ options, onChange }: ExportOptionsPanelProp
       />
       {options.format === 'gif' && (
         <p className="rounded border border-[#f5a623]/30 bg-[#f5a623]/5 px-2 py-1.5 text-[10px] text-[#f5a623]">
-          GIF has no audio and uses a two-pass encode. You'll be asked to confirm before exporting.
+          {ExportOptionsStrings.gifWarningBodyPanel}
         </p>
       )}
     </div>

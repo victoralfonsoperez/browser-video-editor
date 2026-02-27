@@ -31,10 +31,25 @@ function resolutionFilter(resolution: ExportOptions['resolution']): string | nul
 }
 
 /**
+ * Returns true when the chosen options require full re-encoding.
+ * Returns false when a stream copy (-c copy) is sufficient and much faster.
+ * GIF is excluded here — it is always handled by exportGif().
+ */
+function needsTranscode(options: ExportOptions, inputExt: string): boolean {
+  // WebM requires VP9 encoding
+  if (options.format === 'webm') return true;
+  // A scale filter forces decoding + filtering + re-encoding
+  if (options.resolution !== 'original') return true;
+  // mp4 and mov share h264/aac codecs and can be stream-copied from mp4-family inputs
+  const mp4Family = new Set(['mp4', 'm4v', 'mov']);
+  return !mp4Family.has(inputExt.toLowerCase());
+}
+
+/**
  * Build the encode flags for a given format + quality.
  * Returns an array of FFmpeg args (no input/output filenames).
  */
-function buildEncodeArgs(options: ExportOptions, hasScaleFilter: boolean): string[] {
+function buildEncodeArgs(options: ExportOptions): string[] {
   const { format, quality, resolution } = options;
   const scaleFilter = resolutionFilter(resolution);
 
@@ -163,7 +178,9 @@ export function useFFmpeg(): UseFFmpegReturn {
       if (options.format === 'gif') {
         await exportGif(ffmpeg, inputName, outputName, clip.inPoint, clip.outPoint, options.resolution);
       } else {
-        const encodeArgs = buildEncodeArgs(options, false);
+        const encodeArgs = needsTranscode(options, inputExt)
+          ? buildEncodeArgs(options)
+          : ['-c', 'copy'];
         await ffmpeg.exec([
           '-ss', String(clip.inPoint),
           '-to', String(clip.outPoint),
@@ -238,7 +255,9 @@ export function useFFmpeg(): UseFFmpegReturn {
         if (options.format === 'gif') {
           await exportGif(ffmpeg, inputName, segName, clip.inPoint, clip.outPoint, options.resolution);
         } else {
-          const encodeArgs = buildEncodeArgs(options, false);
+          const encodeArgs = needsTranscode(options, inputExt)
+            ? buildEncodeArgs(options)
+            : ['-c', 'copy'];
           await ffmpeg.exec([
             '-ss', String(clip.inPoint),
             '-to', String(clip.outPoint),

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { SharedStrings, TimelineStrings } from '../../constants/ui';
 import { useVideoThumbnails, THUMB_WIDTH } from '../../hooks/useVideoThumbnails';
 import type { useTrimMarkers } from '../../hooks/useTrimMarkers';
 
@@ -20,7 +21,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
   const { thumbnails, isGenerating, generateThumbnails } = useVideoThumbnails();
 
   const generate = useCallback(() => {
-    if (!videoRef?.current || duration <= 0 || isGenerating) return;
+    if (!videoRef?.current || !Number.isFinite(duration) || duration <= 0 || isGenerating) return;
     const width = timelineRef.current?.getBoundingClientRect().width ?? 0;
     if (width <= 0) return;
     const count = Math.max(1, Math.floor(width / THUMB_WIDTH));
@@ -32,7 +33,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
     if (duration > 0 && thumbnails.length === 0 && !isGenerating) {
       generate();
     }
-  }, [duration]);
+  }, [duration, generate, thumbnails.length, isGenerating]);
 
   const getTimeFromPosition = useCallback((clientX: number) => {
     if (!timelineRef.current) return 0;
@@ -45,7 +46,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
     const handler = trim.bindKeyboard(currentTime);
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [currentTime, trim.bindKeyboard]);
+  }, [currentTime, trim.bindKeyboard, trim]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -84,7 +85,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
     };
-  }, [isDragging, draggingMarker, duration]);
+  }, [isDragging, draggingMarker, duration, getTimeFromPosition, onSeek, trim]);
 
   const handleFrameSeek = (direction: 'forward' | 'backward') => {
     const frameDuration = 1 / 30;
@@ -115,16 +116,16 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
           {isGenerating ? (
             <span className="flex items-center gap-1.5 text-[#c8f55a]">
               <span className="inline-block w-2.5 h-2.5 border-2 border-[#c8f55a44] border-t-[#c8f55a] rounded-full animate-spin" />
-              Generating thumbnails...
+              {TimelineStrings.generatingThumbnails}
             </span>
           ) : (
             <span className="flex items-center gap-3">
-              {thumbnails.length > 0 ? `${thumbnails.length} thumbnails` : ''}
+              {thumbnails.length > 0 ? TimelineStrings.thumbnailCount(thumbnails.length) : ''}
               {(trim.inPoint !== null || trim.outPoint !== null) && (
                 <span className="text-[#c8f55a]/70 normal-case tracking-normal">
-                  {trim.inPoint !== null && `In: ${formatTime(trim.inPoint)}`}
-                  {trim.inPoint !== null && trim.outPoint !== null && ' → '}
-                  {trim.outPoint !== null && `Out: ${formatTime(trim.outPoint)}`}
+                  {trim.inPoint !== null && `${TimelineStrings.inPointPrefix} ${formatTime(trim.inPoint)}`}
+                  {trim.inPoint !== null && trim.outPoint !== null && ` ${SharedStrings.separator} `}
+                  {trim.outPoint !== null && `${TimelineStrings.outPointPrefix} ${formatTime(trim.outPoint)}`}
                 </span>
               )}
             </span>
@@ -150,13 +151,13 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
                 src={thumb.dataUrl}
                 className="h-full shrink-0 object-cover opacity-85 hover:opacity-100 transition-opacity duration-150"
                 style={{ width: THUMB_WIDTH }}
-                alt={`t=${thumb.time}s`}
+                alt={TimelineStrings.thumbnailAlt(thumb.time)}
                 title={formatTime(thumb.time)}
               />
             ))}
             {thumbnails.length === 0 && !isGenerating && (
               <div className="flex w-full items-center justify-center bg-[#111] text-xs text-[#444]">
-                Load a video to see the timeline
+                {TimelineStrings.emptyState}
               </div>
             )}
           </div>
@@ -184,7 +185,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
               className="absolute top-0 bottom-0 z-20 w-1 bg-[#c8f55a] cursor-ew-resize group"
               style={{ left: pct(trim.inPoint), transform: 'translateX(-50%)' }}
               onMouseDown={(e) => handleMarkerMouseDown(e, 'in')}
-              title="In point (drag or press I)"
+              title={TimelineStrings.titleInMarker}
             >
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#c8f55a] rounded-sm flex items-center justify-center">
                 <span className="text-[8px] text-black font-bold leading-none">I</span>
@@ -198,7 +199,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
               className="absolute top-0 bottom-0 z-20 w-1 bg-[#f55a5a] cursor-ew-resize group"
               style={{ left: pct(trim.outPoint), transform: 'translateX(-50%)' }}
               onMouseDown={(e) => handleMarkerMouseDown(e, 'out')}
-              title="Out point (drag or press O)"
+              title={TimelineStrings.titleOutMarker}
             >
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#f55a5a] rounded-sm flex items-center justify-center">
                 <span className="text-[8px] text-black font-bold leading-none">O</span>
@@ -252,34 +253,34 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
             onClick={() => handleFrameSeek('backward')}
             className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
           >
-            ◀ Frame
+            {TimelineStrings.btnFrameBack}
           </button>
           <button
             onClick={() => handleFrameSeek('forward')}
             className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
           >
-            Frame ▶
+            {TimelineStrings.btnFrameForward}
           </button>
           <button
             onClick={() => trim.setIn(currentTime)}
             className="rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-3 py-1 text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer"
-            title="Set in-point (I)"
+            title={TimelineStrings.titleSetIn}
           >
-            Set In
+            {TimelineStrings.btnSetIn}
           </button>
           <button
             onClick={() => trim.setOut(currentTime)}
             className="rounded border border-[#f55a5a]/40 bg-[#2a2a2e] px-3 py-1 text-sm text-[#f55a5a] hover:bg-[#f55a5a]/10 transition-colors cursor-pointer"
-            title="Set out-point (O)"
+            title={TimelineStrings.titleSetOut}
           >
-            Set Out
+            {TimelineStrings.btnSetOut}
           </button>
           {(trim.inPoint !== null || trim.outPoint !== null) && (
             <button
               onClick={trim.clearMarkers}
               className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1 text-sm text-[#888] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
             >
-              Clear
+              {SharedStrings.btnClear}
             </button>
           )}
         </div>

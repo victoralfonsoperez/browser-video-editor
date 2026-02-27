@@ -8,7 +8,7 @@ export interface Clip {
   thumbnailDataUrl?: string;
 }
 
-export function useTrimMarkers(duration: number) {
+export function useTrimMarkers() {
   const [inPoint, setInPoint] = useState<number | null>(null);
   const [outPoint, setOutPoint] = useState<number | null>(null);
   const [clips, setClips] = useState<Clip[]>([]);

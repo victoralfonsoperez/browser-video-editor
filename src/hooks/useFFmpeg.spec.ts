@@ -156,6 +156,76 @@ describe('useFFmpeg — exportClip', () => {
     expect(result.current.exportingClipId).toBeNull();
   });
 
+  it('uses stream copy for default options (mp4 input, original resolution)', async () => {
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    const execMock = vi.fn().mockResolvedValue(0);
+    vi.mocked(FFmpeg).mockImplementationOnce(function (this) {
+      this.loaded = false;
+      this.on = vi.fn();
+      this.load = vi.fn().mockResolvedValue(undefined);
+      this.writeFile = vi.fn().mockResolvedValue(undefined);
+      this.exec = execMock;
+      this.readFile = vi.fn().mockResolvedValue(new Uint8Array([0, 1, 2]));
+      this.deleteFile = vi.fn().mockResolvedValue(undefined);
+    });
+
+    const { result } = renderHook(() => useFFmpeg());
+    await act(async () => {
+      await result.current.exportClip(mockFile, mockClip);
+    });
+
+    const args = execMock.mock.calls[0][0] as string[];
+    expect(args).toContain('-c');
+    expect(args[args.indexOf('-c') + 1]).toBe('copy');
+    expect(args).not.toContain('-c:v');
+  });
+
+  it('re-encodes when resolution differs from original', async () => {
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    const execMock = vi.fn().mockResolvedValue(0);
+    vi.mocked(FFmpeg).mockImplementationOnce(function (this) {
+      this.loaded = false;
+      this.on = vi.fn();
+      this.load = vi.fn().mockResolvedValue(undefined);
+      this.writeFile = vi.fn().mockResolvedValue(undefined);
+      this.exec = execMock;
+      this.readFile = vi.fn().mockResolvedValue(new Uint8Array([0, 1, 2]));
+      this.deleteFile = vi.fn().mockResolvedValue(undefined);
+    });
+
+    const { result } = renderHook(() => useFFmpeg());
+    await act(async () => {
+      await result.current.exportClip(mockFile, mockClip, { format: 'mp4', quality: 'high', resolution: '720p' });
+    });
+
+    const args = execMock.mock.calls[0][0] as string[];
+    expect(args).toContain('-c:v');
+    expect(args).toContain('-vf');
+  });
+
+  it('re-encodes when format is webm', async () => {
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    const execMock = vi.fn().mockResolvedValue(0);
+    vi.mocked(FFmpeg).mockImplementationOnce(function (this) {
+      this.loaded = false;
+      this.on = vi.fn();
+      this.load = vi.fn().mockResolvedValue(undefined);
+      this.writeFile = vi.fn().mockResolvedValue(undefined);
+      this.exec = execMock;
+      this.readFile = vi.fn().mockResolvedValue(new Uint8Array([0, 1, 2]));
+      this.deleteFile = vi.fn().mockResolvedValue(undefined);
+    });
+
+    const { result } = renderHook(() => useFFmpeg());
+    await act(async () => {
+      await result.current.exportClip(mockFile, mockClip, { format: 'webm', quality: 'high', resolution: 'original' });
+    });
+
+    const args = execMock.mock.calls[0][0] as string[];
+    expect(args).toContain('-c:v');
+    expect(args).toContain('libvpx-vp9');
+  });
+
   it('does not start a second export while one is in progress', async () => {
     const { result } = renderHook(() => useFFmpeg());
 

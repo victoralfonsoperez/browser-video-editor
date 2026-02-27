@@ -16,6 +16,9 @@ export function useVideoThumbnails() {
     async (video: HTMLVideoElement, count: number) => {
       if (count < 1) return
 
+      const duration = video.duration
+      if (!Number.isFinite(duration) || duration <= 0) return
+
       setIsGenerating(true)
       setThumbnails([])
 
@@ -23,8 +26,6 @@ export function useVideoThumbnails() {
       canvas.width = THUMB_WIDTH
       canvas.height = THUMB_HEIGHT
       const ctx = canvas.getContext('2d')!
-
-      const duration = video.duration
       const times: number[] = Array.from(
         { length: count },
         (_, i) => (i / count) * duration

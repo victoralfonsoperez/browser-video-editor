@@ -21,7 +21,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
   const { thumbnails, isGenerating, generateThumbnails } = useVideoThumbnails();
 
   const generate = useCallback(() => {
-    if (!videoRef?.current || duration <= 0 || isGenerating) return;
+    if (!videoRef?.current || !Number.isFinite(duration) || duration <= 0 || isGenerating) return;
     const width = timelineRef.current?.getBoundingClientRect().width ?? 0;
     if (width <= 0) return;
     const count = Math.max(1, Math.floor(width / THUMB_WIDTH));

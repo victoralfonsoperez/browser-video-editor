@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import type { Clip } from './useTrimMarkers';
 import type { UseFFmpegReturn } from './useFFmpeg';
 import type { ExportOptions } from '../types/exportOptions';
@@ -27,56 +27,111 @@ export interface UseExportQueueReturn {
   clear: () => void;
 }
 
+type QueueState = { queue: QueueItem[]; isStarted: boolean; isProcessing: boolean };
+
+type QueueAction =
+  | { type: 'RESET' }
+  | { type: 'ENQUEUE'; item: QueueItem }
+  | { type: 'REMOVE'; queueId: string }
+  | { type: 'REORDER'; fromIndex: number; toIndex: number }
+  | { type: 'START' }
+  | { type: 'PAUSE' }
+  | { type: 'CLEAR' }
+  | { type: 'PROCESS_START'; queueId: string }
+  | { type: 'PROCESS_DONE'; queueId: string }
+  | { type: 'PROCESS_ERROR'; queueId: string; error: string }
+  | { type: 'PROCESS_FINISH' };
+
+const initialState: QueueState = { queue: [], isStarted: false, isProcessing: false };
+
+function reducer(state: QueueState, action: QueueAction): QueueState {
+  switch (action.type) {
+    case 'RESET':
+      return initialState;
+    case 'ENQUEUE':
+      return { ...state, queue: [...state.queue, action.item] };
+    case 'REMOVE':
+      return {
+        ...state,
+        queue: state.queue.filter(
+          (item) => item.queueId !== action.queueId || item.status === 'processing',
+        ),
+      };
+    case 'REORDER': {
+      if (action.fromIndex === action.toIndex) return state;
+      const next = [...state.queue];
+      const item = next[action.fromIndex];
+      if (!item || item.status !== 'pending') return state;
+      next.splice(action.fromIndex, 1);
+      next.splice(action.toIndex, 0, item);
+      return { ...state, queue: next };
+    }
+    case 'START':
+      return { ...state, isStarted: true };
+    case 'PAUSE':
+      return { ...state, isStarted: false };
+    case 'CLEAR':
+      return { ...state, queue: state.queue.filter((item) => item.status === 'processing') };
+    case 'PROCESS_START':
+      return {
+        ...state,
+        isProcessing: true,
+        queue: state.queue.map((item) =>
+          item.queueId === action.queueId ? { ...item, status: 'processing' } : item,
+        ),
+      };
+    case 'PROCESS_DONE':
+      return {
+        ...state,
+        queue: state.queue.map((item) =>
+          item.queueId === action.queueId ? { ...item, status: 'done' } : item,
+        ),
+      };
+    case 'PROCESS_ERROR':
+      return {
+        ...state,
+        queue: state.queue.map((item) =>
+          item.queueId === action.queueId
+            ? { ...item, status: 'error', error: action.error }
+            : item,
+        ),
+      };
+    case 'PROCESS_FINISH':
+      return { ...state, isProcessing: false };
+    default:
+      return state;
+  }
+}
+
 export function useExportQueue(
   videoFile: File | null,
   ffmpeg: UseFFmpegReturn,
 ): UseExportQueueReturn {
-  const [queue, setQueue] = useState<QueueItem[]>([]);
-  const [isStarted, setIsStarted] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { queue, isStarted, isProcessing } = state;
 
   const isRunning = queue.some((item) => item.status === 'processing');
 
   // Clear queue and stop when videoFile changes
   useEffect(() => {
-    setQueue([]);
-    setIsStarted(false);
-    setIsProcessing(false);
+    dispatch({ type: 'RESET' });
   }, [videoFile]);
 
   const enqueue = useCallback((clip: Clip, options: ExportOptions = DEFAULT_EXPORT_OPTIONS) => {
-    setQueue((prev) => [
-      ...prev,
-      { queueId: crypto.randomUUID(), clip, options, status: 'pending' },
-    ]);
+    dispatch({ type: 'ENQUEUE', item: { queueId: crypto.randomUUID(), clip, options, status: 'pending' } });
   }, []);
 
   const remove = useCallback((queueId: string) => {
-    setQueue((prev) =>
-      prev.filter((item) =>
-        item.queueId !== queueId || item.status === 'processing',
-      ),
-    );
+    dispatch({ type: 'REMOVE', queueId });
   }, []);
 
   const reorder = useCallback((fromIndex: number, toIndex: number) => {
-    if (fromIndex === toIndex) return;
-    setQueue((prev) => {
-      const next = [...prev];
-      const item = next[fromIndex];
-      if (!item || item.status !== 'pending') return prev;
-      next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, item);
-      return next;
-    });
+    dispatch({ type: 'REORDER', fromIndex, toIndex });
   }, []);
 
-  const start = useCallback(() => setIsStarted(true), []);
-  const pause = useCallback(() => setIsStarted(false), []);
-
-  const clear = useCallback(() => {
-    setQueue((prev) => prev.filter((item) => item.status === 'processing'));
-  }, []);
+  const start = useCallback(() => dispatch({ type: 'START' }), []);
+  const pause = useCallback(() => dispatch({ type: 'PAUSE' }), []);
+  const clear = useCallback(() => dispatch({ type: 'CLEAR' }), []);
 
   // Sequential processor
   useEffect(() => {
@@ -91,32 +146,15 @@ export function useExportQueue(
 
     const { queueId, clip, options } = nextPending;
 
-    setIsProcessing(true);
-    setQueue((prev) =>
-      prev.map((item) =>
-        item.queueId === queueId ? { ...item, status: 'processing' } : item,
-      ),
-    );
+    dispatch({ type: 'PROCESS_START', queueId });
 
     ffmpeg.exportClip(videoFile, clip, options)
-      .then(() => {
-        setQueue((prev) =>
-          prev.map((item) =>
-            item.queueId === queueId ? { ...item, status: 'done' } : item,
-          ),
-        );
-      })
+      .then(() => dispatch({ type: 'PROCESS_DONE', queueId }))
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : 'Export failed';
-        setQueue((prev) =>
-          prev.map((item) =>
-            item.queueId === queueId ? { ...item, status: 'error', error: message } : item,
-          ),
-        );
+        dispatch({ type: 'PROCESS_ERROR', queueId, error: message });
       })
-      .finally(() => {
-        setIsProcessing(false);
-      });
+      .finally(() => dispatch({ type: 'PROCESS_FINISH' }));
   }, [queue, isStarted, isProcessing, videoFile, ffmpeg]);
 
   return { queue, isRunning, isStarted, enqueue, remove, reorder, start, pause, clear };

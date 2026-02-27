@@ -1,20 +1,28 @@
-import { useState, useEffect, type SyntheticEvent, forwardRef } from 'react';
+import { useState, useEffect, type SyntheticEvent, forwardRef, type RefObject, useCallback } from 'react';
+import { SharedStrings, VideoPlayerStrings } from '../../constants/ui';
 
-const VideoPlayer = forwardRef(({ videoURL, videoFile, currentTime, handleTimeUpdate, handleLoadMetadata }: { videoURL: string | undefined, videoFile: File | null, handleTimeUpdate: () => void, handleLoadMetadata: (value: number) => void, currentTime: number }, ref: any) => {
+interface VideoMetadata {
+  duration: number;
+  width: number;
+  height: number;
+}
+
+const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined, videoFile: File | null, handleTimeUpdate: () => void, handleLoadMetadata: (value: number) => void, currentTime: number }>(({ videoURL, videoFile, currentTime, handleTimeUpdate, handleLoadMetadata }, forwardedRef) => {
+  const ref = forwardedRef as RefObject<HTMLVideoElement>;
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
-  const [videoMetadata, setVideoMetadata] = useState<any>(null);
+  const [videoMetadata, setVideoMetadata] = useState<VideoMetadata | null>(null);
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     if (ref.current) {
       if (isPlaying) { ref.current.pause(); } else { ref.current.play(); }
       setIsPlaying(!isPlaying);
     }
-  };
+  }, [isPlaying, ref]);
 
-  const handleVideoMetadata = (event: any) => {
-    const video = event.target;
+  const handleVideoMetadata = (event: SyntheticEvent<HTMLVideoElement>) => {
+    const video = event.currentTarget;
     handleLoadMetadata(video.duration);
     setVideoMetadata({
       duration: video.duration,
@@ -32,12 +40,12 @@ const VideoPlayer = forwardRef(({ videoURL, videoFile, currentTime, handleTimeUp
     }
   };
 
-  const toggleMute = () => {
+  const toggleMute = useCallback(() => {
     if (ref.current) {
       ref.current.muted = !isMuted;
       setIsMuted(!isMuted);
     }
-  };
+  }, [isMuted, ref]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -51,7 +59,7 @@ const VideoPlayer = forwardRef(({ videoURL, videoFile, currentTime, handleTimeUp
     };
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isPlaying, currentTime, videoMetadata?.duration, isMuted]);
+  }, [isPlaying, currentTime, videoMetadata?.duration, isMuted, toggleMute, ref, togglePlay]);
 
   const formatTime = (seconds: number) => {
     if (isNaN(seconds)) return '0:00';
@@ -64,13 +72,13 @@ const VideoPlayer = forwardRef(({ videoURL, videoFile, currentTime, handleTimeUp
     <div className="w-full max-w-4xl mx-auto">
       {/* File info */}
       <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[#aaa]">
-        <span><strong className="text-[#ccc]">File:</strong> {videoFile?.name}</span>
-        <span><strong className="text-[#ccc]">Size:</strong> {(videoFile?.size ? (videoFile.size / 1024 / 1024).toFixed(1) : '0.0')} MB</span>
-        <span><strong className="text-[#ccc]">Type:</strong> {videoFile?.type}</span>
+        <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelFile}</strong> {videoFile?.name}</span>
+        <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelSize}</strong> {(videoFile?.size ? (videoFile.size / 1024 / 1024).toFixed(1) : '0.0')} MB</span>
+        <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelType}</strong> {videoFile?.type}</span>
         {videoMetadata && (
           <>
-            <span><strong className="text-[#ccc]">Duration:</strong> {videoMetadata.duration.toFixed(2)}s</span>
-            <span><strong className="text-[#ccc]">Resolution:</strong> {videoMetadata.width}x{videoMetadata.height}</span>
+            <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelDuration}</strong> {videoMetadata.duration.toFixed(2)}s</span>
+            <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelResolution}</strong> {videoMetadata.width}x{videoMetadata.height}</span>
           </>
         )}
       </div>
@@ -93,18 +101,18 @@ const VideoPlayer = forwardRef(({ videoURL, videoFile, currentTime, handleTimeUp
           onClick={togglePlay}
           className="rounded border border-[#444] bg-[#1a1a1e] px-3 py-1 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
         >
-          {isPlaying ? '⏸ Pause' : '▶ Play'}
+          {isPlaying ? SharedStrings.btnPause : SharedStrings.btnPlay}
         </button>
 
         <span className="font-mono text-sm text-[#aaa]">
-          {formatTime(currentTime)} / {formatTime(videoMetadata?.duration)}
+          {formatTime(currentTime)} / {formatTime(videoMetadata?.duration ?? 0)}
         </span>
 
         <div className="ml-auto flex items-center gap-2">
           <button
             onClick={toggleMute}
             className="text-lg leading-none cursor-pointer"
-            title={isMuted ? 'Unmute' : 'Mute'}
+            title={isMuted ? VideoPlayerStrings.titleUnmute : VideoPlayerStrings.titleMute}
           >
             {isMuted ? '🔇' : '🔊'}
           </button>
@@ -122,7 +130,7 @@ const VideoPlayer = forwardRef(({ videoURL, videoFile, currentTime, handleTimeUp
 
       {/* Keyboard shortcuts hint */}
       <div className="mt-1.5 rounded bg-[#1a1a1e] px-3 py-1.5 text-xs text-[#666]">
-        <strong className="text-[#555]">Shortcuts:</strong> Space = Play/Pause | ← → = Seek 5s | M = Mute
+        <strong className="text-[#555]">Shortcuts:</strong> {VideoPlayerStrings.shortcutsHint}
       </div>
     </div>
   );

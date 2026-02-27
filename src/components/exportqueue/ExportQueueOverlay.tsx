@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SharedStrings, ExportQueueStrings } from '../../constants/ui';
 import type { QueueItem } from '../../hooks/useExportQueue';
 import { FORMAT_LABELS, QUALITY_LABELS } from '../../types/exportOptions';
 
@@ -86,7 +87,7 @@ export function ExportQueueOverlay({
             <span className="animate-spin inline-block text-[#c8f55a] text-sm leading-none">⟳</span>
           )}
           <span className="text-[11px] uppercase tracking-wider text-[#888] font-medium">
-            Export Queue
+            {ExportQueueStrings.heading}
           </span>
           <span className="text-[10px] text-[#555] font-mono">
             {doneCount}/{totalCount}
@@ -100,17 +101,17 @@ export function ExportQueueOverlay({
                 onClick={onPause}
                 disabled={isRunning}
                 className="rounded px-2 py-0.5 text-[10px] font-medium text-[#f5a623] border border-[#f5a623]/30 hover:bg-[#f5a623]/10 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                title="Pause after current item finishes"
+                title={ExportQueueStrings.titlePause}
               >
-                Pause
+                {ExportQueueStrings.btnPause}
               </button>
             ) : (
               <button
                 onClick={onStart}
                 className="rounded px-2 py-0.5 text-[10px] font-medium text-[#c8f55a] border border-[#c8f55a]/30 hover:bg-[#c8f55a]/10 transition-colors cursor-pointer"
-                title="Start processing the queue"
+                title={ExportQueueStrings.titleStart}
               >
-                {pendingCount > 0 ? 'Start' : 'Resume'}
+                {pendingCount > 0 ? ExportQueueStrings.btnStart : ExportQueueStrings.btnResume}
               </button>
             )
           )}
@@ -119,16 +120,16 @@ export function ExportQueueOverlay({
             <button
               onClick={onClear}
               className="rounded px-1.5 py-0.5 text-[10px] text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
-              title="Clear finished items"
+              title={ExportQueueStrings.titleClear}
             >
-              Clear
+              {SharedStrings.btnClear}
             </button>
           )}
 
           <button
             onClick={() => setCollapsed((c) => !c)}
             className="rounded px-1.5 py-0.5 text-[10px] text-[#555] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer w-5 text-center"
-            title={collapsed ? 'Expand' : 'Collapse'}
+            title={collapsed ? ExportQueueStrings.titleExpand : ExportQueueStrings.titleCollapse}
           >
             {collapsed ? '▲' : '▼'}
           </button>
@@ -216,9 +217,9 @@ export function ExportQueueOverlay({
                     <button
                       onClick={() => onRemove(item.queueId)}
                       className="opacity-0 group-hover:opacity-100 transition-opacity rounded px-1 py-0.5 text-[10px] text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
-                      title="Remove from queue"
+                      title={ExportQueueStrings.titleRemove}
                     >
-                      ✕
+                      {SharedStrings.btnClose}
                     </button>
                   )}
                 </div>
@@ -236,7 +237,7 @@ export function ExportQueueOverlay({
       {isRunning && (
         <div className="px-3 py-2 border-t border-[#2a2a2e] bg-[#0e0e10]">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] text-[#555]">Overall</span>
+            <span className="text-[10px] text-[#555]">{ExportQueueStrings.labelOverall}</span>
             <span className="text-[10px] text-[#888] font-mono">
               {Math.round(overallProgress * 100)}%
             </span>
@@ -249,12 +250,12 @@ export function ExportQueueOverlay({
       {collapsed && (
         <div className="px-3 py-1.5 text-[10px] text-[#555]">
           {isRunning
-            ? `${Math.round(overallProgress * 100)}% · ${doneCount}/${totalCount} done`
+            ? ExportQueueStrings.collapsedProgress(Math.round(overallProgress * 100), doneCount, totalCount)
             : pendingCount > 0
-              ? `${pendingCount} pending · ${isStarted ? 'started' : 'not started'}`
+              ? ExportQueueStrings.collapsedPending(pendingCount, isStarted)
               : allFinished
-                ? 'All done'
-                : 'Idle'}
+                ? ExportQueueStrings.statusAllDone
+                : ExportQueueStrings.statusIdle}
         </div>
       )}
     </div>

@@ -34,7 +34,7 @@ function resolutionFilter(resolution: ExportOptions['resolution']): string | nul
  * Build the encode flags for a given format + quality.
  * Returns an array of FFmpeg args (no input/output filenames).
  */
-function buildEncodeArgs(options: ExportOptions, hasScaleFilter: boolean): string[] {
+function buildEncodeArgs(options: ExportOptions): string[] {
   const { format, quality, resolution } = options;
   const scaleFilter = resolutionFilter(resolution);
 
@@ -163,7 +163,7 @@ export function useFFmpeg(): UseFFmpegReturn {
       if (options.format === 'gif') {
         await exportGif(ffmpeg, inputName, outputName, clip.inPoint, clip.outPoint, options.resolution);
       } else {
-        const encodeArgs = buildEncodeArgs(options, false);
+        const encodeArgs = buildEncodeArgs(options);
         await ffmpeg.exec([
           '-ss', String(clip.inPoint),
           '-to', String(clip.outPoint),
@@ -238,7 +238,7 @@ export function useFFmpeg(): UseFFmpegReturn {
         if (options.format === 'gif') {
           await exportGif(ffmpeg, inputName, segName, clip.inPoint, clip.outPoint, options.resolution);
         } else {
-          const encodeArgs = buildEncodeArgs(options, false);
+          const encodeArgs = buildEncodeArgs(options);
           await ffmpeg.exec([
             '-ss', String(clip.inPoint),
             '-to', String(clip.outPoint),

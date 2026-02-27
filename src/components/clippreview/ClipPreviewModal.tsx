@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { SharedStrings, ClipPreviewStrings } from '../../constants/ui';
 import type { Clip } from '../../hooks/useTrimMarkers';
 
 interface ClipPreviewModalProps {
@@ -55,20 +56,7 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
     return () => video.removeEventListener('timeupdate', onTimeUpdate);
   }, [clip.inPoint, clip.outPoint, loop]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { onClose(); return; }
-      if (e.key === ' ' || e.code === 'Space') {
-        e.preventDefault();
-        togglePlay();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isPlaying]);
-
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
     if (isPlaying) {
@@ -80,7 +68,20 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
       video.play();
     }
     setIsPlaying(!isPlaying);
-  };
+  }, [isPlaying, clip.inPoint, clip.outPoint]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isPlaying, onClose, togglePlay]);
 
   const progress = clipDuration > 0
     ? Math.min(1, Math.max(0, (currentTime - clip.inPoint) / clipDuration))
@@ -114,9 +115,9 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
           <button
             onClick={onClose}
             className="text-[#555] hover:text-[#ccc] transition-colors text-lg leading-none cursor-pointer"
-            title="Close (Esc)"
+            title={ClipPreviewStrings.titleClose}
           >
-            ✕
+            {SharedStrings.btnClose}
           </button>
         </div>
 
@@ -146,7 +147,7 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
             onClick={togglePlay}
             className="rounded border border-[#444] bg-[#2a2a2e] px-4 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer min-w-[80px]"
           >
-            {isPlaying ? '⏸ Pause' : '▶ Play'}
+            {isPlaying ? SharedStrings.btnPause : SharedStrings.btnPlay}
           </button>
 
           <span className="font-mono text-xs text-[#666]">
@@ -161,15 +162,15 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
                 onChange={(e) => setLoop(e.target.checked)}
                 className="accent-[#c8f55a] cursor-pointer"
               />
-              Loop
+              {ClipPreviewStrings.labelLoop}
             </label>
           </div>
         </div>
 
         {/* Keyboard hint */}
         <div className="px-4 pb-3 text-[10px] text-[#444]">
-          <kbd className="rounded bg-[#222] px-1 py-px text-[#555]">Space</kbd> play/pause ·{' '}
-          <kbd className="rounded bg-[#222] px-1 py-px text-[#555]">Esc</kbd> close
+          <kbd className="rounded bg-[#222] px-1 py-px text-[#555]">{ClipPreviewStrings.keySpace}</kbd> {ClipPreviewStrings.hintPlayPause}{' '}
+          <kbd className="rounded bg-[#222] px-1 py-px text-[#555]">{ClipPreviewStrings.keyEsc}</kbd> {ClipPreviewStrings.hintClose}
         </div>
       </div>
     </div>

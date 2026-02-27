@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type ChangeEvent } from 'react';
+import { AppStrings } from './constants/ui';
 import VideoPlayer from './components/videoplayer/videoplayer';
 import Timeline from './components/timeline/timeline';
 import { ClipList } from './components/cliplist/ClipList';
@@ -22,15 +23,17 @@ function App() {
   const [globalOptions, setGlobalOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
   const [showGlobalSettings, setShowGlobalSettings] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const trim = useTrimMarkers(duration);
+  const trim = useTrimMarkers();
   const captureFrame = useClipThumbnail();
   const ffmpeg = useFFmpeg();
   const exportQueue = useExportQueue(videoFile, ffmpeg);
 
-  const handleFileChange = (event: any) => {
-    const file = event.target.files[0];
-    if (!file || !file.type.startsWith('video/')) return;
-    if (file.size > 500 * 1024 * 1024) { alert('File too large (max 500MB)'); return; }
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || !files[0]) return;
+    const file = files[0];
+    if (!file.type.startsWith('video/')) return;
+    if (file.size > 500 * 1024 * 1024) { alert(AppStrings.alertFileTooLarge); return; }
     if (videoURL) URL.revokeObjectURL(videoURL);
     setVideoFile(file);
     setVideoURL(URL.createObjectURL(file));
@@ -69,7 +72,7 @@ function App() {
     <div className="min-h-screen bg-[#111114] text-[#e0e0e0] p-5">
       <div className="mx-auto max-w-4xl">
         <div className="mb-5 flex items-center justify-between">
-          <h1 className="text-xl font-bold uppercase tracking-widest text-[#ccc]">Video Editor</h1>
+          <h1 className="text-xl font-bold uppercase tracking-widest text-[#ccc]">{AppStrings.title}</h1>
 
           <div className="flex items-center gap-2">
             {/* Global export settings */}
@@ -82,7 +85,7 @@ function App() {
                     ? 'border-[#c8f55a]/60 bg-[#c8f55a]/10 text-[#c8f55a]'
                     : 'border-[#444] bg-[#2a2a2e] text-[#ccc] hover:bg-[#3a3a3e]',
                 ].join(' ')}
-                title="Global export settings"
+                title={AppStrings.titleGlobalSettings}
               >
                 <span>⚙</span>
                 <span className="text-xs font-mono text-[#888]">
@@ -93,11 +96,11 @@ function App() {
               {showGlobalSettings && (
                 <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl">
                   <p className="mb-3 text-[10px] uppercase tracking-wider text-[#888]">
-                    Default Export Settings
+                    {AppStrings.headingDefaultSettings}
                   </p>
                   <ExportOptionsPanel options={globalOptions} onChange={setGlobalOptions} />
                   <p className="mt-2 text-[10px] text-[#555]">
-                    Applied to new clips and Export All. Individual clips can override these.
+                    {AppStrings.helpDefaultSettings}
                   </p>
                 </div>
               )}
@@ -108,7 +111,7 @@ function App() {
                 onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); }}
                 className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
               >
-                Load Different Video
+                {AppStrings.btnLoadDifferentVideo}
               </button>
             )}
           </div>
@@ -116,9 +119,9 @@ function App() {
 
         {!videoFile ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-[#333] bg-[#1a1a1e] py-20 text-[#555]">
-            <p className="text-base">Open a video file to get started</p>
+            <p className="text-base">{AppStrings.emptyStatePrompt}</p>
             <label className="cursor-pointer rounded bg-[#c8f55a] px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#111] hover:bg-[#d8ff70] transition-colors">
-              Choose File
+              {AppStrings.btnChooseFile}
               <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
             </label>
           </div>

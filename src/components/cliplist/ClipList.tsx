@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
+import { SharedStrings, ClipListStrings } from '../../constants/ui';
 import type { Clip } from '../../hooks/useTrimMarkers';
 import type { UseFFmpegReturn } from '../../hooks/useFFmpeg';
 import type { ExportOptions } from '../../types/exportOptions';
-import { DEFAULT_EXPORT_OPTIONS, FORMAT_LABELS, QUALITY_LABELS, RESOLUTION_LABELS, isGif } from '../../types/exportOptions';
+import { FORMAT_LABELS, QUALITY_LABELS, RESOLUTION_LABELS, isGif } from '../../types/exportOptions';
 import { ExportOptionsPanel } from '../exportoptions/ExportOptionsPanel';
 
 interface ClipListProps {
@@ -54,22 +55,22 @@ function GifWarningDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCa
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="w-72 rounded-lg border border-[#333] bg-[#1a1a1e] p-4 shadow-xl">
-        <p className="mb-1 text-sm font-semibold text-[#ccc]">Export as GIF?</p>
+        <p className="mb-1 text-sm font-semibold text-[#ccc]">{ClipListStrings.gifWarningHeading}</p>
         <p className="mb-4 text-xs text-[#888]">
-          GIF format does not support audio. The audio track will be dropped. This also uses a slower two-pass encode.
+          {ClipListStrings.gifWarningBody}
         </p>
         <div className="flex justify-end gap-2">
           <button
             onClick={onCancel}
             className="rounded border border-[#333] bg-[#111] px-3 py-1.5 text-xs text-[#888] hover:text-[#ccc] transition-colors cursor-pointer"
           >
-            Cancel
+            {SharedStrings.btnCancel}
           </button>
           <button
             onClick={onConfirm}
             className="rounded border border-[#f5a623]/40 bg-[#f5a623]/10 px-3 py-1.5 text-xs text-[#f5a623] hover:bg-[#f5a623]/20 transition-colors cursor-pointer"
           >
-            Export anyway
+            {ClipListStrings.btnExportAnyway}
           </button>
         </div>
       </div>
@@ -186,16 +187,16 @@ function ClipRow({
         )}
 
         <div className="flex items-center gap-2">
-          <span className="cursor-grab text-[#444] hover:text-[#888] transition-colors text-base leading-none active:cursor-grabbing shrink-0" title="Drag to reorder">⠿</span>
+          <span className="cursor-grab text-[#444] hover:text-[#888] transition-colors text-base leading-none active:cursor-grabbing shrink-0" title={ClipListStrings.titleDragToReorder}>⠿</span>
           <span className="text-[10px] text-[#555] font-mono w-4 shrink-0">{index + 1}</span>
 
           <div
             className="shrink-0 w-[56px] h-[32px] rounded overflow-hidden bg-[#222] border border-[#333] cursor-pointer hover:border-[#c8f55a]/60 transition-colors"
             onClick={onPreview}
-            title="Preview clip"
+            title={ClipListStrings.titlePreviewClip}
           >
             {clip.thumbnailDataUrl ? (
-              <img src={clip.thumbnailDataUrl} alt={`Thumbnail for ${clip.name}`} className="w-full h-full object-cover" />
+              <img src={clip.thumbnailDataUrl} alt={ClipListStrings.clipThumbnailAlt(clip.name)} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-[#444] text-[10px]">▶</div>
             )}
@@ -215,7 +216,7 @@ function ClipRow({
                 className="w-full rounded border border-[#c8f55a]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-sm text-[#ccc] outline-none focus:border-[#c8f55a]"
               />
             ) : (
-              <button onClick={startEdit} className="block w-full text-left text-sm text-[#ccc] truncate hover:text-white transition-colors cursor-text" title="Click to rename">
+              <button onClick={startEdit} className="block w-full text-left text-sm text-[#ccc] truncate hover:text-white transition-colors cursor-text" title={ClipListStrings.titleClickToRename}>
                 {clip.name}
               </button>
             )}
@@ -227,9 +228,9 @@ function ClipRow({
           <span className="font-mono text-xs text-[#777] shrink-0">{formatTime(clipDuration)}</span>
 
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-            <button onClick={onPreview} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Preview clip">⬛▶</button>
-            <button onClick={onSeek} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Seek to in-point">▶</button>
-            <button onClick={onEditPoints} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Load in/out points into timeline for editing">✎</button>
+            <button onClick={onPreview} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titlePreviewClip}>⬛▶</button>
+            <button onClick={onSeek} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleSeekToInPoint}>▶</button>
+            <button onClick={onEditPoints} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleEditPoints}>✎</button>
 
             {/* ⚙ per-clip settings */}
             <div className="relative" ref={settingsRef}>
@@ -239,7 +240,7 @@ function ClipRow({
                   'rounded px-1.5 py-0.5 text-xs hover:bg-[#2a2a2e] transition-colors cursor-pointer',
                   showSettings ? 'text-[#c8f55a]' : 'text-[#888] hover:text-[#c8f55a]',
                 ].join(' ')}
-                title="Per-clip export settings"
+                title={ClipListStrings.titlePerClipSettings}
               >
                 ⚙
               </button>
@@ -247,13 +248,13 @@ function ClipRow({
               {showSettings && (
                 <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl">
                   <div className="mb-2 flex items-center justify-between">
-                    <p className="text-[10px] uppercase tracking-wider text-[#888]">Clip Export Settings</p>
+                    <p className="text-[10px] uppercase tracking-wider text-[#888]">{ClipListStrings.headingClipSettings}</p>
                     <button
                       onClick={() => setClipOptions(globalOptions)}
                       className="text-[10px] text-[#555] hover:text-[#c8f55a] transition-colors cursor-pointer"
-                      title="Reset to global defaults"
+                      title={ClipListStrings.titleReset}
                     >
-                      Reset
+                      {ClipListStrings.btnReset}
                     </button>
                   </div>
                   <ExportOptionsPanel options={clipOptions} onChange={setClipOptions} />
@@ -265,23 +266,23 @@ function ClipRow({
               onClick={handleExportClick}
               disabled={!canExport}
               className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-              title="Export this clip instantly"
+              title={ClipListStrings.titleExportInstant}
             >
               {isThisExporting
                 ? ffmpeg.status === 'loading'
-                  ? 'Loading…'
-                  : `${Math.round(ffmpeg.progress * 100)}%`
+                  ? ClipListStrings.loadingFfmpeg
+                  : ClipListStrings.exportProgress(Math.round(ffmpeg.progress * 100))
                 : '⬇'}
             </button>
             <button
               onClick={handleEnqueueClick}
               disabled={!videoFile}
               className="rounded px-1.5 py-0.5 text-xs font-bold text-[#888] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-              title="Add to export queue"
+              title={ClipListStrings.titleAddToQueue}
             >
               +
             </button>
-            <button onClick={onRemove} className="rounded px-1.5 py-0.5 text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title="Remove clip">✕</button>
+            <button onClick={onRemove} className="rounded px-1.5 py-0.5 text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
           </div>
 
           {/* Always-visible options badge */}
@@ -292,7 +293,7 @@ function ClipRow({
         {isThisExporting && (
           <div className="mt-1.5 flex items-center gap-2">
             {ffmpeg.status === 'loading' ? (
-              <p className="text-[10px] text-[#888] animate-pulse">Loading FFmpeg (first export only)…</p>
+              <p className="text-[10px] text-[#888] animate-pulse">{ClipListStrings.loadingFfmpegFirst}</p>
             ) : (
               <ProgressBar progress={ffmpeg.progress} />
             )}
@@ -301,7 +302,7 @@ function ClipRow({
 
         {/* Per-clip error */}
         {ffmpeg.exportingClipId === null && ffmpeg.status === 'error' && ffmpeg.error && (
-          <p className="mt-1 text-[10px] text-[#f55a5a]">Export error: {ffmpeg.error}</p>
+          <p className="mt-1 text-[10px] text-[#f55a5a]">{ClipListStrings.exportError(ffmpeg.error!)}</p>
         )}
       </div>
     </>
@@ -329,7 +330,7 @@ export function ClipList({
   const canExportAll = !!videoFile && clips.length > 0 && !isAnyExporting;
 
   const handleAdd = () => {
-    const name = clipName.trim() || `Clip ${clips.length + 1}`;
+    const name = clipName.trim() || ClipListStrings.clipNamePlaceholder(clips.length + 1);
     onAddClip(name);
     setClipName('');
   };
@@ -371,23 +372,23 @@ export function ClipList({
       )}
 
       <div className="w-full max-w-4xl mx-auto mt-4 rounded-md border border-[#333] bg-[#1a1a1e] p-3">
-        <div className="text-[11px] uppercase tracking-wider text-[#888] mb-3">Clip Definition</div>
+        <div className="text-[11px] uppercase tracking-wider text-[#888] mb-3">{ClipListStrings.sectionHeading}</div>
 
         <div className="flex gap-3 mb-3">
           <div className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2">
-            <div className="text-[10px] uppercase text-[#555] mb-0.5">In Point</div>
+            <div className="text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelInPoint}</div>
             <div className={`font-mono text-sm ${inPoint !== null ? 'text-[#c8f55a]' : 'text-[#444]'}`}>
               {inPoint !== null ? formatTime(inPoint) : '—'}
             </div>
           </div>
           <div className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2">
-            <div className="text-[10px] uppercase text-[#555] mb-0.5">Out Point</div>
+            <div className="text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelOutPoint}</div>
             <div className={`font-mono text-sm ${outPoint !== null ? 'text-[#f55a5a]' : 'text-[#444]'}`}>
               {outPoint !== null ? formatTime(outPoint) : '—'}
             </div>
           </div>
           <div className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2">
-            <div className="text-[10px] uppercase text-[#555] mb-0.5">Duration</div>
+            <div className="text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelDuration}</div>
             <div className={`font-mono text-sm ${duration !== null ? 'text-[#ccc]' : 'text-[#444]'}`}>
               {duration !== null ? formatTime(duration) : '—'}
             </div>
@@ -397,7 +398,7 @@ export function ClipList({
         <div className="flex gap-2 mb-4">
           <input
             type="text"
-            placeholder={`Clip ${clips.length + 1}`}
+            placeholder={ClipListStrings.clipNamePlaceholder(clips.length + 1)}
             value={clipName}
             onChange={(e) => setClipName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && canAdd && handleAdd()}
@@ -409,13 +410,13 @@ export function ClipList({
             disabled={!canAdd}
             className="rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-4 py-1.5 text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            Add Clip
+            {ClipListStrings.btnAddClip}
           </button>
         </div>
 
         {clips.length === 0 ? (
           <div className="text-center text-xs text-[#444] py-4">
-            Set in/out points and add clips — they'll appear here
+            {ClipListStrings.emptyState}
           </div>
         ) : (
           <div className="flex flex-col gap-1.5">
@@ -455,11 +456,11 @@ export function ClipList({
             >
               {isExportingAll
                 ? ffmpeg.status === 'loading'
-                  ? 'Loading FFmpeg…'
-                  : `Exporting… ${Math.round(ffmpeg.progress * 100)}%`
+                  ? ClipListStrings.loadingFfmpegAll
+                  : ClipListStrings.exportAllProgress(Math.round(ffmpeg.progress * 100))
                 : ffmpeg.status === 'done' && ffmpeg.exportingClipId === null
-                  ? '✓ Done'
-                  : `⬇ Export All (${clips.length} clip${clips.length === 1 ? '' : 's'}) · ${FORMAT_LABELS[globalOptions.format]}`}
+                  ? ClipListStrings.exportDone
+                  : ClipListStrings.exportAllLabel(clips.length, FORMAT_LABELS[globalOptions.format])}
             </button>
 
             {isExportingAll && ffmpeg.status === 'processing' && (
@@ -472,17 +473,17 @@ export function ClipList({
             )}
 
             {isExportingAll && ffmpeg.status === 'loading' && (
-              <p className="text-[10px] text-[#888] animate-pulse">Loading FFmpeg (first export only)…</p>
+              <p className="text-[10px] text-[#888] animate-pulse">{ClipListStrings.loadingFfmpegFirst}</p>
             )}
 
             {!isAnyExporting && ffmpeg.status === 'error' && ffmpeg.error && ffmpeg.exportingClipId === null && (
-              <p className="text-[10px] text-[#f55a5a]">Export error: {ffmpeg.error}</p>
+              <p className="text-[10px] text-[#f55a5a]">{ClipListStrings.exportError(ffmpeg.error!)}</p>
             )}
           </div>
         )}
 
         <p className="mt-3 text-[10px] text-[#444]">
-          Keyboard:{' '}
+          {ClipListStrings.keyboardHintHeading}{' '}
           <kbd className="rounded bg-[#222] px-1 py-px text-[#666]">I</kbd> set in ·{' '}
           <kbd className="rounded bg-[#222] px-1 py-px text-[#666]">O</kbd> set out · drag{' '}
           <span className="text-[#666]">⠿</span> to reorder · click name to rename ·{' '}

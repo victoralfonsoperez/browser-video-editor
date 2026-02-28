@@ -83,15 +83,13 @@ describe('useVideoThumbnails', () => {
       const { result } = renderHook(() => useVideoThumbnails())
       const video = makeVideoElement(60)
 
-      // Start generating — seeked never fires because addEventListener is mocked
-      const generating = result.current.generateThumbnails(video, 1)
-
-      // Advance past the 3-second per-frame timeout so the promise resolves
+      // Start generating inside act so that setIsGenerating(true) and the
+      // final setIsGenerating(false) are both captured by React's test wrapper.
+      // seeked never fires because addEventListener is mocked, so only the
+      // 3-second setTimeout resolves the per-frame promise.
       await act(async () => {
+        const generating = result.current.generateThumbnails(video, 1)
         vi.advanceTimersByTime(3000)
-      })
-
-      await act(async () => {
         await generating
       })
 

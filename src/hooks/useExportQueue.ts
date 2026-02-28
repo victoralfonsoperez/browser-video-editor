@@ -115,7 +115,7 @@ function reducer(state: QueueState, action: QueueAction): QueueState {
 }
 
 export function useExportQueue(
-  videoFile: File | null,
+  videoSource: File | string | null,
   ffmpeg: UseFFmpegReturn,
 ): UseExportQueueReturn {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -123,10 +123,10 @@ export function useExportQueue(
 
   const isRunning = queue.some((item) => item.status === 'processing');
 
-  // Clear queue and stop when videoFile changes
+  // Clear queue and stop when videoSource changes
   useEffect(() => {
     dispatch({ type: 'RESET' });
-  }, [videoFile]);
+  }, [videoSource]);
 
   const enqueue = useCallback((clip: Clip, options: ExportOptions = DEFAULT_EXPORT_OPTIONS) => {
     dispatch({ type: 'ENQUEUE', item: { queueId: crypto.randomUUID(), clip, options, status: 'pending' } });
@@ -149,7 +149,7 @@ export function useExportQueue(
   useEffect(() => {
     if (!isStarted) return;
     if (isProcessing) return;
-    if (!videoFile) return;
+    if (!videoSource) return;
 
     const nextPending = queue.find((item) => item.status === 'pending');
     if (!nextPending) return;
@@ -160,14 +160,14 @@ export function useExportQueue(
 
     dispatch({ type: 'PROCESS_START', queueId });
 
-    ffmpeg.exportClip(videoFile, clip, options)
+    ffmpeg.exportClip(videoSource, clip, options)
       .then(() => dispatch({ type: 'PROCESS_DONE', queueId }))
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : 'Export failed';
         dispatch({ type: 'PROCESS_ERROR', queueId, error: message });
       })
       .finally(() => dispatch({ type: 'PROCESS_FINISH' }));
-  }, [queue, isStarted, isProcessing, videoFile, ffmpeg]);
+  }, [queue, isStarted, isProcessing, videoSource, ffmpeg]);
 
   return { queue, isRunning, isStarted, enqueue, remove, reorder, start, pause, clear, retry };
 }

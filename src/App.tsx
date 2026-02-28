@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
 import { AppStrings } from './constants/ui';
+import { extractGoogleDriveFileId, buildProxiedGoogleDriveUrl } from './utils/googleDrive';
 import VideoPlayer from './components/videoplayer/videoplayer';
 import Timeline from './components/timeline/timeline';
 import { ClipList } from './components/cliplist/ClipList';
@@ -20,6 +21,9 @@ function App() {
   const { showToast } = useToast();
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoURL, setVideoURL] = useState<string | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState<'file' | 'drive'>('file');
+  const [driveInputUrl, setDriveInputUrl] = useState('');
+  const [isDriveSource, setIsDriveSource] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [previewClip, setPreviewClip] = useState<Clip | null>(null);
@@ -29,7 +33,11 @@ function App() {
   const trim = useTrimMarkers();
   const captureFrame = useClipThumbnail();
   const ffmpeg = useFFmpeg();
-  const exportQueue = useExportQueue(videoFile, ffmpeg);
+
+  const isVideoLoaded = videoFile !== null || isDriveSource;
+  const videoSource: File | string | null = videoFile ?? videoURL ?? null;
+
+  const exportQueue = useExportQueue(videoSource, ffmpeg);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -43,6 +51,17 @@ function App() {
     if (videoURL) URL.revokeObjectURL(videoURL);
     setVideoFile(file);
     setVideoURL(URL.createObjectURL(file));
+    setIsDriveSource(false);
+    trim.clearMarkers();
+  };
+
+  const handleDriveLoad = () => {
+    const fileId = extractGoogleDriveFileId(driveInputUrl);
+    if (!fileId) { showToast(AppStrings.errorInvalidDriveUrl, 'error'); return; }
+    if (videoURL) URL.revokeObjectURL(videoURL);
+    setVideoFile(null);
+    setVideoURL(buildProxiedGoogleDriveUrl(fileId));
+    setIsDriveSource(true);
     trim.clearMarkers();
   };
 
@@ -112,9 +131,9 @@ function App() {
               )}
             </div>
 
-            {videoFile && (
+            {isVideoLoaded && (
               <button
-                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); }}
+                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveInputUrl(''); }}
                 className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
               >
                 {AppStrings.btnLoadDifferentVideo}
@@ -123,13 +142,60 @@ function App() {
           </div>
         </div>
 
-        {!videoFile ? (
+        {!isVideoLoaded ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-[#333] bg-[#1a1a1e] py-20 text-[#555]">
-            <p className="text-base">{AppStrings.emptyStatePrompt}</p>
-            <label className="cursor-pointer rounded bg-[#c8f55a] px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#111] hover:bg-[#d8ff70] transition-colors">
-              {AppStrings.btnChooseFile}
-              <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
-            </label>
+            {/* Source tabs */}
+            <div className="flex rounded border border-[#333] overflow-hidden">
+              <button
+                onClick={() => setActiveTab('file')}
+                className={[
+                  'px-4 py-1.5 text-sm transition-colors cursor-pointer',
+                  activeTab === 'file'
+                    ? 'bg-[#c8f55a] text-[#111] font-bold'
+                    : 'bg-[#1a1a1e] text-[#888] hover:text-[#ccc]',
+                ].join(' ')}
+              >
+                {AppStrings.tabLocalFile}
+              </button>
+              <button
+                onClick={() => setActiveTab('drive')}
+                className={[
+                  'px-4 py-1.5 text-sm transition-colors cursor-pointer',
+                  activeTab === 'drive'
+                    ? 'bg-[#c8f55a] text-[#111] font-bold'
+                    : 'bg-[#1a1a1e] text-[#888] hover:text-[#ccc]',
+                ].join(' ')}
+              >
+                {AppStrings.tabGoogleDrive}
+              </button>
+            </div>
+
+            {activeTab === 'file' ? (
+              <>
+                <p className="text-base">{AppStrings.emptyStatePrompt}</p>
+                <label className="cursor-pointer rounded bg-[#c8f55a] px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#111] hover:bg-[#d8ff70] transition-colors">
+                  {AppStrings.btnChooseFile}
+                  <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
+                </label>
+              </>
+            ) : (
+              <div className="flex w-full max-w-sm gap-2">
+                <input
+                  type="text"
+                  placeholder={AppStrings.driveUrlPlaceholder}
+                  value={driveInputUrl}
+                  onChange={(e) => setDriveInputUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleDriveLoad()}
+                  className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2 text-sm text-[#ccc] placeholder-[#444] outline-none focus:border-[#c8f55a]/60"
+                />
+                <button
+                  onClick={handleDriveLoad}
+                  className="rounded bg-[#c8f55a] px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#111] hover:bg-[#d8ff70] transition-colors cursor-pointer"
+                >
+                  {AppStrings.btnLoadFromDrive}
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <>
@@ -153,7 +219,7 @@ function App() {
               clips={trim.clips}
               inPoint={trim.inPoint}
               outPoint={trim.outPoint}
-              videoFile={videoFile}
+              videoSource={videoSource}
               ffmpeg={ffmpeg}
               globalOptions={globalOptions}
               onAddClip={handleAddClip}

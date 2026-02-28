@@ -10,7 +10,7 @@ interface ClipListProps {
   clips: Clip[];
   inPoint: number | null;
   outPoint: number | null;
-  videoFile: File | null;
+  videoSource: File | string | null;
   ffmpeg: UseFFmpegReturn;
   globalOptions: ExportOptions;
   onAddClip: (name: string) => void;
@@ -83,7 +83,7 @@ interface ClipRowProps {
   index: number;
   isDragOver: boolean;
   dragOverSide: 'top' | 'bottom' | null;
-  videoFile: File | null;
+  videoSource: File | string | null;
   ffmpeg: UseFFmpegReturn;
   globalOptions: ExportOptions;
   onDragStart: (index: number) => void;
@@ -101,7 +101,7 @@ interface ClipRowProps {
 
 function ClipRow({
   clip, index, isDragOver, dragOverSide,
-  videoFile, ffmpeg,
+  videoSource, ffmpeg,
   globalOptions,
   onDragStart, onDragEnter, onDragEnd, onDrop,
   onRemove, onSeek, onPreview, onRename, onEditPoints, onEnqueue, onInstantExport,
@@ -130,7 +130,7 @@ function ClipRow({
   const clipDuration = clip.outPoint - clip.inPoint;
   const isThisExporting = ffmpeg.exportingClipId === clip.id;
   const isAnyExporting = ffmpeg.status === 'loading' || ffmpeg.status === 'processing';
-  const canExport = !!videoFile && !isAnyExporting;
+  const canExport = !!videoSource && !isAnyExporting;
 
   const handleExportClick = () => {
     if (isGif(clipOptions)) {
@@ -276,7 +276,7 @@ function ClipRow({
             </button>
             <button
               onClick={handleEnqueueClick}
-              disabled={!videoFile}
+              disabled={!videoSource}
               className="rounded px-1.5 py-0.5 text-xs font-bold text-[#888] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={ClipListStrings.titleAddToQueue}
             >
@@ -311,7 +311,7 @@ function ClipRow({
 
 export function ClipList({
   clips, inPoint, outPoint,
-  videoFile, ffmpeg,
+  videoSource, ffmpeg,
   globalOptions,
   onAddClip, onRemoveClip, onSeekToClip, onPreviewClip, onUpdateClip, onReorderClips,
   onEnqueueClip,
@@ -327,7 +327,7 @@ export function ClipList({
 
   const isAnyExporting = ffmpeg.status === 'loading' || ffmpeg.status === 'processing';
   const isExportingAll = isAnyExporting && ffmpeg.exportingClipId === '__all__';
-  const canExportAll = !!videoFile && clips.length > 0 && !isAnyExporting;
+  const canExportAll = !!videoSource && clips.length > 0 && !isAnyExporting;
 
   const handleAdd = () => {
     const name = clipName.trim() || ClipListStrings.clipNamePlaceholder(clips.length + 1);
@@ -339,7 +339,7 @@ export function ClipList({
     if (isGif(globalOptions)) {
       setGifExportAllPending(true);
     } else {
-      if (videoFile) ffmpeg.exportAllClips(videoFile, clips, globalOptions);
+      if (videoSource) ffmpeg.exportAllClips(videoSource, clips, globalOptions);
     }
   };
 
@@ -365,7 +365,7 @@ export function ClipList({
         <GifWarningDialog
           onConfirm={() => {
             setGifExportAllPending(false);
-            if (videoFile) ffmpeg.exportAllClips(videoFile, clips, globalOptions);
+            if (videoSource) ffmpeg.exportAllClips(videoSource, clips, globalOptions);
           }}
           onCancel={() => setGifExportAllPending(false)}
         />
@@ -427,7 +427,7 @@ export function ClipList({
                 index={i}
                 isDragOver={dragOverIndex === i}
                 dragOverSide={dragOverIndex === i ? dragOverSide : null}
-                videoFile={videoFile}
+                videoSource={videoSource}
                 ffmpeg={ffmpeg}
                 globalOptions={globalOptions}
                 onDragStart={(idx) => setDragFromIndex(idx)}
@@ -440,7 +440,7 @@ export function ClipList({
                 onRename={(name) => onUpdateClip(clip.id, { name })}
                 onEditPoints={() => onSeekToClip(clip)}
                 onEnqueue={(options) => onEnqueueClip(clip, options)}
-                onInstantExport={(options) => { if (videoFile) ffmpeg.exportClip(videoFile, clip, options); }}
+                onInstantExport={(options) => { if (videoSource) ffmpeg.exportClip(videoSource, clip, options); }}
               />
             ))}
           </div>

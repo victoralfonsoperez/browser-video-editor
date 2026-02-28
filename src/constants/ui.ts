@@ -32,6 +32,12 @@ export const AppStrings = {
   btnChooseFile: 'Choose File',
   alertFileTooLarge: 'File too large (max 500MB)',
   alertNotVideoFile: 'Please select a video file',
+  tabLocalFile: 'Local File',
+  tabGoogleDrive: 'Google Drive',
+  driveUrlPlaceholder: 'Paste Google Drive sharing URL…',
+  btnLoadFromDrive: 'Load',
+  errorInvalidDriveUrl: 'Not a valid Google Drive sharing URL',
+  driveLabelSource: 'Google Drive',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -47,6 +53,7 @@ export const VideoPlayerStrings = {
   titleUnmute: 'Unmute',
   shortcutsHint: 'Space/K = Play/Pause | ←/→ = ±5s | J/L = ±10s | ,/. = Frame | Home/End | M = Mute',
   errorVideoLoad: 'Video failed to load — the format or codec may not be supported by your browser.',
+  errorVideoNetwork: 'Network error — could not fetch the video. Check the URL or try again.',
 } as const;
 
 // ---------------------------------------------------------------------------

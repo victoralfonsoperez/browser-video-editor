@@ -178,6 +178,48 @@ describe('VideoPlayer', () => {
     });
   });
 
+  describe('loading overlay', () => {
+    it('shows loading overlay when video starts loading', () => {
+      renderVideoPlayer();
+      fireEvent.loadStart(document.querySelector('video')!);
+      expect(screen.getByText(/loading\.\.\./i)).toBeInTheDocument();
+    });
+
+    it('hides loading overlay after canplay fires', () => {
+      renderVideoPlayer();
+      fireEvent.loadStart(document.querySelector('video')!);
+      fireEvent.canPlay(document.querySelector('video')!);
+      expect(screen.queryByText(/loading\.\.\./i)).not.toBeInTheDocument();
+    });
+
+    it('hides loading overlay after loadeddata fires', () => {
+      renderVideoPlayer();
+      fireEvent.loadStart(document.querySelector('video')!);
+      fireEvent.loadedData(document.querySelector('video')!);
+      expect(screen.queryByText(/loading\.\.\./i)).not.toBeInTheDocument();
+    });
+
+    it('shows loading overlay when video is buffering (waiting event)', () => {
+      renderVideoPlayer();
+      fireEvent.waiting(document.querySelector('video')!);
+      expect(screen.getByText(/loading\.\.\./i)).toBeInTheDocument();
+    });
+
+    it('hides loading overlay when playback resumes after buffering', () => {
+      renderVideoPlayer();
+      fireEvent.waiting(document.querySelector('video')!);
+      fireEvent.playing(document.querySelector('video')!);
+      expect(screen.queryByText(/loading\.\.\./i)).not.toBeInTheDocument();
+    });
+
+    it('hides loading overlay on video error', () => {
+      renderVideoPlayer();
+      fireEvent.loadStart(document.querySelector('video')!);
+      fireEvent.error(document.querySelector('video')!);
+      expect(screen.queryByText(/loading\.\.\./i)).not.toBeInTheDocument();
+    });
+  });
+
   describe('video error handling', () => {
     it('shows an error toast when the video fails to load', () => {
       renderVideoPlayer();

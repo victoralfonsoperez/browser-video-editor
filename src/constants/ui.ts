@@ -54,6 +54,7 @@ export const VideoPlayerStrings = {
   shortcutsHint: 'Space/K = Play/Pause | ←/→ = ±5s | J/L = ±10s | ,/. = Frame | Home/End | M = Mute',
   errorVideoLoad: 'Video failed to load — the format or codec may not be supported by your browser.',
   errorVideoNetwork: 'Network error — could not fetch the video. Check the URL or try again.',
+  loadingVideo: 'Loading...',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -114,6 +115,7 @@ export const ClipListStrings = {
     `⬇ Export All (${count} clip${count === 1 ? '' : 's'}) · ${format}`,
   exportError: (msg: string) => `Export error: ${msg}`,
   clipThumbnailAlt: (name: string) => `Thumbnail for ${name}`,
+  addingClip: 'Capturing...',
 } as const;
 
 // ---------------------------------------------------------------------------

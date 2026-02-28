@@ -35,6 +35,7 @@ const baseProps = {
   onRemove: vi.fn(),
   onReorder: vi.fn(),
   onClear: vi.fn(),
+  onRetry: vi.fn(),
 };
 
 beforeEach(() => vi.clearAllMocks());
@@ -173,6 +174,30 @@ describe('ExportQueueOverlay — item statuses', () => {
     render(<ExportQueueOverlay {...baseProps} queue={[pendingItem]} onRemove={onRemove} />);
     await userEvent.click(screen.getByTitle(/remove from queue/i));
     expect(onRemove).toHaveBeenCalledWith('q-remove');
+  });
+});
+
+// ─── Retry button ─────────────────────────────────────────────────────────────
+
+describe('ExportQueueOverlay — retry button', () => {
+  it('shows a Retry button for error items', () => {
+    const errorItem = makeItem({ status: 'error', error: 'encode failed' });
+    render(<ExportQueueOverlay {...baseProps} queue={[errorItem]} />);
+    expect(screen.getByTitle(/re-add this item/i)).toBeInTheDocument();
+  });
+
+  it('does not show a Retry button for done items', () => {
+    const doneItem = makeItem({ status: 'done' });
+    render(<ExportQueueOverlay {...baseProps} queue={[doneItem]} />);
+    expect(screen.queryByTitle(/re-add this item/i)).not.toBeInTheDocument();
+  });
+
+  it('calls onRetry with the correct queueId when Retry is clicked', async () => {
+    const onRetry = vi.fn();
+    const errorItem = makeItem({ queueId: 'q-retry', status: 'error', error: 'boom' });
+    render(<ExportQueueOverlay {...baseProps} queue={[errorItem]} onRetry={onRetry} />);
+    await userEvent.click(screen.getByTitle(/re-add this item/i));
+    expect(onRetry).toHaveBeenCalledWith('q-retry');
   });
 });
 

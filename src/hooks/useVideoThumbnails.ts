@@ -33,21 +33,29 @@ export function useVideoThumbnails() {
 
       const results: Thumbnail[] = []
 
-      for (const time of times) {
-        await new Promise<void>((resolve) => {
-          const onSeeked = () => {
-            ctx.drawImage(video, 0, 0, THUMB_WIDTH, THUMB_HEIGHT)
-            results.push({ time, dataUrl: canvas.toDataURL('image/jpeg', 0.6) })
-            video.removeEventListener('seeked', onSeeked)
-            resolve()
-          }
-          video.addEventListener('seeked', onSeeked)
-          video.currentTime = time
-        })
+      try {
+        for (const time of times) {
+          await new Promise<void>((resolve) => {
+            const onSeeked = () => {
+              try {
+                ctx.drawImage(video, 0, 0, THUMB_WIDTH, THUMB_HEIGHT)
+                results.push({ time, dataUrl: canvas.toDataURL('image/jpeg', 0.6) })
+              } catch { /* skip frame */ }
+              video.removeEventListener('seeked', onSeeked)
+              resolve()
+            }
+            video.addEventListener('seeked', onSeeked)
+            video.currentTime = time
+            setTimeout(() => {
+              video.removeEventListener('seeked', onSeeked)
+              resolve()
+            }, 3000)
+          })
+        }
+      } finally {
+        setThumbnails(results)
+        setIsGenerating(false)
       }
-
-      setThumbnails(results)
-      setIsGenerating(false)
     },
     []
   )

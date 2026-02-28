@@ -31,6 +31,7 @@ export const AppStrings = {
   emptyStatePrompt: 'Open a video file to get started',
   btnChooseFile: 'Choose File',
   alertFileTooLarge: 'File too large (max 500MB)',
+  alertNotVideoFile: 'Please select a video file',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -45,6 +46,7 @@ export const VideoPlayerStrings = {
   titleMute: 'Mute',
   titleUnmute: 'Unmute',
   shortcutsHint: 'Space/K = Play/Pause | ←/→ = ±5s | J/L = ±10s | ,/. = Frame | Home/End | M = Mute',
+  errorVideoLoad: 'Video failed to load — the format or codec may not be supported by your browser.',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -163,4 +165,6 @@ export const ExportQueueStrings = {
     `${pct}% · ${done}/${total} done`,
   collapsedPending: (n: number, started: boolean) =>
     `${n} pending · ${started ? 'started' : 'not started'}`,
+  btnRetry: 'Retry',
+  titleRetry: 'Re-add this item to the queue',
 } as const;

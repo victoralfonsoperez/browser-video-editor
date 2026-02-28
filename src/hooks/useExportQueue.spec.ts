@@ -188,6 +188,53 @@ describe('useExportQueue', () => {
     expect(result.current.queue[0].error).toBe('boom');
   });
 
+  it('retry resets an error item to pending and clears its error field', async () => {
+    const exportClip = vi.fn().mockRejectedValue(new Error('boom'));
+    const ffmpeg = makeFFmpeg({ exportClip });
+    const { result } = renderHook(() => useExportQueue(mockFile, ffmpeg));
+
+    await act(async () => {
+      result.current.enqueue(makeClip('c1'));
+      result.current.start();
+    });
+
+    expect(result.current.queue[0].status).toBe('error');
+    expect(result.current.queue[0].error).toBe('boom');
+
+    // Pause so the processor doesn't immediately re-pick the retried item
+    act(() => { result.current.pause(); });
+
+    const queueId = result.current.queue[0].queueId;
+    act(() => { result.current.retry(queueId); });
+
+    expect(result.current.queue[0].status).toBe('pending');
+    expect(result.current.queue[0].error).toBeUndefined();
+  });
+
+  it('retry is a no-op on pending items', () => {
+    const { result } = renderHook(() => useExportQueue(null, makeFFmpeg()));
+    act(() => { result.current.enqueue(makeClip('c1')); });
+    const queueId = result.current.queue[0].queueId;
+    act(() => { result.current.retry(queueId); });
+    expect(result.current.queue[0].status).toBe('pending');
+  });
+
+  it('retry is a no-op on done items', async () => {
+    const exportClip = vi.fn().mockResolvedValue(undefined);
+    const ffmpeg = makeFFmpeg({ exportClip });
+    const { result } = renderHook(() => useExportQueue(mockFile, ffmpeg));
+
+    await act(async () => {
+      result.current.enqueue(makeClip('c1'));
+      result.current.start();
+    });
+
+    expect(result.current.queue[0].status).toBe('done');
+    const queueId = result.current.queue[0].queueId;
+    act(() => { result.current.retry(queueId); });
+    expect(result.current.queue[0].status).toBe('done');
+  });
+
   it('processes items sequentially, not in parallel', async () => {
     let resolveFirst!: () => void;
     const firstDone = new Promise<void>((res) => { resolveFirst = res; });

@@ -2,6 +2,8 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import VideoPlayer from './videoplayer';
+import { ToastProvider } from '../../context/ToastContext';
+import { ToastContainer } from '../toasts/ToastContainer';
 
 beforeEach(() => {
   window.HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
@@ -19,7 +21,12 @@ const defaultProps = {
 
 function renderVideoPlayer(props = {}) {
   const ref = createRef<HTMLVideoElement>();
-  const result = render(<VideoPlayer {...defaultProps} {...props} ref={ref} />);
+  const result = render(
+    <ToastProvider>
+      <VideoPlayer {...defaultProps} {...props} ref={ref} />
+      <ToastContainer />
+    </ToastProvider>,
+  );
   return { ...result, ref };
 }
 
@@ -168,6 +175,15 @@ describe('VideoPlayer', () => {
       renderVideoPlayer({ handleTimeUpdate });
       fireEvent.timeUpdate(document.querySelector('video')!);
       expect(handleTimeUpdate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('video error handling', () => {
+    it('shows an error toast when the video fails to load', () => {
+      renderVideoPlayer();
+      const video = document.querySelector('video')!;
+      fireEvent.error(video);
+      expect(screen.getByText(/Video failed to load/i)).toBeInTheDocument();
     });
   });
 

@@ -25,6 +25,7 @@ export interface UseExportQueueReturn {
   start: () => void;
   pause: () => void;
   clear: () => void;
+  retry: (queueId: string) => void;
 }
 
 type QueueState = { queue: QueueItem[]; isStarted: boolean; isProcessing: boolean };
@@ -37,6 +38,7 @@ type QueueAction =
   | { type: 'START' }
   | { type: 'PAUSE' }
   | { type: 'CLEAR' }
+  | { type: 'RETRY'; queueId: string }
   | { type: 'PROCESS_START'; queueId: string }
   | { type: 'PROCESS_DONE'; queueId: string }
   | { type: 'PROCESS_ERROR'; queueId: string; error: string }
@@ -96,6 +98,15 @@ function reducer(state: QueueState, action: QueueAction): QueueState {
             : item,
         ),
       };
+    case 'RETRY':
+      return {
+        ...state,
+        queue: state.queue.map((item) =>
+          item.queueId === action.queueId && item.status === 'error'
+            ? { ...item, status: 'pending', error: undefined }
+            : item,
+        ),
+      };
     case 'PROCESS_FINISH':
       return { ...state, isProcessing: false };
     default:
@@ -132,6 +143,7 @@ export function useExportQueue(
   const start = useCallback(() => dispatch({ type: 'START' }), []);
   const pause = useCallback(() => dispatch({ type: 'PAUSE' }), []);
   const clear = useCallback(() => dispatch({ type: 'CLEAR' }), []);
+  const retry = useCallback((queueId: string) => dispatch({ type: 'RETRY', queueId }), []);
 
   // Sequential processor
   useEffect(() => {
@@ -157,5 +169,5 @@ export function useExportQueue(
       .finally(() => dispatch({ type: 'PROCESS_FINISH' }));
   }, [queue, isStarted, isProcessing, videoFile, ffmpeg]);
 
-  return { queue, isRunning, isStarted, enqueue, remove, reorder, start, pause, clear };
+  return { queue, isRunning, isStarted, enqueue, remove, reorder, start, pause, clear, retry };
 }

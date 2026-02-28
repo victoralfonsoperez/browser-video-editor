@@ -10,11 +10,14 @@ import { useExportQueue } from './hooks/useExportQueue';
 import { ClipPreviewModal } from './components/clippreview/ClipPreviewModal';
 import { ExportQueueOverlay } from './components/exportqueue/ExportQueueOverlay';
 import { ExportOptionsPanel } from './components/exportoptions/ExportOptionsPanel';
+import { ToastContainer } from './components/toasts/ToastContainer';
+import { useToast } from './context/ToastContext';
 import type { ExportOptions } from './types/exportOptions';
 import { DEFAULT_EXPORT_OPTIONS, FORMAT_LABELS, QUALITY_LABELS } from './types/exportOptions';
 import type { Clip } from './hooks/useTrimMarkers';
 
 function App() {
+  const { showToast } = useToast();
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoURL, setVideoURL] = useState<string | undefined>(undefined);
   const [currentTime, setCurrentTime] = useState(0);
@@ -32,8 +35,11 @@ function App() {
     const files = event.target.files;
     if (!files || !files[0]) return;
     const file = files[0];
-    if (!file.type.startsWith('video/')) return;
-    if (file.size > 500 * 1024 * 1024) { alert(AppStrings.alertFileTooLarge); return; }
+    if (!file.type.startsWith('video/')) {
+      showToast(AppStrings.alertNotVideoFile, 'warning');
+      return;
+    }
+    if (file.size > 500 * 1024 * 1024) { showToast(AppStrings.alertFileTooLarge, 'error'); return; }
     if (videoURL) URL.revokeObjectURL(videoURL);
     setVideoFile(file);
     setVideoURL(URL.createObjectURL(file));
@@ -180,7 +186,10 @@ function App() {
         onRemove={exportQueue.remove}
         onReorder={exportQueue.reorder}
         onClear={exportQueue.clear}
+        onRetry={exportQueue.retry}
       />
+
+      <ToastContainer />
 
       {/* Close global settings when clicking outside */}
       {showGlobalSettings && (

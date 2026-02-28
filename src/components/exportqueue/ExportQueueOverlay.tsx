@@ -13,6 +13,7 @@ interface ExportQueueOverlayProps {
   onRemove: (queueId: string) => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
   onClear: () => void;
+  onRetry: (queueId: string) => void;
 }
 
 function StatusIcon({ status }: { status: QueueItem['status'] }) {
@@ -50,6 +51,7 @@ export function ExportQueueOverlay({
   onRemove,
   onReorder,
   onClear,
+  onRetry,
 }: ExportQueueOverlayProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [dragFrom, setDragFrom] = useState<number | null>(null);
@@ -160,6 +162,15 @@ export function ExportQueueOverlay({
                     {item.status === 'error' && item.error ? ` — ${item.error}` : ''}
                   </span>
                   <span className="text-[9px] text-[#444] font-mono shrink-0">{optionsBadge}</span>
+                  {item.status === 'error' && (
+                    <button
+                      onClick={() => onRetry(item.queueId)}
+                      title={ExportQueueStrings.titleRetry}
+                      className="rounded border border-[#f5a623]/30 px-1.5 py-0.5 text-[10px] text-[#f5a623] hover:bg-[#f5a623]/10 transition-colors cursor-pointer shrink-0"
+                    >
+                      {ExportQueueStrings.btnRetry}
+                    </button>
+                  )}
                 </div>
               );
             }

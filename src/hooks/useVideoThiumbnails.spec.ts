@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useVideoThumbnails } from './useVideoThumbnails'
 
@@ -70,6 +70,32 @@ describe('useVideoThumbnails', () => {
       expect(result.current.thumbnails).toEqual([])
       expect(result.current.isGenerating).toBe(false)
       expect(video.currentTime).toBe(0)
+    })
+  })
+
+  describe('generateThumbnails — seek timeout', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('resets isGenerating to false when a seek times out after 3000 ms', async () => {
+      vi.useFakeTimers()
+      const { result } = renderHook(() => useVideoThumbnails())
+      const video = makeVideoElement(60)
+
+      // Start generating — seeked never fires because addEventListener is mocked
+      const generating = result.current.generateThumbnails(video, 1)
+
+      // Advance past the 3-second per-frame timeout so the promise resolves
+      await act(async () => {
+        vi.advanceTimersByTime(3000)
+      })
+
+      await act(async () => {
+        await generating
+      })
+
+      expect(result.current.isGenerating).toBe(false)
     })
   })
 })

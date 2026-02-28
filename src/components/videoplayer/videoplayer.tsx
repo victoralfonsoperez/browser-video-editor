@@ -1,5 +1,6 @@
 import { useState, useEffect, type SyntheticEvent, forwardRef, type RefObject, useCallback } from 'react';
 import { SharedStrings, VideoPlayerStrings } from '../../constants/ui';
+import { useToast } from '../../context/ToastContext';
 
 interface VideoMetadata {
   duration: number;
@@ -9,6 +10,7 @@ interface VideoMetadata {
 
 const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined, videoFile: File | null, handleTimeUpdate: () => void, handleLoadMetadata: (value: number) => void, currentTime: number, isModalOpen: boolean }>(({ videoURL, videoFile, currentTime, handleTimeUpdate, handleLoadMetadata, isModalOpen }, forwardedRef) => {
   const ref = forwardedRef as RefObject<HTMLVideoElement>;
+  const { showToast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
@@ -123,6 +125,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
+        onError={() => showToast(VideoPlayerStrings.errorVideoLoad, 'error')}
         className="w-full max-w-4xl bg-black block"
       />
 

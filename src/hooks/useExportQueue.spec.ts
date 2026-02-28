@@ -83,7 +83,7 @@ describe('useExportQueue', () => {
   it('pause() stops new items from being picked up', async () => {
     let resolveFirst!: () => void;
     const firstDone = new Promise<void>((res) => { resolveFirst = res; });
-    const exportClip = vi.fn().mockImplementation((_f: File, clip: Clip) =>
+    const exportClip = vi.fn().mockImplementation((_f: File | string, clip: Clip) =>
       clip.id === 'c1' ? firstDone : Promise.resolve(),
     );
     const ffmpeg = makeFFmpeg({ exportClip });
@@ -239,7 +239,7 @@ describe('useExportQueue', () => {
     let resolveFirst!: () => void;
     const firstDone = new Promise<void>((res) => { resolveFirst = res; });
     const callOrder: string[] = [];
-    const exportClip = vi.fn().mockImplementation((_file: File, clip: Clip) => {
+    const exportClip = vi.fn().mockImplementation((_file: File | string, clip: Clip) => {
       callOrder.push(clip.id);
       if (clip.id === 'c1') return firstDone;
       return Promise.resolve();

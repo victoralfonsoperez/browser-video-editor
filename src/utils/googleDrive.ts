@@ -35,3 +35,7 @@ export function extractGoogleDriveFileId(url: string): string | null {
 export function buildGoogleDriveDownloadUrl(fileId: string): string {
   return `https://drive.google.com/uc?export=download&id=${fileId}`;
 }
+
+export function buildProxiedGoogleDriveUrl(fileId: string): string {
+  return `/api/gdrive/uc?export=download&id=${fileId}&confirm=t`;
+}

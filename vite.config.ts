@@ -17,6 +17,13 @@ export default defineConfig({
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',
     },
+    proxy: {
+      '/api/gdrive': {
+        target: 'https://drive.google.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/gdrive/, ''),
+      },
+    },
   },
   assetsInclude: ['**/*.wasm'],
   optimizeDeps: {

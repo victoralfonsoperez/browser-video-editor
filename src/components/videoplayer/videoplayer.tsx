@@ -1,5 +1,5 @@
 import { useState, useEffect, type SyntheticEvent, forwardRef, type RefObject, useCallback } from 'react';
-import { SharedStrings, VideoPlayerStrings } from '../../constants/ui';
+import { SharedStrings, VideoPlayerStrings, AppStrings } from '../../constants/ui';
 import { useToast } from '../../context/ToastContext';
 
 interface VideoMetadata {
@@ -105,9 +105,9 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
     <div className="w-full max-w-4xl mx-auto">
       {/* File info */}
       <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[#aaa]">
-        <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelFile}</strong> {videoFile?.name}</span>
-        <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelSize}</strong> {(videoFile?.size ? (videoFile.size / 1024 / 1024).toFixed(1) : '0.0')} MB</span>
-        <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelType}</strong> {videoFile?.type}</span>
+        <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelFile}</strong> {videoFile?.name ?? AppStrings.driveLabelSource}</span>
+        {videoFile && <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelSize}</strong> {(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>}
+        {videoFile && <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelType}</strong> {videoFile.type}</span>}
         {videoMetadata && (
           <>
             <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelDuration}</strong> {videoMetadata.duration.toFixed(2)}s</span>

@@ -32,6 +32,12 @@ export const AppStrings = {
   btnChooseFile: 'Choose File',
   alertFileTooLarge: 'File too large (max 500MB)',
   alertNotVideoFile: 'Please select a video file',
+  tabLocalFile: 'Local File',
+  tabGoogleDrive: 'Google Drive',
+  driveUrlPlaceholder: 'Paste Google Drive sharing URL…',
+  btnLoadFromDrive: 'Load',
+  errorInvalidDriveUrl: 'Not a valid Google Drive sharing URL',
+  driveLabelSource: 'Google Drive',
 } as const;
 
 // ---------------------------------------------------------------------------

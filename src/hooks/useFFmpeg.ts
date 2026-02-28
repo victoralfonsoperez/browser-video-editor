@@ -12,8 +12,8 @@ export interface UseFFmpegReturn {
   status: FFmpegStatus;
   progress: number;
   error: string | null;
-  exportClip: (videoFile: File, clip: Clip, options?: ExportOptions) => Promise<void>;
-  exportAllClips: (videoFile: File, clips: Clip[], options?: ExportOptions) => Promise<void>;
+  exportClip: (videoSource: File | string, clip: Clip, options?: ExportOptions) => Promise<void>;
+  exportAllClips: (videoSource: File | string, clips: Clip[], options?: ExportOptions) => Promise<void>;
   exportingClipId: string | null;
 }
 
@@ -150,7 +150,7 @@ export function useFFmpeg(): UseFFmpegReturn {
   }, []);
 
   const exportClip = useCallback(async (
-    videoFile: File,
+    videoSource: File | string,
     clip: Clip,
     options: ExportOptions = DEFAULT_EXPORT_OPTIONS,
   ): Promise<void> => {
@@ -164,7 +164,9 @@ export function useFFmpeg(): UseFFmpegReturn {
       const ffmpeg = await loadFFmpeg();
       setStatus('processing');
 
-      const inputExt = videoFile.name.split('.').pop() ?? 'mp4';
+      const inputExt = videoSource instanceof File
+        ? (videoSource.name.split('.').pop() ?? 'mp4')
+        : 'mp4';
       const inputName = `input.${inputExt}`;
       const outputExt = options.format === 'mov' ? 'mov'
         : options.format === 'webm' ? 'webm'
@@ -173,7 +175,7 @@ export function useFFmpeg(): UseFFmpegReturn {
       const safeName = clip.name.replace(/[^a-z0-9_-]/gi, '_');
       const outputName = `${safeName}.${outputExt}`;
 
-      await ffmpeg.writeFile(inputName, await fetchFile(videoFile));
+      await ffmpeg.writeFile(inputName, await fetchFile(videoSource));
 
       if (options.format === 'gif') {
         await exportGif(ffmpeg, inputName, outputName, clip.inPoint, clip.outPoint, options.resolution);
@@ -220,7 +222,7 @@ export function useFFmpeg(): UseFFmpegReturn {
   }, [status, loadFFmpeg, scheduleReset]);
 
   const exportAllClips = useCallback(async (
-    videoFile: File,
+    videoSource: File | string,
     clips: Clip[],
     options: ExportOptions = DEFAULT_EXPORT_OPTIONS,
   ): Promise<void> => {
@@ -235,14 +237,16 @@ export function useFFmpeg(): UseFFmpegReturn {
       const ffmpeg = await loadFFmpeg();
       setStatus('processing');
 
-      const inputExt = videoFile.name.split('.').pop() ?? 'mp4';
+      const inputExt = videoSource instanceof File
+        ? (videoSource.name.split('.').pop() ?? 'mp4')
+        : 'mp4';
       const inputName = `input.${inputExt}`;
       const outputExt = options.format === 'mov' ? 'mov'
         : options.format === 'webm' ? 'webm'
         : options.format === 'gif'  ? 'gif'
         : 'mp4';
 
-      await ffmpeg.writeFile(inputName, await fetchFile(videoFile));
+      await ffmpeg.writeFile(inputName, await fetchFile(videoSource));
 
       const segmentNames: string[] = [];
 

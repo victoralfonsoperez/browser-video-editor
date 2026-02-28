@@ -7,7 +7,7 @@ interface VideoMetadata {
   height: number;
 }
 
-const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined, videoFile: File | null, handleTimeUpdate: () => void, handleLoadMetadata: (value: number) => void, currentTime: number }>(({ videoURL, videoFile, currentTime, handleTimeUpdate, handleLoadMetadata }, forwardedRef) => {
+const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined, videoFile: File | null, handleTimeUpdate: () => void, handleLoadMetadata: (value: number) => void, currentTime: number, isModalOpen: boolean }>(({ videoURL, videoFile, currentTime, handleTimeUpdate, handleLoadMetadata, isModalOpen }, forwardedRef) => {
   const ref = forwardedRef as RefObject<HTMLVideoElement>;
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -50,16 +50,47 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (!ref.current) return;
+      const tag = (event.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (isModalOpen) return;
       switch (event.code) {
         case 'Space': event.preventDefault(); togglePlay(); break;
         case 'ArrowLeft': event.preventDefault(); ref.current.currentTime = Math.max(0, currentTime - 5); break;
-        case 'ArrowRight': event.preventDefault(); ref.current.currentTime = Math.min(videoMetadata?.duration || 0, currentTime + 5); break;
+        case 'ArrowRight': event.preventDefault(); ref.current.currentTime = Math.min(videoMetadata?.duration ?? 0, currentTime + 5); break;
         case 'KeyM': toggleMute(); break;
+        case 'Home':
+          event.preventDefault();
+          ref.current.currentTime = 0;
+          break;
+        case 'End':
+          event.preventDefault();
+          ref.current.currentTime = videoMetadata?.duration ?? 0;
+          break;
+        case 'Comma':
+          event.preventDefault();
+          ref.current.currentTime = Math.max(0, currentTime - 1 / 30);
+          break;
+        case 'Period':
+          event.preventDefault();
+          ref.current.currentTime = Math.min(videoMetadata?.duration ?? 0, currentTime + 1 / 30);
+          break;
+        case 'KeyJ':
+          event.preventDefault();
+          ref.current.currentTime = Math.max(0, currentTime - 10);
+          break;
+        case 'KeyK':
+          if (isPlaying) ref.current.pause(); else ref.current.play();
+          setIsPlaying(!isPlaying);
+          break;
+        case 'KeyL':
+          event.preventDefault();
+          ref.current.currentTime = Math.min(videoMetadata?.duration ?? 0, currentTime + 10);
+          break;
       }
     };
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isPlaying, currentTime, videoMetadata?.duration, isMuted, toggleMute, ref, togglePlay]);
+  }, [isPlaying, currentTime, videoMetadata?.duration, isMuted, toggleMute, ref, togglePlay, isModalOpen]);
 
   const formatTime = (seconds: number) => {
     if (isNaN(seconds)) return '0:00';

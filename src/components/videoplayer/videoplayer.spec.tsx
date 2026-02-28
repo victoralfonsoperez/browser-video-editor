@@ -14,6 +14,7 @@ const defaultProps = {
   currentTime: 0,
   handleTimeUpdate: vi.fn(),
   handleLoadMetadata: vi.fn(),
+  isModalOpen: false,
 };
 
 function renderVideoPlayer(props = {}) {
@@ -199,10 +200,111 @@ describe('VideoPlayer', () => {
       expect(ref.current?.currentTime).toBe(0);
     });
 
+    it('seeks forward 5s on ArrowRight', () => {
+      const { ref } = renderVideoPlayer({ currentTime: 10 });
+      const video = document.querySelector('video')!;
+      Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      fireEvent.loadedMetadata(video);
+      fireEvent.keyDown(window, { code: 'ArrowRight' });
+      expect(ref.current?.currentTime).toBe(15);
+    });
+
+    it('clamps seek to duration on ArrowRight when near end', () => {
+      const { ref } = renderVideoPlayer({ currentTime: 58 });
+      const video = document.querySelector('video')!;
+      Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      fireEvent.loadedMetadata(video);
+      fireEvent.keyDown(window, { code: 'ArrowRight' });
+      expect(ref.current?.currentTime).toBe(60);
+    });
+
     it('toggles mute on M key', () => {
       renderVideoPlayer();
       fireEvent.keyDown(window, { code: 'KeyM' });
       expect(screen.getByTitle(/unmute/i)).toBeInTheDocument();
+    });
+
+    it('does nothing when Space is fired from an input element', () => {
+      renderVideoPlayer();
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      fireEvent.keyDown(input, { code: 'Space' });
+      document.body.removeChild(input);
+      expect(window.HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when Space is fired while modal is open', () => {
+      renderVideoPlayer({ isModalOpen: true });
+      fireEvent.keyDown(window, { code: 'Space' });
+      expect(window.HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+    });
+
+    it('jumps to start on Home key', () => {
+      const { ref } = renderVideoPlayer({ currentTime: 30 });
+      fireEvent.keyDown(window, { code: 'Home' });
+      expect(ref.current?.currentTime).toBe(0);
+    });
+
+    it('jumps to duration on End key', () => {
+      const { ref } = renderVideoPlayer({ currentTime: 10 });
+      const video = document.querySelector('video')!;
+      Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      fireEvent.loadedMetadata(video);
+      fireEvent.keyDown(window, { code: 'End' });
+      expect(ref.current?.currentTime).toBe(60);
+    });
+
+    it('seeks back one frame on Comma key', () => {
+      const { ref } = renderVideoPlayer({ currentTime: 1 });
+      fireEvent.keyDown(window, { code: 'Comma' });
+      expect(ref.current?.currentTime).toBeCloseTo(1 - 1 / 30);
+    });
+
+    it('seeks forward one frame on Period key', () => {
+      const { ref } = renderVideoPlayer({ currentTime: 1 });
+      const video = document.querySelector('video')!;
+      Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      fireEvent.loadedMetadata(video);
+      fireEvent.keyDown(window, { code: 'Period' });
+      expect(ref.current?.currentTime).toBeCloseTo(1 + 1 / 30);
+    });
+
+    it('seeks back 10s on J key', () => {
+      const { ref } = renderVideoPlayer({ currentTime: 15 });
+      fireEvent.keyDown(window, { code: 'KeyJ' });
+      expect(ref.current?.currentTime).toBe(5);
+    });
+
+    it('clamps to 0 on J key when near start', () => {
+      const { ref } = renderVideoPlayer({ currentTime: 3 });
+      fireEvent.keyDown(window, { code: 'KeyJ' });
+      expect(ref.current?.currentTime).toBe(0);
+    });
+
+    it('pauses on K key when playing', () => {
+      renderVideoPlayer();
+      fireEvent.click(screen.getByRole('button', { name: /play/i }));
+      fireEvent.play(document.querySelector('video')!);
+      fireEvent.keyDown(window, { code: 'KeyK' });
+      expect(window.HTMLMediaElement.prototype.pause).toHaveBeenCalledTimes(1);
+    });
+
+    it('seeks forward 10s on L key', () => {
+      const { ref } = renderVideoPlayer({ currentTime: 10 });
+      const video = document.querySelector('video')!;
+      Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      fireEvent.loadedMetadata(video);
+      fireEvent.keyDown(window, { code: 'KeyL' });
+      expect(ref.current?.currentTime).toBe(20);
+    });
+
+    it('clamps to duration on L key when near end', () => {
+      const { ref } = renderVideoPlayer({ currentTime: 55 });
+      const video = document.querySelector('video')!;
+      Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      fireEvent.loadedMetadata(video);
+      fireEvent.keyDown(window, { code: 'KeyL' });
+      expect(ref.current?.currentTime).toBe(60);
     });
   });
 });

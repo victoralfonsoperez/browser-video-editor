@@ -44,7 +44,7 @@ export const VideoPlayerStrings = {
   labelResolution: 'Resolution:',
   titleMute: 'Mute',
   titleUnmute: 'Unmute',
-  shortcutsHint: 'Space = Play/Pause | ← → = Seek 5s | M = Mute',
+  shortcutsHint: 'Space/K = Play/Pause | ←/→ = ±5s | J/L = ±10s | ,/. = Frame | Home/End | M = Mute',
 } as const;
 
 // ---------------------------------------------------------------------------

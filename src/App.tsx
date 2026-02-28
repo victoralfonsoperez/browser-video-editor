@@ -134,6 +134,7 @@ function App() {
               handleTimeUpdate={handleTimeUpdate}
               handleLoadMetadata={handleLoadedMetadata}
               currentTime={currentTime}
+              isModalOpen={!!previewClip}
             />
             <Timeline
               currentTime={currentTime}

@@ -114,6 +114,22 @@ Tests use **Vitest** with **@testing-library/react**. Test files live alongside 
 npm run test
 ```
 
+## 🔒 Security
+
+Dependency vulnerabilities are checked automatically via the [Security workflow](.github/workflows/security.yml) on every push, pull request, and weekly on Mondays (`npm audit --audit-level=high`).
+
+Run the audit locally:
+```bash
+npm audit
+```
+
+### Pending security tasks
+
+- [ ] Configure `Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy` headers for the production host (currently dev-only in `vite.config.ts`) — required for FFmpeg WASM multithreading in production
+- [ ] Add a `Content-Security-Policy` header for production
+- [ ] Evaluate adding [Semgrep](https://semgrep.dev) static analysis to the Security workflow (`p/react`, `p/typescript`, `p/secrets` rulesets)
+- [ ] Consider installing the [Socket.dev GitHub App](https://socket.dev) for supply-chain monitoring
+
 ## 📊 Project Status
 
 **Current Phase:** 3 of 6 — Clip Creation Interface (~50% complete)  

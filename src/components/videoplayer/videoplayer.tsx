@@ -15,6 +15,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [videoMetadata, setVideoMetadata] = useState<VideoMetadata | null>(null);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
 
   const togglePlay = useCallback(() => {
     if (ref.current) {
@@ -117,25 +118,41 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
       </div>
 
       {/* Video element */}
-      <video
-        ref={ref}
-        src={videoURL}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleVideoMetadata}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
-        onError={(e) => {
-          // code 2 = MEDIA_ERR_NETWORK (proxy/fetch failure)
-          // code 4 = MEDIA_ERR_SRC_NOT_SUPPORTED (bad format or unreachable URL)
-          const code = e.currentTarget.error?.code
-          showToast(
-            code === 2 ? VideoPlayerStrings.errorVideoNetwork : VideoPlayerStrings.errorVideoLoad,
-            'error',
-          )
-        }}
-        className="w-full max-w-4xl bg-black block"
-      />
+      <div className="relative">
+        <video
+          ref={ref}
+          src={videoURL}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleVideoMetadata}
+          onLoadStart={() => setIsVideoLoading(true)}
+          onCanPlay={() => setIsVideoLoading(false)}
+          onLoadedData={() => setIsVideoLoading(false)}
+          onWaiting={() => setIsVideoLoading(true)}
+          onPlaying={() => setIsVideoLoading(false)}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+          onError={(e) => {
+            setIsVideoLoading(false);
+            // code 2 = MEDIA_ERR_NETWORK (proxy/fetch failure)
+            // code 4 = MEDIA_ERR_SRC_NOT_SUPPORTED (bad format or unreachable URL)
+            const code = e.currentTarget.error?.code
+            showToast(
+              code === 2 ? VideoPlayerStrings.errorVideoNetwork : VideoPlayerStrings.errorVideoLoad,
+              'error',
+            )
+          }}
+          className="w-full max-w-4xl bg-black block"
+        />
+        {isVideoLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 border-2 border-[#c8f55a] border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm text-[#ccc]">{VideoPlayerStrings.loadingVideo}</span>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Controls bar */}
       <div className="mt-2 flex items-center gap-3 rounded bg-[#2a2a2e] px-3 py-2">

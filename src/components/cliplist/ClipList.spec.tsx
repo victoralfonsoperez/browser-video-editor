@@ -265,6 +265,46 @@ describe('ClipList — Export All', () => {
   });
 });
 
+// ─── Thumbnail capture loading state ─────────────────────────────────────────
+
+describe('ClipList — Add Clip loading state (thumbnail capture)', () => {
+  it('disables the Add Clip button while isAddingClip is true', () => {
+    render(<ClipList {...baseProps} inPoint={0} outPoint={10} isAddingClip={true} />);
+    expect(screen.getByRole('button', { name: /capturing/i })).toBeDisabled();
+  });
+
+  it('shows "Capturing..." text on the button while isAddingClip is true', () => {
+    render(<ClipList {...baseProps} inPoint={0} outPoint={10} isAddingClip={true} />);
+    expect(screen.getByText(/capturing\.\.\./i)).toBeInTheDocument();
+  });
+
+  it('re-enables the Add Clip button once isAddingClip returns to false', () => {
+    const { rerender } = render(<ClipList {...baseProps} inPoint={0} outPoint={10} isAddingClip={true} />);
+    expect(screen.getByRole('button', { name: /capturing/i })).toBeDisabled();
+    rerender(<ClipList {...baseProps} inPoint={0} outPoint={10} isAddingClip={false} />);
+    expect(screen.getByRole('button', { name: /add clip/i })).toBeEnabled();
+  });
+});
+
+// ─── FFmpeg loading spinner ────────────────────────────────────────────────────
+
+describe('ClipList — FFmpeg loading spinner', () => {
+  const clip = makeClip();
+
+  it('shows a spinner while FFmpeg is loading for per-clip export', () => {
+    const ffmpeg = makeFFmpeg({ status: 'loading', exportingClipId: clip.id });
+    render(<ClipList {...baseProps} clips={[clip]} videoSource={mockFile} ffmpeg={ffmpeg} />);
+    expect(screen.getByRole('status', { name: /loading ffmpeg/i })).toBeInTheDocument();
+  });
+
+  it('shows a spinner while FFmpeg is loading for Export All', () => {
+    const clips = [makeClip({ id: 'c1' }), makeClip({ id: 'c2', name: 'Second' })];
+    const ffmpeg = makeFFmpeg({ status: 'loading', exportingClipId: '__all__' });
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} ffmpeg={ffmpeg} />);
+    expect(screen.getByRole('status', { name: /loading ffmpeg/i })).toBeInTheDocument();
+  });
+});
+
 // ─── In/Out point display ─────────────────────────────────────────────────────
 
 describe('ClipList — in/out point display', () => {

@@ -13,6 +13,7 @@ interface ClipListProps {
   videoSource: File | string | null;
   ffmpeg: UseFFmpegReturn;
   globalOptions: ExportOptions;
+  isAddingClip?: boolean;
   onAddClip: (name: string) => void;
   onRemoveClip: (id: string) => void;
   onSeekToClip: (clip: Clip) => void;
@@ -293,7 +294,10 @@ function ClipRow({
         {isThisExporting && (
           <div className="mt-1.5 flex items-center gap-2">
             {ffmpeg.status === 'loading' ? (
-              <p className="text-[10px] text-[#888] animate-pulse">{ClipListStrings.loadingFfmpegFirst}</p>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 border border-[#888] border-t-transparent rounded-full animate-spin shrink-0" role="status" aria-label="Loading FFmpeg" />
+                <p className="text-[10px] text-[#888]">{ClipListStrings.loadingFfmpegFirst}</p>
+              </div>
             ) : (
               <ProgressBar progress={ffmpeg.progress} />
             )}
@@ -313,6 +317,7 @@ export function ClipList({
   clips, inPoint, outPoint,
   videoSource, ffmpeg,
   globalOptions,
+  isAddingClip = false,
   onAddClip, onRemoveClip, onSeekToClip, onPreviewClip, onUpdateClip, onReorderClips,
   onEnqueueClip,
 }: ClipListProps) {
@@ -407,10 +412,10 @@ export function ClipList({
           />
           <button
             onClick={handleAdd}
-            disabled={!canAdd}
+            disabled={!canAdd || isAddingClip}
             className="rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-4 py-1.5 text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            {ClipListStrings.btnAddClip}
+            {isAddingClip ? ClipListStrings.addingClip : ClipListStrings.btnAddClip}
           </button>
         </div>
 
@@ -473,7 +478,10 @@ export function ClipList({
             )}
 
             {isExportingAll && ffmpeg.status === 'loading' && (
-              <p className="text-[10px] text-[#888] animate-pulse">{ClipListStrings.loadingFfmpegFirst}</p>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 border border-[#888] border-t-transparent rounded-full animate-spin shrink-0" role="status" aria-label="Loading FFmpeg" />
+                <p className="text-[10px] text-[#888]">{ClipListStrings.loadingFfmpegFirst}</p>
+              </div>
             )}
 
             {!isAnyExporting && ffmpeg.status === 'error' && ffmpeg.error && ffmpeg.exportingClipId === null && (

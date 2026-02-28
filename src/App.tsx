@@ -28,6 +28,7 @@ function App() {
   const [duration, setDuration] = useState(0);
   const [previewClip, setPreviewClip] = useState<Clip | null>(null);
   const [globalOptions, setGlobalOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
+  const [isCapturingThumbnail, setIsCapturingThumbnail] = useState(false);
   const [showGlobalSettings, setShowGlobalSettings] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trim = useTrimMarkers();
@@ -86,7 +87,12 @@ function App() {
   const handleAddClip = async (name: string) => {
     let thumbnailDataUrl: string | undefined;
     if (videoRef.current && trim.inPoint !== null) {
-      thumbnailDataUrl = await captureFrame(videoRef.current, trim.inPoint);
+      setIsCapturingThumbnail(true);
+      try {
+        thumbnailDataUrl = await captureFrame(videoRef.current, trim.inPoint);
+      } finally {
+        setIsCapturingThumbnail(false);
+      }
     }
     trim.addClip(name, thumbnailDataUrl);
   };
@@ -222,6 +228,7 @@ function App() {
               videoSource={videoSource}
               ffmpeg={ffmpeg}
               globalOptions={globalOptions}
+              isAddingClip={isCapturingThumbnail}
               onAddClip={handleAddClip}
               onRemoveClip={trim.removeClip}
               onSeekToClip={handleSeekToClip}

@@ -53,6 +53,7 @@ export const VideoPlayerStrings = {
   titleUnmute: 'Unmute',
   shortcutsHint: 'Space/K = Play/Pause | ←/→ = ±5s | J/L = ±10s | ,/. = Frame | Home/End | M = Mute',
   errorVideoLoad: 'Video failed to load — the format or codec may not be supported by your browser.',
+  errorVideoNetwork: 'Network error — could not fetch the video. Check the URL or try again.',
 } as const;
 
 // ---------------------------------------------------------------------------

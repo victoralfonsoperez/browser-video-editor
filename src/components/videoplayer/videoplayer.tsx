@@ -125,7 +125,15 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
-        onError={() => showToast(VideoPlayerStrings.errorVideoLoad, 'error')}
+        onError={(e) => {
+          // code 2 = MEDIA_ERR_NETWORK (proxy/fetch failure)
+          // code 4 = MEDIA_ERR_SRC_NOT_SUPPORTED (bad format or unreachable URL)
+          const code = e.currentTarget.error?.code
+          showToast(
+            code === 2 ? VideoPlayerStrings.errorVideoNetwork : VideoPlayerStrings.errorVideoLoad,
+            'error',
+          )
+        }}
         className="w-full max-w-4xl bg-black block"
       />
 

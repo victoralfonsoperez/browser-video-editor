@@ -5,30 +5,37 @@ A browser-based video clip editor for creating and exporting clips from video fi
 ## 🎯 Project Overview
 
 This tool allows users to:
-- Upload video files locally (drag & drop or file picker)
+- Upload video files locally (file picker)
 - Visualize videos with an interactive timeline and thumbnail previews
-- Create and manage multiple clips from a single video
-- Preview clips in real-time
-- Export clips as downloadable video files
+- Create and manage multiple named clips from a single video
+- Preview clips in real-time before exporting
+- Export clips as downloadable video files in multiple formats and quality settings
 
-All processing happens directly in the browser.
+All processing happens directly in the browser. No data is ever sent to a server.
 
 ## ✨ Features
 
 ### Implemented
-- ✅ Local file upload with drag & drop
-- ✅ Multi-format video playback (MP4, WebM, MOV)
-- ✅ Interactive timeline with thumbnail strip generation
-- ✅ Draggable trim markers (in/out points)
-- ✅ Multiple clip management via clip list
-- ✅ In-browser clip preview
+- ✅ Local file upload with format and size validation
+- ✅ Multi-format video playback (MP4, WebM, MOV, and more)
+- ✅ Interactive timeline with auto-generated thumbnail strip
+- ✅ Draggable in/out point markers with keyboard shortcuts (I / O)
+- ✅ Multiple clip management — add, rename, reorder, remove
+- ✅ In-browser clip preview modal with loop support
+- ✅ FFmpeg.wasm export: MP4, WebM, MOV, GIF
+- ✅ Per-clip and global export settings (format, quality, resolution)
+- ✅ Export queue with start/pause/retry and real-time progress
+- ✅ Keyboard shortcuts (Space/K, J/L, ←/→, ,/., I/O, M, Home/End)
+- ✅ Toast notifications for errors, warnings, and feedback
+- ✅ Loading states and progress indicators throughout
 
-### Planned
-- Clip export as video files (FFmpeg.wasm)
-- Audio waveform visualization
-- Transitions between clips
-- Text overlays and titles
-- Video filters and effects
+### Roadmap
+- [ ] Export settings persistence across page refresh (localStorage)
+- [ ] Web workers for thumbnail generation (performance)
+- [ ] Horizontally scrollable timeline for very long videos
+- [ ] Audio waveform visualization
+- [ ] Cross-browser testing and public deployment (Phase 6)
+- [ ] Transitions, text overlays, and video filters (future)
 
 ## 🛠️ Tech Stack
 
@@ -37,42 +44,13 @@ All processing happens directly in the browser.
 | Framework | React 19 + TypeScript |
 | Build Tool | Vite 7 |
 | Styling | Tailwind CSS v4 (via `@tailwindcss/vite`) |
+| Video Processing | `@ffmpeg/ffmpeg` (WebAssembly) |
 | Testing | Vitest + Testing Library |
 | Linting | ESLint 9 + typescript-eslint |
 | Video / Canvas | HTML5 Video API + Canvas API |
 | Node Version | 22 (see `.nvmrc`) |
 
 > **Note:** Tailwind CSS v4 is integrated as a Vite plugin — no separate `tailwind.config` file needed.
-
-## 📁 Folder Structure
-```
-browser-video-editor/
-├── public/                     # Static assets
-├── src/
-│   ├── components/
-│   │   ├── cliplist/
-│   │   │   └── ClipList.tsx        # Clip management panel
-│   │   ├── timeline/
-│   │   │   ├── timeline.tsx        # Interactive video timeline
-│   │   │   └── timeline.spec.tsx   # Timeline unit tests
-│   │   ├── videoplayer/            # Video playback component
-│   │   ├── videouploader/
-│   │   │   └── videouploader.tsx   # File upload / drag & drop
-│   │   ├── VideoTimeline.tsx       # Legacy timeline (being refactored)
-│   │   └── VideoTimeline.css
-│   ├── hooks/
-│   │   ├── useTrimMarkers.ts       # Draggable in/out point logic
-│   │   └── useVideoThumbnails.ts   # Canvas-based thumbnail generation
-│   ├── assets/
-│   ├── App.tsx
-│   ├── main.tsx
-│   ├── index.css                   # Tailwind base import
-│   └── test-setup.ts
-├── index.html
-├── vite.config.ts
-├── tsconfig.json
-└── package.json
-```
 
 ## 🚀 Getting Started
 
@@ -110,6 +88,7 @@ npm run dev
 ## 🧪 Testing
 
 Tests use **Vitest** with **@testing-library/react**. Test files live alongside their components using the `.spec.tsx` convention.
+
 ```bash
 npm run test
 ```
@@ -132,10 +111,10 @@ npm audit
 
 ## 📊 Project Status
 
-**Current Phase:** 3 of 6 — Clip Creation Interface (~50% complete)  
-**Overall Progress:** ~40%  
-**Started:** February 2026  
-**Target Completion:** May–June 2026
+**Current Phase:** 5 of 6 — Polish & UX (~85% complete)
+**Overall Progress:** ~80%
+**Started:** February 2026
+**Target Completion:** May–June 2026 (on track, likely to finish early)
 
 ---
 

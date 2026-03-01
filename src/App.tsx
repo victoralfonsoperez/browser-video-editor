@@ -175,7 +175,7 @@ function App() {
               </button>
 
               {showGlobalSettings && (
-                <div className="absolute left-0 mobile-landscape:left-auto right-0 mobile-landscape:right-0 top-full z-50 mt-1 w-full mobile-landscape:w-64 rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl">
+                <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl">
                   <p className="mb-3 text-[10px] uppercase tracking-wider text-[#888]">
                     {AppStrings.headingDefaultSettings}
                   </p>

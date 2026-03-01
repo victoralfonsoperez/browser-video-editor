@@ -14,7 +14,7 @@ afterEach(() => {
 // create workers on mount (e.g. useVideoThumbnails) don't throw.
 class MockWorker {
   onmessage: ((ev: MessageEvent) => void) | null = null
-  postMessage(_message: unknown, _transfer?: Transferable[]): void {}
+  postMessage(): void {}
   terminate(): void {}
 }
 

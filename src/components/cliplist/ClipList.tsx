@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { SharedStrings, ClipListStrings } from '../../constants/ui';
+import { formatTime } from '../../utils/formatTime';
 import type { Clip } from '../../hooks/useTrimMarkers';
 import type { UseFFmpegReturn } from '../../hooks/useFFmpeg';
 import type { ExportOptions } from '../../types/exportOptions';
@@ -21,13 +22,6 @@ interface ClipListProps {
   onUpdateClip: (id: string, patch: Partial<Pick<Clip, 'name' | 'inPoint' | 'outPoint'>>) => void;
   onReorderClips: (fromIndex: number, toIndex: number) => void;
   onEnqueueClip: (clip: Clip, options: ExportOptions) => void;
-}
-
-function formatTime(seconds: number) {
-  if (isNaN(seconds)) return '0:00';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function ProgressBar({ progress }: { progress: number }) {

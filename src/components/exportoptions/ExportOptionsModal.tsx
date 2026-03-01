@@ -1,29 +1,22 @@
 import { useState } from 'react';
 import { SharedStrings, ExportOptionsStrings } from '../../constants/ui';
+import { formatTime } from '../../utils/formatTime';
 import type { Clip } from '../../hooks/useTrimMarkers';
 import {
   FORMAT_LABELS,
   QUALITY_LABELS,
   RESOLUTION_LABELS,
+  FORMATS,
+  QUALITIES,
+  RESOLUTIONS,
 } from '../../types/exportOptions';
-import type { ExportFormat, ExportOptions, QualityPreset, Resolution } from '../../types/exportOptions';
+import type { ExportOptions } from '../../types/exportOptions';
 
 interface ExportOptionsModalProps {
   clip: Clip;
   defaultOptions: ExportOptions;
   onConfirm: (clip: Clip, options: ExportOptions) => void;
   onCancel: () => void;
-}
-
-const FORMATS: ExportFormat[] = ['mp4', 'webm', 'mov', 'gif'];
-const QUALITIES: QualityPreset[] = ['high', 'medium', 'low'];
-const RESOLUTIONS: Resolution[] = ['original', '1080p', '720p', '480p'];
-
-function formatTime(seconds: number) {
-  if (isNaN(seconds)) return '0:00';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function OptionButton<T extends string>({

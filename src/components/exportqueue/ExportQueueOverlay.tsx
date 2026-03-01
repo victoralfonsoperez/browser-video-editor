@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SharedStrings, ExportQueueStrings } from '../../constants/ui';
+import { formatTime } from '../../utils/formatTime';
 import type { QueueItem } from '../../hooks/useExportQueue';
 import { FORMAT_LABELS, QUALITY_LABELS } from '../../types/exportOptions';
 
@@ -21,13 +22,6 @@ function StatusIcon({ status }: { status: QueueItem['status'] }) {
   if (status === 'done') return <span className="text-[#c8f55a]">✓</span>;
   if (status === 'error') return <span className="text-[#f55a5a]">✕</span>;
   return <span className="text-[#555]">–</span>;
-}
-
-function formatTime(seconds: number) {
-  if (isNaN(seconds)) return '0:00';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function ProgressBar({ progress, className = '' }: { progress: number; className?: string }) {

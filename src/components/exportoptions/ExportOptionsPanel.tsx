@@ -4,6 +4,9 @@ import {
   FORMAT_LABELS,
   QUALITY_LABELS,
   RESOLUTION_LABELS,
+  FORMATS,
+  QUALITIES,
+  RESOLUTIONS,
 } from '../../types/exportOptions';
 
 interface ExportOptionsPanelProps {
@@ -20,7 +23,7 @@ function OptionGroup<T extends string>({
 }: {
   label: string;
   value: T;
-  choices: T[];
+  choices: readonly T[];
   labels: Record<T, string>;
   onChange: (v: T) => void;
 }) {
@@ -48,9 +51,9 @@ function OptionGroup<T extends string>({
 }
 
 export function ExportOptionsPanel({ options, onChange }: ExportOptionsPanelProps) {
-  const formats: ExportFormat[] = ['mp4', 'webm', 'mov', 'gif'];
-  const qualities: ExportQuality[] = ['low', 'medium', 'high'];
-  const resolutions: ExportResolution[] = ['original', '1080p', '720p', '480p'];
+  const formats = FORMATS;
+  const qualities = QUALITIES;
+  const resolutions = RESOLUTIONS;
 
   return (
     <div className="flex flex-col gap-3">

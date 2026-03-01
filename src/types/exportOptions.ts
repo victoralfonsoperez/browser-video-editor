@@ -34,6 +34,10 @@ export const RESOLUTION_LABELS: Record<ExportResolution, string> = {
   '480p': '480p',
 };
 
+export const FORMATS: readonly ExportFormat[] = ['mp4', 'webm', 'mov', 'gif'];
+export const QUALITIES: readonly ExportQuality[] = ['low', 'medium', 'high'];
+export const RESOLUTIONS: readonly ExportResolution[] = ['original', '1080p', '720p', '480p'];
+
 /** GIF does not support audio — callers should warn the user before proceeding. */
 export function isGif(options: ExportOptions): boolean {
   return options.format === 'gif';

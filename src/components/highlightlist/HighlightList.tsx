@@ -1,13 +1,7 @@
 import { useReducer, useEffect, useState, useRef } from 'react';
 import { SharedStrings, HighlightListStrings } from '../../constants/ui';
+import { formatTime } from '../../utils/formatTime';
 import type { Highlight } from '../../types/highlights';
-
-function formatTime(seconds: number) {
-  if (isNaN(seconds)) return '0:00';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
 
 interface HighlightRowProps {
   highlight: Highlight;

@@ -1,5 +1,6 @@
 import { useState, useEffect, type SyntheticEvent, forwardRef, type RefObject, useCallback } from 'react';
 import { SharedStrings, VideoPlayerStrings, AppStrings } from '../../constants/ui';
+import { formatTime } from '../../utils/formatTime';
 import { useToast } from '../../context/ToastContext';
 
 interface VideoMetadata {
@@ -94,13 +95,6 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [isPlaying, currentTime, videoMetadata?.duration, isMuted, toggleMute, ref, togglePlay, isModalOpen]);
-
-  const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   return (
     <div className="w-full max-w-4xl mx-auto">

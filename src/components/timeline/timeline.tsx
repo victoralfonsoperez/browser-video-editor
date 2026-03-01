@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { SharedStrings, TimelineStrings } from '../../constants/ui';
+import { formatTime } from '../../utils/formatTime';
 import { useVideoThumbnails, THUMB_WIDTH } from '../../hooks/useVideoThumbnails';
 import type { useTrimMarkers } from '../../hooks/useTrimMarkers';
 import type { Highlight } from '../../types/highlights';
@@ -106,13 +107,6 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
     const frameDuration = 1 / 30;
     const newTime = direction === 'forward' ? currentTime + frameDuration : currentTime - frameDuration;
     onSeek(Math.max(0, Math.min(duration, newTime)));
-  };
-
-  const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const pct = (t: number) => duration > 0 ? `${(t / duration) * 100}%` : '0%';

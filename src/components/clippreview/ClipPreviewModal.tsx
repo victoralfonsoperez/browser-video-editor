@@ -1,18 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SharedStrings, ClipPreviewStrings } from '../../constants/ui';
+import { formatTime } from '../../utils/formatTime';
 import type { Clip } from '../../hooks/useTrimMarkers';
 
 interface ClipPreviewModalProps {
   clip: Clip;
   videoURL: string;
   onClose: () => void;
-}
-
-function formatTime(seconds: number) {
-  if (isNaN(seconds)) return '0:00';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalProps) {

@@ -25,20 +25,14 @@ jobs:
       - name: Dependency audit
         run: npm audit --audit-level=high
 
-  secret-scanning:
+  gitleaks:
     runs-on: ubuntu-latest
-    permissions:
-      security-events: read
     steps:
-      - name: Check for open secret scanning alerts
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for secrets with Gitleaks
+        uses: gitleaks/gitleaks-action@v2
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          alerts=$(gh api "repos/${{ github.repository }}/secret-scanning/alerts?state=open&per_page=100")
-          count=$(echo "$alerts" | jq 'length')
-          if [ "$count" -gt 0 ]; then
-            echo "❌ $count open secret scanning alert(s) found:"
-            echo "$alerts" | jq -r '.[] | "  \(.secret_type_display_name) → \(.html_url)"'
-            exit 1
-          fi
-          echo "✅ No open secret scanning alerts"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -175,6 +175,28 @@ describe('useHighlights', () => {
       expect(caught).toBeInstanceOf(Error);
     });
 
+    it('rejects with a version-specific message when the version field is unsupported', async () => {
+      const { result } = renderHook(() => useHighlights());
+      const file = new File(
+        [JSON.stringify({ version: 99, highlights: [] })],
+        'future.highlights.json',
+        { type: 'application/json' },
+      );
+
+      let caught: unknown;
+      await act(async () => {
+        try {
+          await result.current.importFromFile(file);
+        } catch (e) {
+          caught = e;
+        }
+      });
+
+      expect(caught).toBeInstanceOf(Error);
+      expect((caught as Error).message).toContain('version');
+      expect((caught as Error).message).toContain('99');
+    });
+
     it('rejects when the file has an unexpected shape', async () => {
       const { result } = renderHook(() => useHighlights());
       const file = new File([JSON.stringify({ foo: 'bar' })], 'wrong.json', {

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { SharedStrings, TimelineStrings } from '../../constants/ui';
 import { useVideoThumbnails, THUMB_WIDTH } from '../../hooks/useVideoThumbnails';
 import type { useTrimMarkers } from '../../hooks/useTrimMarkers';
+import type { Highlight } from '../../types/highlights';
 
 type TrimMarkers = ReturnType<typeof useTrimMarkers>;
 
@@ -10,14 +11,17 @@ interface TimelineProps {
   currentTime: number;
   duration: number;
   onSeek: (time: number) => void;
+  onMark: () => void;
   trim: TrimMarkers;
+  highlights?: Highlight[];
 }
 
-export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: TimelineProps) {
+export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim, highlights = [] }: TimelineProps) {
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [draggingMarker, setDraggingMarker] = useState<'in' | 'out' | null>(null);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
+  const [hoveredHighlightId, setHoveredHighlightId] = useState<string | null>(null);
   const { thumbnails, isGenerating, generateThumbnails } = useVideoThumbnails();
 
   const generate = useCallback(() => {
@@ -47,6 +51,17 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [currentTime, trim.bindKeyboard, trim]);
+
+  // H key — mark highlight
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === 'h' || e.key === 'H') onMark();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onMark]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -179,6 +194,17 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
             />
           )}
 
+          {/* Highlight range bands */}
+          {highlights
+            .filter((h): h is Highlight & { endTime: number } => h.endTime !== undefined && duration > 0)
+            .map((h) => (
+              <div
+                key={`band-${h.id}`}
+                className="pointer-events-none absolute top-0 z-[5] h-full bg-[#f59e0b]/15 border-x border-[#f59e0b]/40"
+                style={{ left: pct(h.time), width: pct(h.endTime - h.time) }}
+              />
+            ))}
+
           {/* In-point marker */}
           {trim.inPoint !== null && duration > 0 && (
             <div
@@ -207,6 +233,28 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
             </div>
           )}
 
+          {/* Highlight markers */}
+          {duration > 0 && highlights.map((h) => (
+            <div
+              key={h.id}
+              className="absolute top-0 z-[15] -translate-x-1/2 cursor-pointer select-none"
+              style={{ left: pct(h.time) }}
+              role="button"
+              aria-label={h.label}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseEnter={() => setHoveredHighlightId(h.id)}
+              onMouseLeave={() => setHoveredHighlightId(null)}
+              onClick={(e) => { e.stopPropagation(); onSeek(h.time); }}
+            >
+              <div className="w-0 h-0 border-x-[5px] border-x-transparent border-t-[7px] border-t-[#f59e0b]" />
+              {hoveredHighlightId === h.id && (
+                <span className="pointer-events-none absolute left-1 top-2 z-[20] whitespace-nowrap rounded bg-black/70 px-1 py-px text-[10px] text-white">
+                  {h.label}
+                </span>
+              )}
+            </div>
+          ))}
+
           {/* Playhead */}
           {duration > 0 && (
             <div
@@ -218,7 +266,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
           )}
 
           {/* Hover ghost */}
-          {hoverTime !== null && !isDragging && !draggingMarker && duration > 0 && (
+          {hoverTime !== null && !isDragging && !draggingMarker && hoveredHighlightId === null && duration > 0 && (
             <div
               className="pointer-events-none absolute top-0 bottom-0 z-[9] w-px -translate-x-1/2 bg-white/35"
               style={{ left: `${(hoverTime / duration) * 100}%` }}
@@ -274,6 +322,13 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, trim }: Time
             title={TimelineStrings.titleSetOut}
           >
             {TimelineStrings.btnSetOut}
+          </button>
+          <button
+            onClick={onMark}
+            className="rounded border border-[#f59e0b]/40 bg-[#2a2a2e] px-3 py-1 text-sm text-[#f59e0b] hover:bg-[#f59e0b]/10 transition-colors cursor-pointer"
+            title={TimelineStrings.titleMark}
+          >
+            {TimelineStrings.btnMark}
           </button>
           {(trim.inPoint !== null || trim.outPoint !== null) && (
             <button

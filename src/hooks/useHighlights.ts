@@ -67,6 +67,14 @@ export function useHighlights() {
       reader.onload = (e) => {
         try {
           const parsed: unknown = JSON.parse(e.target?.result as string);
+          if (typeof parsed === 'object' && parsed !== null) {
+            const v = parsed as Record<string, unknown>;
+            if ('version' in v && typeof v['version'] === 'number' && v['version'] !== 1) {
+              throw new Error(
+                `Unsupported highlights file version (${v['version']}). Only version 1 is supported.`,
+              );
+            }
+          }
           if (!isHighlightsFile(parsed)) {
             throw new Error('Invalid highlights file: expected { version: 1, highlights: [] }');
           }

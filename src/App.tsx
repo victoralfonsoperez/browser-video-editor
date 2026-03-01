@@ -96,7 +96,7 @@ function App() {
   };
 
   const handleExportHighlights = () => {
-    exportJSON();
+    exportJSON(videoFile ? videoFile.name.replace(/\.[^.]+$/, '') : undefined);
     showToast(HighlightListStrings.toastExportSuccess, 'success');
   };
 

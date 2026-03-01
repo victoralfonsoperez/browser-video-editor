@@ -53,6 +53,7 @@ export function useVideoThumbnails() {
           })
         }
       } finally {
+        video.currentTime = 0
         setThumbnails(results)
         setIsGenerating(false)
       }

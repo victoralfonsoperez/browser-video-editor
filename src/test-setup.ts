@@ -9,3 +9,17 @@ expect.extend(matchers)
 afterEach(() => {
   cleanup()
 })
+
+// Web Worker is not available in jsdom — provide a no-op stub so hooks that
+// create workers on mount (e.g. useVideoThumbnails) don't throw.
+class MockWorker {
+  onmessage: ((ev: MessageEvent) => void) | null = null
+  postMessage(_message: unknown, _transfer?: Transferable[]): void {}
+  terminate(): void {}
+}
+
+Object.defineProperty(globalThis, 'Worker', {
+  writable: true,
+  configurable: true,
+  value: MockWorker,
+})

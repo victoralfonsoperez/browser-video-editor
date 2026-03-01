@@ -123,21 +123,22 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
   const showRegion = inPct !== null && outPct !== null;
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-5 select-none">
+    <div className="w-full max-w-4xl mx-auto mt-3 tablet:mt-5 select-none">
       <div className="rounded-md border border-[#333] bg-[#1a1a1e] pb-1">
 
         {/* Header */}
-        <div className="flex justify-between items-center px-3 py-1.5 text-[11px] uppercase tracking-wider text-[#888]">
+        <div className="flex justify-between items-center px-2 tablet:px-3 py-1.5 text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#888]">
           {isGenerating ? (
             <span className="flex items-center gap-1.5 text-[#c8f55a]">
               <span className="inline-block w-2.5 h-2.5 border-2 border-[#c8f55a44] border-t-[#c8f55a] rounded-full animate-spin" />
-              {TimelineStrings.generatingThumbnails}
+              <span className="hidden mobile-landscape:inline">{TimelineStrings.generatingThumbnails}</span>
+              <span className="mobile-landscape:hidden">Loading...</span>
             </span>
           ) : (
-            <span className="flex items-center gap-3">
-              {thumbnails.length > 0 ? TimelineStrings.thumbnailCount(thumbnails.length) : ''}
+            <span className="flex items-center gap-2 tablet:gap-3">
+              <span className="hidden mobile-landscape:inline">{thumbnails.length > 0 ? TimelineStrings.thumbnailCount(thumbnails.length) : ''}</span>
               {(trim.inPoint !== null || trim.outPoint !== null) && (
-                <span className="text-[#c8f55a]/70 normal-case tracking-normal">
+                <span className="text-[#c8f55a]/70 normal-case tracking-normal text-[8px] tablet:text-[10px]">
                   {trim.inPoint !== null && `${TimelineStrings.inPointPrefix} ${formatTime(trim.inPoint)}`}
                   {trim.inPoint !== null && trim.outPoint !== null && ` ${SharedStrings.separator} `}
                   {trim.outPoint !== null && `${TimelineStrings.outPointPrefix} ${formatTime(trim.outPoint)}`}
@@ -145,13 +146,13 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               )}
             </span>
           )}
-          <span className="text-[#c8f55a] tabular-nums text-xs font-semibold">{formatTime(currentTime)}</span>
+          <span className="text-[#c8f55a] tabular-nums text-[10px] tablet:text-xs font-semibold">{formatTime(currentTime)}</span>
         </div>
 
         {/* Track */}
         <div
           ref={timelineRef}
-          className="relative h-[54px] w-full cursor-crosshair overflow-hidden"
+          className="relative h-[44px] tablet:h-[54px] w-full cursor-crosshair overflow-hidden"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
@@ -280,7 +281,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
 
         {/* Tick marks */}
         {thumbnails.length > 0 && (
-          <div className="relative h-[18px] mt-0.5 px-3">
+          <div className="relative h-[18px] mt-0.5 px-2 tablet:px-3 hidden mobile-landscape:block">
             {thumbnails.map((thumb) => (
               <span
                 key={thumb.time}
@@ -295,37 +296,39 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
       </div>
 
       {/* Frame controls + time labels */}
-      <div className="mt-2 flex items-center justify-between">
-        <div className="flex gap-2">
+      <div className="mt-2 flex flex-col tablet:flex-row items-stretch tablet:items-center justify-between gap-2">
+        <div className="flex gap-1 tablet:gap-2 flex-wrap">
           <button
             onClick={() => handleFrameSeek('backward')}
-            className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+            className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
           >
-            {TimelineStrings.btnFrameBack}
+            <span className="hidden tablet:inline">{TimelineStrings.btnFrameBack}</span>
+            <span className="tablet:hidden">◀◀</span>
           </button>
           <button
             onClick={() => handleFrameSeek('forward')}
-            className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+            className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
           >
-            {TimelineStrings.btnFrameForward}
+            <span className="hidden tablet:inline">{TimelineStrings.btnFrameForward}</span>
+            <span className="tablet:hidden">▶▶</span>
           </button>
           <button
             onClick={() => trim.setIn(currentTime)}
-            className="rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-3 py-1 text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer"
+            className="rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer"
             title={TimelineStrings.titleSetIn}
           >
             {TimelineStrings.btnSetIn}
           </button>
           <button
             onClick={() => trim.setOut(currentTime)}
-            className="rounded border border-[#f55a5a]/40 bg-[#2a2a2e] px-3 py-1 text-sm text-[#f55a5a] hover:bg-[#f55a5a]/10 transition-colors cursor-pointer"
+            className="rounded border border-[#f55a5a]/40 bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#f55a5a] hover:bg-[#f55a5a]/10 transition-colors cursor-pointer"
             title={TimelineStrings.titleSetOut}
           >
             {TimelineStrings.btnSetOut}
           </button>
           <button
             onClick={onMark}
-            className="rounded border border-[#f59e0b]/40 bg-[#2a2a2e] px-3 py-1 text-sm text-[#f59e0b] hover:bg-[#f59e0b]/10 transition-colors cursor-pointer"
+            className="rounded border border-[#f59e0b]/40 bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#f59e0b] hover:bg-[#f59e0b]/10 transition-colors cursor-pointer hidden tablet:inline-block"
             title={TimelineStrings.titleMark}
           >
             {TimelineStrings.btnMark}
@@ -333,13 +336,13 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           {(trim.inPoint !== null || trim.outPoint !== null) && (
             <button
               onClick={trim.clearMarkers}
-              className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1 text-sm text-[#888] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+              className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#888] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
             >
               {SharedStrings.btnClear}
             </button>
           )}
         </div>
-        <div className="flex gap-4 font-mono text-sm text-[#666]">
+        <div className="flex gap-4 font-mono text-xs tablet:text-sm text-[#666] justify-end">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>

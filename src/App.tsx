@@ -139,18 +139,18 @@ function App() {
   useEffect(() => { return () => { if (videoURL) URL.revokeObjectURL(videoURL); }; }, [videoURL]);
 
   return (
-    <div className="min-h-screen bg-[#111114] text-[#e0e0e0] p-5">
+    <div className="min-h-screen bg-[#111114] text-[#e0e0e0] p-2 mobile-landscape:p-3 tablet:p-5">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-5 flex items-center justify-between">
-          <h1 className="text-xl font-bold uppercase tracking-widest text-[#ccc]">{AppStrings.title}</h1>
+        <div className="mb-3 tablet:mb-5 flex flex-col mobile-landscape:flex-row items-start mobile-landscape:items-center justify-between gap-2 mobile-landscape:gap-0">
+          <h1 className="text-base tablet:text-xl font-bold uppercase tracking-widest text-[#ccc]">{AppStrings.title}</h1>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full mobile-landscape:w-auto">
             {/* Global export settings */}
             <div className="relative">
               <button
                 onClick={() => setShowGlobalSettings((s) => !s)}
                 className={[
-                  'flex items-center gap-1.5 rounded border px-3 py-1.5 text-sm transition-colors cursor-pointer',
+                  'flex items-center gap-1.5 rounded border px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm transition-colors cursor-pointer flex-1 mobile-landscape:flex-initial justify-center mobile-landscape:justify-start',
                   showGlobalSettings
                     ? 'border-[#c8f55a]/60 bg-[#c8f55a]/10 text-[#c8f55a]'
                     : 'border-[#444] bg-[#2a2a2e] text-[#ccc] hover:bg-[#3a3a3e]',
@@ -158,13 +158,13 @@ function App() {
                 title={AppStrings.titleGlobalSettings}
               >
                 <span>⚙</span>
-                <span className="text-xs font-mono text-[#888]">
+                <span className="text-xs font-mono text-[#888] hidden mobile-landscape:inline">
                   {FORMAT_LABELS[globalOptions.format]} · {QUALITY_LABELS[globalOptions.quality]}
                 </span>
               </button>
 
               {showGlobalSettings && (
-                <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl">
+                <div className="absolute left-0 mobile-landscape:left-auto right-0 mobile-landscape:right-0 top-full z-50 mt-1 w-full mobile-landscape:w-64 rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl">
                   <p className="mb-3 text-[10px] uppercase tracking-wider text-[#888]">
                     {AppStrings.headingDefaultSettings}
                   </p>
@@ -179,9 +179,10 @@ function App() {
             {isVideoLoaded && (
               <button
                 onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveInputUrl(''); clearHighlights(); }}
-                className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+                className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer flex-1 mobile-landscape:flex-initial"
               >
-                {AppStrings.btnLoadDifferentVideo}
+                <span className="hidden tablet:inline">{AppStrings.btnLoadDifferentVideo}</span>
+                <span className="tablet:hidden">Load New</span>
               </button>
             )}
           </div>
@@ -224,7 +225,7 @@ function App() {
                 </label>
               </>
             ) : (
-              <div className="flex w-full max-w-sm gap-2">
+              <div className="flex flex-col tablet:flex-row w-full max-w-sm gap-2">
                 <input
                   type="text"
                   placeholder={AppStrings.driveUrlPlaceholder}
@@ -265,17 +266,19 @@ function App() {
           </>
         )}
 
-        <HighlightList
-          highlights={highlights}
-          onSeek={handleTimelineSeek}
-          onRemove={removeHighlight}
-          onRename={(id, label) => updateHighlight(id, { label })}
-          onLoadIntoTimeline={handleLoadHighlightIntoTimeline}
-          onExport={handleExportHighlights}
-          onImport={handleImportHighlights}
-          showOnTimeline={showHighlightsOnTimeline}
-          onToggleOnTimeline={() => setShowHighlightsOnTimeline((v) => !v)}
-        />
+        <div className="hidden tablet:block">
+          <HighlightList
+            highlights={highlights}
+            onSeek={handleTimelineSeek}
+            onRemove={removeHighlight}
+            onRename={(id, label) => updateHighlight(id, { label })}
+            onLoadIntoTimeline={handleLoadHighlightIntoTimeline}
+            onExport={handleExportHighlights}
+            onImport={handleImportHighlights}
+            showOnTimeline={showHighlightsOnTimeline}
+            onToggleOnTimeline={() => setShowHighlightsOnTimeline((v) => !v)}
+          />
+        </div>
 
         {isVideoLoaded && (
           <ClipList

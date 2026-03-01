@@ -28,8 +28,10 @@ All processing happens directly in the browser. No data is ever sent to a server
 - ✅ Keyboard shortcuts (Space/K, J/L, ←/→, ,/., I/O, M, Home/End)
 - ✅ Toast notifications for errors, warnings, and feedback
 - ✅ Loading states and progress indicators throughout
+- ✅ Responsive design for mobile, tablet, and desktop
 
 ### Roadmap
+- [ ] Mobile touch-optimized interactions (larger touch targets, swipe gestures)
 - [ ] Export settings persistence across page refresh (localStorage)
 - [ ] Web workers for thumbnail generation (performance)
 - [ ] Horizontally scrollable timeline for very long videos

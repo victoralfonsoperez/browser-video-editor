@@ -81,22 +81,22 @@ export function ExportQueueOverlay({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-72 rounded-lg border border-[#333] bg-[#111] shadow-xl shadow-black/60 overflow-hidden">
+    <div className="fixed bottom-2 tablet:bottom-4 right-2 tablet:right-4 left-2 tablet:left-auto z-50 w-auto tablet:w-72 max-w-full tablet:max-w-none rounded-lg border border-[#333] bg-[#111] shadow-xl shadow-black/60 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-[#1a1a1e] border-b border-[#2a2a2e]">
+      <div className="flex items-center justify-between px-2 tablet:px-3 py-2 bg-[#1a1a1e] border-b border-[#2a2a2e]">
         <div className="flex items-center gap-2">
           {isRunning && (
-            <span className="animate-spin inline-block text-[#c8f55a] text-sm leading-none">⟳</span>
+            <span className="animate-spin inline-block text-[#c8f55a] text-xs tablet:text-sm leading-none">⟳</span>
           )}
-          <span className="text-[11px] uppercase tracking-wider text-[#888] font-medium">
+          <span className="text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#888] font-medium">
             {ExportQueueStrings.heading}
           </span>
-          <span className="text-[10px] text-[#555] font-mono">
+          <span className="text-[9px] tablet:text-[10px] text-[#555] font-mono">
             {doneCount}/{totalCount}
           </span>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 tablet:gap-1">
           {!allFinished && (
             isStarted ? (
               <button
@@ -140,7 +140,7 @@ export function ExportQueueOverlay({
 
       {/* Item list */}
       {!collapsed && (
-        <div className="max-h-64 overflow-y-auto">
+        <div className="max-h-48 tablet:max-h-64 overflow-y-auto">
           {queue.map((item, i) => {
             const isPending = item.status === 'pending';
             const isProcessing = item.status === 'processing';
@@ -152,16 +152,16 @@ export function ExportQueueOverlay({
               return (
                 <div
                   key={item.queueId}
-                  className="flex items-center gap-2 px-3 py-1.5 border-b border-[#1e1e1e] last:border-0"
+                  className="flex items-center gap-1.5 tablet:gap-2 px-2 tablet:px-3 py-1.5 border-b border-[#1e1e1e] last:border-0"
                 >
-                  <span className="text-xs w-4 text-center shrink-0">
+                  <span className="text-[10px] tablet:text-xs w-3 tablet:w-4 text-center shrink-0">
                     <StatusIcon status={item.status} />
                   </span>
-                  <span className={`flex-1 text-[11px] truncate ${item.status === 'error' ? 'text-[#f55a5a]' : 'text-[#555]'}`}>
+                  <span className={`flex-1 text-[10px] tablet:text-[11px] truncate ${item.status === 'error' ? 'text-[#f55a5a]' : 'text-[#555]'}`}>
                     {item.clip.name}
                     {item.status === 'error' && item.error ? ` — ${item.error}` : ''}
                   </span>
-                  <span className="text-[9px] text-[#444] font-mono shrink-0">{optionsBadge}</span>
+                  <span className="text-[8px] tablet:text-[9px] text-[#444] font-mono shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
                   {item.status === 'error' && (
                     <button
                       onClick={() => onRetry(item.queueId)}
@@ -202,27 +202,27 @@ export function ExportQueueOverlay({
                   <div className="pointer-events-none absolute -bottom-px left-0 right-0 h-0.5 bg-[#c8f55a] rounded-full" />
                 )}
 
-                <div className="flex items-center gap-2">
-                  <span className="text-xs w-4 text-center shrink-0">
+                <div className="flex items-center gap-1.5 tablet:gap-2">
+                  <span className="text-[10px] tablet:text-xs w-3 tablet:w-4 text-center shrink-0">
                     <StatusIcon status={item.status} />
                   </span>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-[#ccc] truncate">{item.clip.name}</p>
+                    <p className="text-[10px] tablet:text-xs text-[#ccc] truncate">{item.clip.name}</p>
                     {isPending && (
-                      <p className="text-[10px] text-[#555]">
+                      <p className="text-[9px] tablet:text-[10px] text-[#555] hidden mobile-landscape:block">
                         {formatTime(item.clip.inPoint)} → {formatTime(item.clip.outPoint)}
                       </p>
                     )}
                     {isProcessing && (
-                      <p className="text-[10px] text-[#888] font-mono">
+                      <p className="text-[9px] tablet:text-[10px] text-[#888] font-mono">
                         {Math.round(ffmpegProgress * 100)}%
                       </p>
                     )}
                   </div>
 
                   {/* Options badge */}
-                  <span className="text-[9px] text-[#555] font-mono shrink-0">{optionsBadge}</span>
+                  <span className="text-[8px] tablet:text-[9px] text-[#555] font-mono shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
 
                   {isPending && (
                     <button
@@ -246,10 +246,10 @@ export function ExportQueueOverlay({
 
       {/* Overall progress bar */}
       {isRunning && (
-        <div className="px-3 py-2 border-t border-[#2a2a2e] bg-[#0e0e10]">
+        <div className="px-2 tablet:px-3 py-2 border-t border-[#2a2a2e] bg-[#0e0e10]">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] text-[#555]">{ExportQueueStrings.labelOverall}</span>
-            <span className="text-[10px] text-[#888] font-mono">
+            <span className="text-[9px] tablet:text-[10px] text-[#555]">{ExportQueueStrings.labelOverall}</span>
+            <span className="text-[9px] tablet:text-[10px] text-[#888] font-mono">
               {Math.round(overallProgress * 100)}%
             </span>
           </div>
@@ -259,7 +259,7 @@ export function ExportQueueOverlay({
 
       {/* Collapsed summary */}
       {collapsed && (
-        <div className="px-3 py-1.5 text-[10px] text-[#555]">
+        <div className="px-2 tablet:px-3 py-1.5 text-[9px] tablet:text-[10px] text-[#555]">
           {isRunning
             ? ExportQueueStrings.collapsedProgress(Math.round(overallProgress * 100), doneCount, totalCount)
             : pendingCount > 0

@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
+import { useTour, TOUR_KEY } from './hooks/useTour';
+import { TourOverlay } from './components/onboarding/TourOverlay';
 import { AppStrings, HighlightListStrings } from './constants/ui';
 import { extractGoogleDriveFileId, buildProxiedGoogleDriveUrl } from './utils/googleDrive';
 import VideoPlayer from './components/videoplayer/videoplayer';
@@ -44,6 +46,9 @@ function App() {
   const videoSource: File | string | null = videoFile ?? videoURL ?? null;
 
   const exportQueue = useExportQueue(videoSource, ffmpeg);
+  const { tourState, startTour, nextStep, prevStep, closeTour } = useTour();
+  // Declare ref BEFORE the useEffect that reads it (immutability rule)
+  const hasAutoTriggeredTourRef = useRef<boolean>(false);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -138,6 +143,13 @@ function App() {
 
   useEffect(() => { return () => { if (videoURL) URL.revokeObjectURL(videoURL); }; }, [videoURL]);
 
+  useEffect(() => {
+    if (isVideoLoaded && !hasAutoTriggeredTourRef.current && !localStorage.getItem(TOUR_KEY)) {
+      hasAutoTriggeredTourRef.current = true;
+      startTour();
+    }
+  }, [isVideoLoaded, startTour]);
+
   return (
     <div className="min-h-screen bg-[#111114] text-[#e0e0e0] p-2 mobile-landscape:p-3 tablet:p-5">
       <div className="mx-auto max-w-4xl">
@@ -175,6 +187,17 @@ function App() {
                 </div>
               )}
             </div>
+
+            {isVideoLoaded && (
+              <button
+                onClick={startTour}
+                className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm text-[#888] hover:text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+                aria-label="Replay onboarding tour"
+                title="Tour"
+              >
+                ?
+              </button>
+            )}
 
             {isVideoLoaded && (
               <button
@@ -320,6 +343,10 @@ function App() {
         onClear={exportQueue.clear}
         onRetry={exportQueue.retry}
       />
+
+      {tourState.isOpen && (
+        <TourOverlay step={tourState.step} onNext={nextStep} onPrev={prevStep} onClose={closeTour} />
+      )}
 
       <ToastContainer />
 

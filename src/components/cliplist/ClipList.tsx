@@ -376,7 +376,7 @@ export function ClipList({
         />
       )}
 
-      <div className="w-full max-w-4xl mx-auto mt-3 tablet:mt-4 rounded-md border border-[#333] bg-[#1a1a1e] p-2 tablet:p-3">
+      <div className="w-full max-w-4xl mx-auto mt-3 tablet:mt-4 rounded-md border border-[#333] bg-[#1a1a1e] p-2 tablet:p-3" data-tour="clip-list">
         <div className="text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#888] mb-2 tablet:mb-3">{ClipListStrings.sectionHeading}</div>
 
         <div className="flex gap-2 tablet:gap-3 mb-3">
@@ -400,7 +400,7 @@ export function ClipList({
           </div>
         </div>
 
-        <div className="flex flex-col mobile-landscape:flex-row gap-2 mb-4">
+        <div className="flex flex-col mobile-landscape:flex-row gap-2 mb-4" data-tour="add-clip">
           <input
             type="text"
             placeholder={ClipListStrings.clipNamePlaceholder(clips.length + 1)}

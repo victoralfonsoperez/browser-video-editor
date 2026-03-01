@@ -123,7 +123,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
   const showRegion = inPct !== null && outPct !== null;
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-3 tablet:mt-5 select-none">
+    <div className="w-full max-w-4xl mx-auto mt-3 tablet:mt-5 select-none" data-tour="timeline">
       <div className="rounded-md border border-[#333] bg-[#1a1a1e] pb-1">
 
         {/* Header */}

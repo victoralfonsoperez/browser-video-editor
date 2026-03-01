@@ -95,5 +95,19 @@ describe('useVideoThumbnails', () => {
 
       expect(result.current.isGenerating).toBe(false)
     })
+
+    it('resets video.currentTime to 0 after generation completes', async () => {
+      vi.useFakeTimers()
+      const { result } = renderHook(() => useVideoThumbnails())
+      const video = makeVideoElement(60)
+
+      await act(async () => {
+        const generating = result.current.generateThumbnails(video, 1)
+        vi.advanceTimersByTime(3000)
+        await generating
+      })
+
+      expect(video.currentTime).toBe(0)
+    })
   })
 })

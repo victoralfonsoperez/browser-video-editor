@@ -67,8 +67,10 @@ export const TimelineStrings = {
   btnFrameForward: 'Frame ▶',
   btnSetIn: 'Set In',
   btnSetOut: 'Set Out',
+  btnMark: 'Mark',
   titleSetIn: 'Set in-point (I)',
   titleSetOut: 'Set out-point (O)',
+  titleMark: 'Mark highlight (H) — point at playhead, or range from in/out',
   titleInMarker: 'In point (drag or press I)',
   titleOutMarker: 'Out point (drag or press O)',
   inPointPrefix: 'In:',
@@ -151,6 +153,30 @@ export const ExportOptionsStrings = {
     'Aspect ratio will be preserved. Upscaling is avoided — if the source is smaller, the original size is kept.',
   modalHeading: 'Export Options',
   btnAddToQueue: 'Add to Queue',
+} as const;
+
+// ---------------------------------------------------------------------------
+// Highlight list
+// ---------------------------------------------------------------------------
+export const HighlightListStrings = {
+  sectionHeading: 'Highlights',
+  emptyState: 'No highlights yet',
+  titleSeek: 'Seek to highlight',
+  titleLoadIntoTimeline: 'Load range into timeline',
+  titleClickToRename: 'Click to rename',
+  titleRemove: 'Remove highlight',
+  btnExport: 'Export',
+  btnLoad: 'Load',
+  titleExport: 'Download highlights as .highlights.json',
+  titleLoad: 'Load highlights from a .highlights.json file',
+  toastExportSuccess: 'Highlights exported',
+  toastLoadSuccess: 'Highlights loaded',
+  toastLoadError: (msg: string) => `Could not load highlights: ${msg}`,
+  btnTimeline: 'Timeline',
+  titleCollapse: 'Collapse',
+  titleExpand: 'Expand',
+  titleShowOnTimeline: 'Show highlights on timeline',
+  titleHideFromTimeline: 'Hide highlights from timeline',
 } as const;
 
 // ---------------------------------------------------------------------------

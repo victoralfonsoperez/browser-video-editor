@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
-import { AppStrings } from './constants/ui';
+import { AppStrings, HighlightListStrings } from './constants/ui';
 import { extractGoogleDriveFileId, buildProxiedGoogleDriveUrl } from './utils/googleDrive';
 import VideoPlayer from './components/videoplayer/videoplayer';
 import Timeline from './components/timeline/timeline';
 import { ClipList } from './components/cliplist/ClipList';
+import { HighlightList } from './components/highlightlist/HighlightList';
 import { useTrimMarkers } from './hooks/useTrimMarkers';
+import { useHighlights } from './hooks/useHighlights';
 import { useClipThumbnail } from './hooks/useClipThumbnail';
 import { useFFmpeg } from './hooks/useFFmpeg';
 import { useExportQueue } from './hooks/useExportQueue';
@@ -16,6 +18,7 @@ import { useToast } from './context/ToastContext';
 import type { ExportOptions } from './types/exportOptions';
 import { DEFAULT_EXPORT_OPTIONS, FORMAT_LABELS, QUALITY_LABELS } from './types/exportOptions';
 import type { Clip } from './hooks/useTrimMarkers';
+import type { Highlight } from './types/highlights';
 
 function App() {
   const { showToast } = useToast();
@@ -30,8 +33,10 @@ function App() {
   const [globalOptions, setGlobalOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
   const [isCapturingThumbnail, setIsCapturingThumbnail] = useState(false);
   const [showGlobalSettings, setShowGlobalSettings] = useState(false);
+  const [showHighlightsOnTimeline, setShowHighlightsOnTimeline] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trim = useTrimMarkers();
+  const { highlights, addHighlight, removeHighlight, updateHighlight, exportJSON, importFromFile, clearHighlights } = useHighlights();
   const captureFrame = useClipThumbnail();
   const ffmpeg = useFFmpeg();
 
@@ -54,6 +59,7 @@ function App() {
     setVideoURL(URL.createObjectURL(file));
     setIsDriveSource(false);
     trim.clearMarkers();
+    clearHighlights();
   };
 
   const handleDriveLoad = () => {
@@ -64,6 +70,7 @@ function App() {
     setVideoURL(buildProxiedGoogleDriveUrl(fileId));
     setIsDriveSource(true);
     trim.clearMarkers();
+    clearHighlights();
   };
 
   const handleTimelineSeek = (newTime: number) => {
@@ -82,6 +89,38 @@ function App() {
     handleTimelineSeek(clip.inPoint);
     trim.setIn(clip.inPoint);
     trim.setOut(clip.outPoint);
+  };
+
+  const handleLoadHighlightIntoTimeline = (h: Highlight) => {
+    handleTimelineSeek(h.time);
+    trim.setIn(h.time);
+    if (h.endTime !== undefined) trim.setOut(h.endTime);
+  };
+
+  const handleExportHighlights = () => {
+    exportJSON(videoFile ? videoFile.name.replace(/\.[^.]+$/, '') : undefined);
+    showToast(HighlightListStrings.toastExportSuccess, 'success');
+  };
+
+  const handleImportHighlights = async (file: File) => {
+    try {
+      await importFromFile(file);
+      showToast(HighlightListStrings.toastLoadSuccess, 'success');
+    } catch (err) {
+      showToast(
+        HighlightListStrings.toastLoadError(err instanceof Error ? err.message : String(err)),
+        'error',
+      );
+    }
+  };
+
+  const handleMark = () => {
+    if (trim.inPoint !== null && trim.outPoint !== null) {
+      addHighlight(trim.inPoint, { endTime: trim.outPoint });
+      trim.clearMarkers();
+    } else {
+      addHighlight(currentTime);
+    }
   };
 
   const handleAddClip = async (name: string) => {
@@ -139,7 +178,7 @@ function App() {
 
             {isVideoLoaded && (
               <button
-                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveInputUrl(''); }}
+                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveInputUrl(''); clearHighlights(); }}
                 className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
               >
                 {AppStrings.btnLoadDifferentVideo}
@@ -218,26 +257,43 @@ function App() {
               currentTime={currentTime}
               duration={duration}
               onSeek={handleTimelineSeek}
+              onMark={handleMark}
               videoRef={videoRef}
               trim={trim}
-            />
-            <ClipList
-              clips={trim.clips}
-              inPoint={trim.inPoint}
-              outPoint={trim.outPoint}
-              videoSource={videoSource}
-              ffmpeg={ffmpeg}
-              globalOptions={globalOptions}
-              isAddingClip={isCapturingThumbnail}
-              onAddClip={handleAddClip}
-              onRemoveClip={trim.removeClip}
-              onSeekToClip={handleSeekToClip}
-              onUpdateClip={trim.updateClip}
-              onReorderClips={trim.reorderClips}
-              onPreviewClip={setPreviewClip}
-              onEnqueueClip={exportQueue.enqueue}
+              highlights={showHighlightsOnTimeline ? highlights : []}
             />
           </>
+        )}
+
+        <HighlightList
+          highlights={highlights}
+          onSeek={handleTimelineSeek}
+          onRemove={removeHighlight}
+          onRename={(id, label) => updateHighlight(id, { label })}
+          onLoadIntoTimeline={handleLoadHighlightIntoTimeline}
+          onExport={handleExportHighlights}
+          onImport={handleImportHighlights}
+          showOnTimeline={showHighlightsOnTimeline}
+          onToggleOnTimeline={() => setShowHighlightsOnTimeline((v) => !v)}
+        />
+
+        {isVideoLoaded && (
+          <ClipList
+            clips={trim.clips}
+            inPoint={trim.inPoint}
+            outPoint={trim.outPoint}
+            videoSource={videoSource}
+            ffmpeg={ffmpeg}
+            globalOptions={globalOptions}
+            isAddingClip={isCapturingThumbnail}
+            onAddClip={handleAddClip}
+            onRemoveClip={trim.removeClip}
+            onSeekToClip={handleSeekToClip}
+            onUpdateClip={trim.updateClip}
+            onReorderClips={trim.reorderClips}
+            onPreviewClip={setPreviewClip}
+            onEnqueueClip={exportQueue.enqueue}
+          />
         )}
       </div>
 

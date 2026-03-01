@@ -187,12 +187,12 @@ function ClipRow({
           <div className="pointer-events-none absolute -bottom-px left-0 right-0 h-0.5 rounded-full bg-[#c8f55a]" />
         )}
 
-        <div className="flex items-center gap-2">
-          <span className="cursor-grab text-[#444] hover:text-[#888] transition-colors text-base leading-none active:cursor-grabbing shrink-0" title={ClipListStrings.titleDragToReorder}>⠿</span>
-          <span className="text-[10px] text-[#555] font-mono w-4 shrink-0">{index + 1}</span>
+        <div className="flex items-center gap-1.5 tablet:gap-2">
+          <span className="cursor-grab text-[#444] hover:text-[#888] transition-colors text-sm tablet:text-base leading-none active:cursor-grabbing shrink-0 hidden tablet:inline" title={ClipListStrings.titleDragToReorder}>⠿</span>
+          <span className="text-[9px] tablet:text-[10px] text-[#555] font-mono w-3 tablet:w-4 shrink-0">{index + 1}</span>
 
           <div
-            className="shrink-0 w-[56px] h-[32px] rounded overflow-hidden bg-[#222] border border-[#333] cursor-pointer hover:border-[#c8f55a]/60 transition-colors"
+            className="shrink-0 w-[48px] tablet:w-[56px] h-[28px] tablet:h-[32px] rounded overflow-hidden bg-[#222] border border-[#333] cursor-pointer hover:border-[#c8f55a]/60 transition-colors"
             onClick={onPreview}
             title={ClipListStrings.titlePreviewClip}
           >
@@ -203,7 +203,7 @@ function ClipRow({
             )}
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 max-w-[120px] tablet:max-w-none">
             {isEditing ? (
               <input
                 ref={inputRef}
@@ -214,27 +214,27 @@ function ClipRow({
                   if (e.key === 'Enter') commitRename();
                   if (e.key === 'Escape') { setEditValue(clip.name); setIsEditing(false); }
                 }}
-                className="w-full rounded border border-[#c8f55a]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-sm text-[#ccc] outline-none focus:border-[#c8f55a]"
+                className="w-full rounded border border-[#c8f55a]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-xs tablet:text-sm text-[#ccc] outline-none focus:border-[#c8f55a]"
               />
             ) : (
-              <button onClick={startEdit} className="block w-full text-left text-sm text-[#ccc] truncate hover:text-white transition-colors cursor-text" title={ClipListStrings.titleClickToRename}>
+              <button onClick={startEdit} className="block w-full text-left text-xs tablet:text-sm text-[#ccc] truncate hover:text-white transition-colors cursor-text" title={ClipListStrings.titleClickToRename}>
                 {clip.name}
               </button>
             )}
           </div>
 
-          <span className="font-mono text-xs text-[#c8f55a] shrink-0">{formatTime(clip.inPoint)}</span>
-          <span className="text-[#555] text-xs shrink-0">→</span>
-          <span className="font-mono text-xs text-[#f55a5a] shrink-0">{formatTime(clip.outPoint)}</span>
-          <span className="font-mono text-xs text-[#777] shrink-0">{formatTime(clipDuration)}</span>
+          <span className="font-mono text-[10px] tablet:text-xs text-[#c8f55a] shrink-0 hidden mobile-landscape:inline">{formatTime(clip.inPoint)}</span>
+          <span className="text-[#555] text-xs shrink-0 hidden mobile-landscape:inline">→</span>
+          <span className="font-mono text-[10px] tablet:text-xs text-[#f55a5a] shrink-0 hidden mobile-landscape:inline">{formatTime(clip.outPoint)}</span>
+          <span className="font-mono text-[10px] tablet:text-xs text-[#777] shrink-0">{formatTime(clipDuration)}</span>
 
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-            <button onClick={onPreview} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titlePreviewClip}>⬛▶</button>
-            <button onClick={onSeek} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleSeekToInPoint}>▶</button>
-            <button onClick={onEditPoints} className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleEditPoints}>✎</button>
+          <div className="flex items-center gap-0.5 tablet:gap-1 opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 transition-opacity shrink-0">
+            <button onClick={onPreview} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden tablet:inline-block" title={ClipListStrings.titlePreviewClip}>⬛▶</button>
+            <button onClick={onSeek} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#888] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-block" title={ClipListStrings.titleSeekToInPoint}>▶</button>
+            <button onClick={onEditPoints} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-block" title={ClipListStrings.titleEditPoints}>✎</button>
 
             {/* ⚙ per-clip settings */}
-            <div className="relative" ref={settingsRef}>
+            <div className="relative hidden tablet:block" ref={settingsRef}>
               <button
                 onClick={() => setShowSettings((s) => !s)}
                 className={[
@@ -266,7 +266,7 @@ function ClipRow({
             <button
               onClick={handleExportClick}
               disabled={!canExport}
-              className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={ClipListStrings.titleExportInstant}
             >
               {isThisExporting
@@ -278,12 +278,12 @@ function ClipRow({
             <button
               onClick={handleEnqueueClick}
               disabled={!videoSource}
-              className="rounded px-1.5 py-0.5 text-xs font-bold text-[#888] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs font-bold text-[#888] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={ClipListStrings.titleAddToQueue}
             >
               +
             </button>
-            <button onClick={onRemove} className="rounded px-1.5 py-0.5 text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
+            <button onClick={onRemove} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
           </div>
 
           {/* Always-visible options badge */}
@@ -376,31 +376,31 @@ export function ClipList({
         />
       )}
 
-      <div className="w-full max-w-4xl mx-auto mt-4 rounded-md border border-[#333] bg-[#1a1a1e] p-3">
-        <div className="text-[11px] uppercase tracking-wider text-[#888] mb-3">{ClipListStrings.sectionHeading}</div>
+      <div className="w-full max-w-4xl mx-auto mt-3 tablet:mt-4 rounded-md border border-[#333] bg-[#1a1a1e] p-2 tablet:p-3">
+        <div className="text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#888] mb-2 tablet:mb-3">{ClipListStrings.sectionHeading}</div>
 
-        <div className="flex gap-3 mb-3">
-          <div className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2">
-            <div className="text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelInPoint}</div>
-            <div className={`font-mono text-sm ${inPoint !== null ? 'text-[#c8f55a]' : 'text-[#444]'}`}>
+        <div className="flex gap-2 tablet:gap-3 mb-3">
+          <div className="flex-1 rounded border border-[#333] bg-[#111] px-2 tablet:px-3 py-1.5 tablet:py-2">
+            <div className="text-[9px] tablet:text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelInPoint}</div>
+            <div className={`font-mono text-xs tablet:text-sm ${inPoint !== null ? 'text-[#c8f55a]' : 'text-[#444]'}`}>
               {inPoint !== null ? formatTime(inPoint) : '—'}
             </div>
           </div>
-          <div className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2">
-            <div className="text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelOutPoint}</div>
-            <div className={`font-mono text-sm ${outPoint !== null ? 'text-[#f55a5a]' : 'text-[#444]'}`}>
+          <div className="flex-1 rounded border border-[#333] bg-[#111] px-2 tablet:px-3 py-1.5 tablet:py-2">
+            <div className="text-[9px] tablet:text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelOutPoint}</div>
+            <div className={`font-mono text-xs tablet:text-sm ${outPoint !== null ? 'text-[#f55a5a]' : 'text-[#444]'}`}>
               {outPoint !== null ? formatTime(outPoint) : '—'}
             </div>
           </div>
-          <div className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2">
-            <div className="text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelDuration}</div>
-            <div className={`font-mono text-sm ${duration !== null ? 'text-[#ccc]' : 'text-[#444]'}`}>
+          <div className="flex-1 rounded border border-[#333] bg-[#111] px-2 tablet:px-3 py-1.5 tablet:py-2">
+            <div className="text-[9px] tablet:text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelDuration}</div>
+            <div className={`font-mono text-xs tablet:text-sm ${duration !== null ? 'text-[#ccc]' : 'text-[#444]'}`}>
               {duration !== null ? formatTime(duration) : '—'}
             </div>
           </div>
         </div>
 
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-col mobile-landscape:flex-row gap-2 mb-4">
           <input
             type="text"
             placeholder={ClipListStrings.clipNamePlaceholder(clips.length + 1)}
@@ -413,7 +413,7 @@ export function ClipList({
           <button
             onClick={handleAdd}
             disabled={!canAdd || isAddingClip}
-            className="rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-4 py-1.5 text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-3 tablet:px-4 py-1.5 text-xs tablet:text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap"
           >
             {isAddingClip ? ClipListStrings.addingClip : ClipListStrings.btnAddClip}
           </button>
@@ -424,7 +424,7 @@ export function ClipList({
             {ClipListStrings.emptyState}
           </div>
         ) : (
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 tablet:overflow-visible overflow-x-auto -mx-2 tablet:mx-0 px-2 tablet:px-0">
             {clips.map((clip, i) => (
               <ClipRow
                 key={clip.id}
@@ -490,7 +490,7 @@ export function ClipList({
           </div>
         )}
 
-        <p className="mt-3 text-[10px] text-[#444]">
+        <p className="mt-3 text-[9px] tablet:text-[10px] text-[#444] hidden mobile-landscape:block">
           {ClipListStrings.keyboardHintHeading}{' '}
           <kbd className="rounded bg-[#222] px-1 py-px text-[#666]">I</kbd> set in ·{' '}
           <kbd className="rounded bg-[#222] px-1 py-px text-[#666]">O</kbd> set out · drag{' '}

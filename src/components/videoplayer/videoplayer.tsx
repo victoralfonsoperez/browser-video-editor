@@ -105,10 +105,10 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
   return (
     <div className="w-full max-w-4xl mx-auto">
       {/* File info */}
-      <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[#aaa]">
-        <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelFile}</strong> {videoFile?.name ?? AppStrings.driveLabelSource}</span>
+      <div className="mb-2 flex flex-wrap gap-x-2 tablet:gap-x-4 gap-y-1 text-xs tablet:text-sm text-[#aaa]">
+        <span className="truncate max-w-full mobile-landscape:max-w-none"><strong className="text-[#ccc]">{VideoPlayerStrings.labelFile}</strong> {videoFile?.name ?? AppStrings.driveLabelSource}</span>
         {videoFile && <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelSize}</strong> {(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>}
-        {videoFile && <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelType}</strong> {videoFile.type}</span>}
+        {videoFile && <span className="hidden mobile-landscape:inline"><strong className="text-[#ccc]">{VideoPlayerStrings.labelType}</strong> {videoFile.type}</span>}
         {videoMetadata && (
           <>
             <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelDuration}</strong> {videoMetadata.duration.toFixed(2)}s</span>
@@ -118,7 +118,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
       </div>
 
       {/* Video element */}
-      <div className="relative">
+      <div className="relative aspect-video bg-black">
         <video
           ref={ref}
           src={videoURL}
@@ -142,7 +142,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
               'error',
             )
           }}
-          className="w-full max-w-4xl bg-black block"
+          className="w-full h-full object-contain bg-black block"
         />
         {isVideoLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none">
@@ -155,22 +155,22 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
       </div>
 
       {/* Controls bar */}
-      <div className="mt-2 flex items-center gap-3 rounded bg-[#2a2a2e] px-3 py-2">
+      <div className="mt-2 flex items-center gap-2 tablet:gap-3 rounded bg-[#2a2a2e] px-2 tablet:px-3 py-2">
         <button
           onClick={togglePlay}
-          className="rounded border border-[#444] bg-[#1a1a1e] px-3 py-1 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+          className="rounded border border-[#444] bg-[#1a1a1e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
         >
           {isPlaying ? SharedStrings.btnPause : SharedStrings.btnPlay}
         </button>
 
-        <span className="font-mono text-sm text-[#aaa]">
+        <span className="font-mono text-xs tablet:text-sm text-[#aaa]">
           {formatTime(currentTime)} / {formatTime(videoMetadata?.duration ?? 0)}
         </span>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 tablet:gap-2">
           <button
             onClick={toggleMute}
-            className="text-lg leading-none cursor-pointer"
+            className="text-base tablet:text-lg leading-none cursor-pointer"
             title={isMuted ? VideoPlayerStrings.titleUnmute : VideoPlayerStrings.titleMute}
           >
             {isMuted ? '🔇' : '🔊'}
@@ -182,13 +182,13 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
             step="0.1"
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
-            className="w-20 cursor-pointer accent-[#c8f55a]"
+            className="w-12 tablet:w-20 cursor-pointer accent-[#c8f55a]"
           />
         </div>
       </div>
 
       {/* Keyboard shortcuts hint */}
-      <div className="mt-1.5 rounded bg-[#1a1a1e] px-3 py-1.5 text-xs text-[#666]">
+      <div className="mt-1.5 rounded bg-[#1a1a1e] px-2 tablet:px-3 py-1.5 text-[10px] tablet:text-xs text-[#666] hidden mobile-landscape:block">
         <strong className="text-[#555]">Shortcuts:</strong> {VideoPlayerStrings.shortcutsHint}
       </div>
     </div>

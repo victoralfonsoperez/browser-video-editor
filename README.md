@@ -17,23 +17,26 @@ All processing happens directly in the browser. No data is ever sent to a server
 
 ### Implemented
 - ✅ Local file upload with format and size validation
+- ✅ Google Drive URL loading (server-side proxy for COEP compliance)
 - ✅ Multi-format video playback (MP4, WebM, MOV, and more)
 - ✅ Interactive timeline with auto-generated thumbnail strip
 - ✅ Draggable in/out point markers with keyboard shortcuts (I / O)
 - ✅ Multiple clip management — add, rename, reorder, remove
+- ✅ Highlights / markers — add, rename, import/export JSON, show on timeline
 - ✅ In-browser clip preview modal with loop support
 - ✅ FFmpeg.wasm export: MP4, WebM, MOV, GIF
 - ✅ Per-clip and global export settings (format, quality, resolution)
+- ✅ Export settings persistence across page refresh (localStorage)
 - ✅ Export queue with start/pause/retry and real-time progress
+- ✅ Web Worker for thumbnail generation (performance)
 - ✅ Keyboard shortcuts (Space/K, J/L, ←/→, ,/., I/O, M, Home/End)
+- ✅ Guided onboarding tour for first-time users
 - ✅ Toast notifications for errors, warnings, and feedback
 - ✅ Loading states and progress indicators throughout
 - ✅ Responsive design for mobile, tablet, and desktop
 
 ### Roadmap
 - [ ] Mobile touch-optimized interactions (larger touch targets, swipe gestures)
-- [ ] Export settings persistence across page refresh (localStorage)
-- [ ] Web workers for thumbnail generation (performance)
 - [ ] Horizontally scrollable timeline for very long videos
 - [ ] Audio waveform visualization
 - [ ] Cross-browser testing and public deployment (Phase 6)

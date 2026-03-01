@@ -4,26 +4,26 @@ import { useTrimMarkers } from './useTrimMarkers'
 
 describe('useTrimMarkers', () => {
   it('starts with null inPoint, outPoint and empty clips', () => {
-    const { result } = renderHook(() => useTrimMarkers(100))
+    const { result } = renderHook(() => useTrimMarkers())
     expect(result.current.inPoint).toBeNull()
     expect(result.current.outPoint).toBeNull()
     expect(result.current.clips).toEqual([])
   })
 
   it('sets inPoint', () => {
-    const { result } = renderHook(() => useTrimMarkers(100))
+    const { result } = renderHook(() => useTrimMarkers())
     act(() => result.current.setIn(10))
     expect(result.current.inPoint).toBe(10)
   })
 
   it('sets outPoint', () => {
-    const { result } = renderHook(() => useTrimMarkers(100))
+    const { result } = renderHook(() => useTrimMarkers())
     act(() => result.current.setOut(50))
     expect(result.current.outPoint).toBe(50)
   })
 
   it('clears both markers', () => {
-    const { result } = renderHook(() => useTrimMarkers(100))
+    const { result } = renderHook(() => useTrimMarkers())
     act(() => { result.current.setIn(10); result.current.setOut(50) })
     act(() => result.current.clearMarkers())
     expect(result.current.inPoint).toBeNull()
@@ -31,7 +31,7 @@ describe('useTrimMarkers', () => {
   })
 
   it('adds a clip when both markers are set', () => {
-    const { result } = renderHook(() => useTrimMarkers(100))
+    const { result } = renderHook(() => useTrimMarkers())
     act(() => { result.current.setIn(10); result.current.setOut(50) })
     act(() => result.current.addClip('My Clip'))
     expect(result.current.clips).toHaveLength(1)
@@ -39,7 +39,7 @@ describe('useTrimMarkers', () => {
   })
 
   it('removes a clip by id', () => {
-    const { result } = renderHook(() => useTrimMarkers(100))
+    const { result } = renderHook(() => useTrimMarkers())
     act(() => { result.current.setIn(10); result.current.setOut(50) })
     act(() => result.current.addClip('Clip'))
     const id = result.current.clips[0].id
@@ -48,7 +48,7 @@ describe('useTrimMarkers', () => {
   })
 
   it('updates a clip', () => {
-    const { result } = renderHook(() => useTrimMarkers(100))
+    const { result } = renderHook(() => useTrimMarkers())
     act(() => { result.current.setIn(10); result.current.setOut(50) })
     act(() => result.current.addClip('Original'))
     const id = result.current.clips[0].id
@@ -57,7 +57,7 @@ describe('useTrimMarkers', () => {
   })
 
   it('reorders clips', () => {
-    const { result } = renderHook(() => useTrimMarkers(100))
+    const { result } = renderHook(() => useTrimMarkers())
     act(() => { result.current.setIn(0); result.current.setOut(10) })
     act(() => result.current.addClip('A'))
     act(() => { result.current.setIn(20); result.current.setOut(30) })
@@ -67,7 +67,7 @@ describe('useTrimMarkers', () => {
   })
 
   it('bindKeyboard sets inPoint on "i" and outPoint on "o"', () => {
-    const { result } = renderHook(() => useTrimMarkers(100))
+    const { result } = renderHook(() => useTrimMarkers())
 
     const handlerIn = result.current.bindKeyboard(25)
     window.addEventListener('keydown', handlerIn)

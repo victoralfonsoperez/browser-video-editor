@@ -2,7 +2,7 @@ import { type ChangeEvent } from 'react';
 
 function VideoUpload({ onVideoLoaded }: { onVideoLoaded: (file: File) => void }) {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files[0];
+    const file = event.target.files?.[0];
     console.log({file});
     if (file && file.type.startsWith('video/')) {
       // Basic validation

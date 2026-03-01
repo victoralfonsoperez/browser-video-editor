@@ -12,13 +12,13 @@ import { useHighlights } from './hooks/useHighlights';
 import { useClipThumbnail } from './hooks/useClipThumbnail';
 import { useFFmpeg } from './hooks/useFFmpeg';
 import { useExportQueue } from './hooks/useExportQueue';
+import { usePreferences } from './hooks/usePreferences';
 import { ClipPreviewModal } from './components/clippreview/ClipPreviewModal';
 import { ExportQueueOverlay } from './components/exportqueue/ExportQueueOverlay';
 import { ExportOptionsPanel } from './components/exportoptions/ExportOptionsPanel';
 import { ToastContainer } from './components/toasts/ToastContainer';
 import { useToast } from './context/ToastContext';
-import type { ExportOptions } from './types/exportOptions';
-import { DEFAULT_EXPORT_OPTIONS, FORMAT_LABELS, QUALITY_LABELS } from './types/exportOptions';
+import { FORMAT_LABELS, QUALITY_LABELS } from './types/exportOptions';
 import type { Clip } from './hooks/useTrimMarkers';
 import type { Highlight } from './types/highlights';
 
@@ -32,10 +32,9 @@ function App() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [previewClip, setPreviewClip] = useState<Clip | null>(null);
-  const [globalOptions, setGlobalOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
   const [isCapturingThumbnail, setIsCapturingThumbnail] = useState(false);
   const [showGlobalSettings, setShowGlobalSettings] = useState(false);
-  const [showHighlightsOnTimeline, setShowHighlightsOnTimeline] = useState(true);
+  const { globalOptions, setGlobalOptions, showHighlightsOnTimeline, toggleHighlightsOnTimeline } = usePreferences();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trim = useTrimMarkers();
   const { highlights, addHighlight, removeHighlight, updateHighlight, exportJSON, importFromFile, clearHighlights } = useHighlights();
@@ -184,6 +183,21 @@ function App() {
                   <p className="mt-2 text-[10px] text-[#555]">
                     {AppStrings.helpDefaultSettings}
                   </p>
+
+                  <div className="mt-3 border-t border-[#333] pt-3">
+                    <p className="mb-2 text-[10px] uppercase tracking-wider text-[#888]">
+                      {AppStrings.headingPreferences}
+                    </p>
+                    <label className="flex items-center gap-2 cursor-pointer text-xs text-[#ccc]">
+                      <input
+                        type="checkbox"
+                        checked={showHighlightsOnTimeline}
+                        onChange={toggleHighlightsOnTimeline}
+                        className="accent-[#c8f55a]"
+                      />
+                      {AppStrings.labelShowHighlightsOnTimeline}
+                    </label>
+                  </div>
                 </div>
               )}
             </div>
@@ -299,7 +313,7 @@ function App() {
             onExport={handleExportHighlights}
             onImport={handleImportHighlights}
             showOnTimeline={showHighlightsOnTimeline}
-            onToggleOnTimeline={() => setShowHighlightsOnTimeline((v) => !v)}
+            onToggleOnTimeline={toggleHighlightsOnTimeline}
           />
         </div>
 

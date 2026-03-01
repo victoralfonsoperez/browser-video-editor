@@ -118,7 +118,7 @@ describe('useHighlights', () => {
       expect(anchor.download).toBe('my-video.highlights.json');
       expect(anchor.click).toHaveBeenCalledOnce();
 
-      const blob: Blob = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls.at(-1)[0];
+      const blob: Blob = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls.at(-1)![0];
       const text = await blob.text();
       const parsed = JSON.parse(text);
       expect(parsed.version).toBe(1);

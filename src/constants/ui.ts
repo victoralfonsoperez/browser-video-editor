@@ -27,6 +27,8 @@ export const AppStrings = {
   headingDefaultSettings: 'Default Export Settings',
   helpDefaultSettings:
     'Applied to new clips and Export All. Individual clips can override these.',
+  headingPreferences: 'Preferences',
+  labelShowHighlightsOnTimeline: 'Show highlights on timeline',
   btnLoadDifferentVideo: 'Load Different Video',
   emptyStatePrompt: 'Open a video file to get started',
   btnChooseFile: 'Choose File',

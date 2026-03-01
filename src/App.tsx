@@ -36,7 +36,7 @@ function App() {
   const [showHighlightsOnTimeline, setShowHighlightsOnTimeline] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trim = useTrimMarkers();
-  const { highlights, addHighlight, removeHighlight, updateHighlight, exportJSON, importFromFile } = useHighlights();
+  const { highlights, addHighlight, removeHighlight, updateHighlight, exportJSON, importFromFile, clearHighlights } = useHighlights();
   const captureFrame = useClipThumbnail();
   const ffmpeg = useFFmpeg();
 
@@ -59,6 +59,7 @@ function App() {
     setVideoURL(URL.createObjectURL(file));
     setIsDriveSource(false);
     trim.clearMarkers();
+    clearHighlights();
   };
 
   const handleDriveLoad = () => {
@@ -69,6 +70,7 @@ function App() {
     setVideoURL(buildProxiedGoogleDriveUrl(fileId));
     setIsDriveSource(true);
     trim.clearMarkers();
+    clearHighlights();
   };
 
   const handleTimelineSeek = (newTime: number) => {
@@ -176,7 +178,7 @@ function App() {
 
             {isVideoLoaded && (
               <button
-                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveInputUrl(''); }}
+                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveInputUrl(''); clearHighlights(); }}
                 className="rounded border border-[#444] bg-[#2a2a2e] px-3 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
               >
                 {AppStrings.btnLoadDifferentVideo}

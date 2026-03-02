@@ -3,6 +3,7 @@ import { SharedStrings, ExportQueueStrings } from '../../constants/ui';
 import { formatTime } from '../../utils/formatTime';
 import type { QueueItem } from '../../hooks/useExportQueue';
 import { FORMAT_LABELS, QUALITY_LABELS } from '../../types/exportOptions';
+import { ProgressBar } from '../shared/ProgressBar';
 
 interface ExportQueueOverlayProps {
   queue: QueueItem[];
@@ -22,17 +23,6 @@ function StatusIcon({ status }: { status: QueueItem['status'] }) {
   if (status === 'done') return <span className="text-[#c8f55a]">✓</span>;
   if (status === 'error') return <span className="text-[#f55a5a]">✕</span>;
   return <span className="text-[#555]">–</span>;
-}
-
-function ProgressBar({ progress, className = '' }: { progress: number; className?: string }) {
-  return (
-    <div className={`h-0.5 w-full rounded-full bg-[#2a2a2e] overflow-hidden ${className}`}>
-      <div
-        className="h-full rounded-full bg-[#c8f55a] transition-[width] duration-500 ease-out"
-        style={{ width: `${Math.round(Math.max(0, Math.min(1, progress)) * 100)}%` }}
-      />
-    </div>
-  );
 }
 
 export function ExportQueueOverlay({

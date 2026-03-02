@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { SharedStrings, TimelineStrings } from '../../constants/ui';
 import { formatTime } from '../../utils/formatTime';
-import { useVideoThumbnails, THUMB_WIDTH } from '../../hooks/useVideoThumbnails';
+import { isInputFocused } from '../../utils/isInputFocused';
+import { THUMB_WIDTH } from '../../utils/thumbnails';
+import { useVideoThumbnails } from '../../hooks/useVideoThumbnails';
 import type { useTrimMarkers } from '../../hooks/useTrimMarkers';
 import type { Highlight } from '../../types/highlights';
 
@@ -56,8 +58,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
   // H key — mark highlight
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement).tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (isInputFocused(e)) return;
       if (e.key === 'h' || e.key === 'H') onMark();
     };
     window.addEventListener('keydown', handler);

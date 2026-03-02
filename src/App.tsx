@@ -19,6 +19,7 @@ import { ExportOptionsPanel } from './components/exportoptions/ExportOptionsPane
 import { ToastContainer } from './components/toasts/ToastContainer';
 import { useToast } from './context/ToastContext';
 import { FORMAT_LABELS, QUALITY_LABELS } from './types/exportOptions';
+import { getErrorMessage } from './utils/getErrorMessage';
 import type { Clip } from './hooks/useTrimMarkers';
 import type { Highlight } from './types/highlights';
 
@@ -112,7 +113,7 @@ function App() {
       showToast(HighlightListStrings.toastLoadSuccess, 'success');
     } catch (err) {
       showToast(
-        HighlightListStrings.toastLoadError(err instanceof Error ? err.message : String(err)),
+        HighlightListStrings.toastLoadError(getErrorMessage(err, String(err))),
         'error',
       );
     }

@@ -5,6 +5,8 @@ import { coreURL, wasmURL } from './ffmpeg-urls';
 import type { Clip } from './useTrimMarkers';
 import type { ExportOptions } from '../types/exportOptions';
 import { DEFAULT_EXPORT_OPTIONS } from '../types/exportOptions';
+import { downloadBlob } from '../utils/downloadBlob';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 export type FFmpegStatus = 'idle' | 'loading' | 'processing' | 'done' | 'error';
 
@@ -116,6 +118,26 @@ async function exportGif(
   await ffmpeg.deleteFile(paletteName);
 }
 
+function getInputName(source: File | string): string {
+  const ext = source instanceof File
+    ? (source.name.split('.').pop() ?? 'mp4')
+    : 'mp4';
+  return `input.${ext}`;
+}
+
+function getOutputExt(format: ExportOptions['format']): string {
+  if (format === 'mov') return 'mov';
+  if (format === 'webm') return 'webm';
+  if (format === 'gif') return 'gif';
+  return 'mp4';
+}
+
+function getMimeType(format: ExportOptions['format']): string {
+  if (format === 'webm') return 'video/webm';
+  if (format === 'gif') return 'image/gif';
+  return 'video/mp4';
+}
+
 // ─── hook ────────────────────────────────────────────────────────────────────
 
 export function useFFmpeg(): UseFFmpegReturn {
@@ -164,14 +186,9 @@ export function useFFmpeg(): UseFFmpegReturn {
       const ffmpeg = await loadFFmpeg();
       setStatus('processing');
 
-      const inputExt = videoSource instanceof File
-        ? (videoSource.name.split('.').pop() ?? 'mp4')
-        : 'mp4';
-      const inputName = `input.${inputExt}`;
-      const outputExt = options.format === 'mov' ? 'mov'
-        : options.format === 'webm' ? 'webm'
-        : options.format === 'gif'  ? 'gif'
-        : 'mp4';
+      const inputName = getInputName(videoSource);
+      const inputExt = inputName.split('.').pop()!;
+      const outputExt = getOutputExt(options.format);
       const safeName = clip.name.replace(/[^a-z0-9_-]/gi, '_');
       const outputName = `${safeName}.${outputExt}`;
 
@@ -194,17 +211,8 @@ export function useFFmpeg(): UseFFmpegReturn {
       }
 
       const data = await ffmpeg.readFile(outputName);
-      const mimeType = options.format === 'webm' ? 'video/webm'
-        : options.format === 'gif' ? 'image/gif'
-        : 'video/mp4';
-      const blob = new Blob([data as BlobPart], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = outputName;
-      a.click();
-      URL.revokeObjectURL(url);
+      const blob = new Blob([data as BlobPart], { type: getMimeType(options.format) });
+      downloadBlob(blob, outputName);
 
       await ffmpeg.deleteFile(inputName);
       await ffmpeg.deleteFile(outputName);
@@ -213,8 +221,7 @@ export function useFFmpeg(): UseFFmpegReturn {
       setProgress(1);
       scheduleReset();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Export failed';
-      setError(message);
+      setError(getErrorMessage(err));
       setStatus('error');
     } finally {
       setExportingClipId(null);
@@ -237,14 +244,9 @@ export function useFFmpeg(): UseFFmpegReturn {
       const ffmpeg = await loadFFmpeg();
       setStatus('processing');
 
-      const inputExt = videoSource instanceof File
-        ? (videoSource.name.split('.').pop() ?? 'mp4')
-        : 'mp4';
-      const inputName = `input.${inputExt}`;
-      const outputExt = options.format === 'mov' ? 'mov'
-        : options.format === 'webm' ? 'webm'
-        : options.format === 'gif'  ? 'gif'
-        : 'mp4';
+      const inputName = getInputName(videoSource);
+      const inputExt = inputName.split('.').pop()!;
+      const outputExt = getOutputExt(options.format);
 
       await ffmpeg.writeFile(inputName, await fetchFile(videoSource));
 
@@ -287,17 +289,8 @@ export function useFFmpeg(): UseFFmpegReturn {
       ]);
 
       const data = await ffmpeg.readFile(outputName);
-      const mimeType = options.format === 'webm' ? 'video/webm'
-        : options.format === 'gif' ? 'image/gif'
-        : 'video/mp4';
-      const blob = new Blob([data as BlobPart], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = outputName;
-      a.click();
-      URL.revokeObjectURL(url);
+      const blob = new Blob([data as BlobPart], { type: getMimeType(options.format) });
+      downloadBlob(blob, outputName);
 
       await ffmpeg.deleteFile(inputName);
       await ffmpeg.deleteFile('concat_list.txt');
@@ -308,8 +301,7 @@ export function useFFmpeg(): UseFFmpegReturn {
       setProgress(1);
       scheduleReset();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Export failed';
-      setError(message);
+      setError(getErrorMessage(err));
       setStatus('error');
     } finally {
       setExportingClipId(null);

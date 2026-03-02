@@ -1,12 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { THUMB_WIDTH, THUMB_HEIGHT, seekToTime } from '../utils/thumbnails'
+
+export { THUMB_WIDTH, THUMB_HEIGHT } from '../utils/thumbnails'
 
 export interface Thumbnail {
   time: number
   dataUrl: string
 }
-
-export const THUMB_WIDTH = 80
-export const THUMB_HEIGHT = 45
 
 interface WorkerResponse {
   id: number
@@ -78,30 +78,19 @@ export function useVideoThumbnails() {
         for (const time of times) {
           if (generationIdRef.current !== myGenId) break
 
-          await new Promise<void>((resolve) => {
-            const onSeeked = () => {
-              video.removeEventListener('seeked', onSeeked)
-              try {
-                ctx.drawImage(video, 0, 0, THUMB_WIDTH, THUMB_HEIGHT)
-                const imageData = ctx.getImageData(0, 0, THUMB_WIDTH, THUMB_HEIGHT)
-                const frameId = nextFrameIdRef.current++
-                void encodeFrame(frameId, imageData.data.buffer).then((dataUrl) => {
-                  if (generationIdRef.current === myGenId && dataUrl) {
-                    setThumbnails((prev) => [...prev, { time, dataUrl }])
-                  }
-                })
-              } catch {
-                // skip frame
+          try {
+            await seekToTime(video, time, 3000)
+            ctx.drawImage(video, 0, 0, THUMB_WIDTH, THUMB_HEIGHT)
+            const imageData = ctx.getImageData(0, 0, THUMB_WIDTH, THUMB_HEIGHT)
+            const frameId = nextFrameIdRef.current++
+            void encodeFrame(frameId, imageData.data.buffer).then((dataUrl) => {
+              if (generationIdRef.current === myGenId && dataUrl) {
+                setThumbnails((prev) => [...prev, { time, dataUrl }])
               }
-              resolve()
-            }
-            video.addEventListener('seeked', onSeeked)
-            video.currentTime = time
-            setTimeout(() => {
-              video.removeEventListener('seeked', onSeeked)
-              resolve()
-            }, 3000)
-          })
+            })
+          } catch {
+            // skip frame (seek timed out)
+          }
         }
       } finally {
         if (generationIdRef.current === myGenId) {

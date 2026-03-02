@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { Highlight, HighlightsFile } from '../types/highlights';
+import { downloadBlob } from '../utils/downloadBlob';
 
 function isHighlightsFile(value: unknown): value is HighlightsFile {
   if (typeof value !== 'object' || value === null) return false;
@@ -49,12 +50,7 @@ export function useHighlights() {
     (filename = 'highlights') => {
       const file: HighlightsFile = { version: 1, highlights };
       const blob = new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${filename}.highlights.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadBlob(blob, `${filename}.highlights.json`);
     },
     [highlights],
   );

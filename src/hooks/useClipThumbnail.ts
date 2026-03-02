@@ -1,7 +1,5 @@
 import { useCallback } from 'react';
-
-const THUMB_W = 80;
-const THUMB_H = 45;
+import { THUMB_WIDTH, THUMB_HEIGHT, THUMB_JPEG_QUALITY, seekToTime } from '../utils/thumbnails';
 
 /**
  * Returns an async function that seeks a video element to the given time
@@ -16,24 +14,15 @@ export function useClipThumbnail() {
     async (video: HTMLVideoElement, time: number): Promise<string | undefined> => {
       try {
         const canvas = document.createElement('canvas');
-        canvas.width = THUMB_W;
-        canvas.height = THUMB_H;
+        canvas.width = THUMB_WIDTH;
+        canvas.height = THUMB_HEIGHT;
         const ctx = canvas.getContext('2d');
         if (!ctx) return undefined;
 
-        await new Promise<void>((resolve, reject) => {
-          const timeout = setTimeout(() => reject(new Error('seek timeout')), 5000);
-          const onSeeked = () => {
-            clearTimeout(timeout);
-            video.removeEventListener('seeked', onSeeked);
-            resolve();
-          };
-          video.addEventListener('seeked', onSeeked);
-          video.currentTime = time;
-        });
+        await seekToTime(video, time);
 
-        ctx.drawImage(video, 0, 0, THUMB_W, THUMB_H);
-        return canvas.toDataURL('image/jpeg', 0.6);
+        ctx.drawImage(video, 0, 0, THUMB_WIDTH, THUMB_HEIGHT);
+        return canvas.toDataURL('image/jpeg', THUMB_JPEG_QUALITY);
       } catch {
         return undefined;
       }

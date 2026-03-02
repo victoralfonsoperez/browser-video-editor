@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { isInputFocused } from '../utils/isInputFocused';
 
 export interface Clip {
   id: string;
@@ -73,8 +74,7 @@ export function useTrimMarkers() {
   const bindKeyboard = useCallback(
     (currentTime: number) => {
       const handler = (e: KeyboardEvent) => {
-        const tag = (e.target as HTMLElement).tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (isInputFocused(e)) return;
         if (e.key === 'i' || e.key === 'I') setIn(currentTime);
         if (e.key === 'o' || e.key === 'O') setOut(currentTime);
       };

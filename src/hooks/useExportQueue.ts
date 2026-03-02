@@ -3,6 +3,7 @@ import type { Clip } from './useTrimMarkers';
 import type { UseFFmpegReturn } from './useFFmpeg';
 import type { ExportOptions } from '../types/exportOptions';
 import { DEFAULT_EXPORT_OPTIONS } from '../types/exportOptions';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 export type QueueItemStatus = 'pending' | 'processing' | 'done' | 'error';
 
@@ -163,8 +164,7 @@ export function useExportQueue(
     ffmpeg.exportClip(videoSource, clip, options)
       .then(() => dispatch({ type: 'PROCESS_DONE', queueId }))
       .catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : 'Export failed';
-        dispatch({ type: 'PROCESS_ERROR', queueId, error: message });
+        dispatch({ type: 'PROCESS_ERROR', queueId, error: getErrorMessage(err) });
       })
       .finally(() => dispatch({ type: 'PROCESS_FINISH' }));
   }, [queue, isStarted, isProcessing, videoSource, ffmpeg]);

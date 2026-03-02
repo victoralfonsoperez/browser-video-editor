@@ -1,6 +1,7 @@
 import { useState, useEffect, type SyntheticEvent, forwardRef, type RefObject, useCallback } from 'react';
 import { SharedStrings, VideoPlayerStrings, AppStrings } from '../../constants/ui';
 import { formatTime } from '../../utils/formatTime';
+import { isInputFocused } from '../../utils/isInputFocused';
 import { useToast } from '../../context/ToastContext';
 
 interface VideoMetadata {
@@ -54,8 +55,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (!ref.current) return;
-      const tag = (event.target as HTMLElement).tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (isInputFocused(event)) return;
       if (isModalOpen) return;
       switch (event.code) {
         case 'Space': event.preventDefault(); togglePlay(); break;

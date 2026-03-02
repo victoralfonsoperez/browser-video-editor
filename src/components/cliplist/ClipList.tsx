@@ -6,6 +6,7 @@ import type { UseFFmpegReturn } from '../../hooks/useFFmpeg';
 import type { ExportOptions } from '../../types/exportOptions';
 import { FORMAT_LABELS, QUALITY_LABELS, RESOLUTION_LABELS, isGif } from '../../types/exportOptions';
 import { ExportOptionsPanel } from '../exportoptions/ExportOptionsPanel';
+import { ProgressBar } from '../shared/ProgressBar';
 
 interface ClipListProps {
   clips: Clip[];
@@ -22,17 +23,6 @@ interface ClipListProps {
   onUpdateClip: (id: string, patch: Partial<Pick<Clip, 'name' | 'inPoint' | 'outPoint'>>) => void;
   onReorderClips: (fromIndex: number, toIndex: number) => void;
   onEnqueueClip: (clip: Clip, options: ExportOptions) => void;
-}
-
-function ProgressBar({ progress }: { progress: number }) {
-  return (
-    <div className="h-0.5 flex-1 rounded-full bg-[#2a2a2e] overflow-hidden">
-      <div
-        className="h-full rounded-full bg-[#c8f55a] transition-[width] duration-500 ease-out"
-        style={{ width: `${Math.round(Math.max(0, Math.min(1, progress)) * 100)}%` }}
-      />
-    </div>
-  );
 }
 
 /** Small inline badge showing format · quality */
@@ -293,7 +283,7 @@ function ClipRow({
                 <p className="text-[10px] text-[#888]">{ClipListStrings.loadingFfmpegFirst}</p>
               </div>
             ) : (
-              <ProgressBar progress={ffmpeg.progress} />
+              <ProgressBar progress={ffmpeg.progress} className="flex-1" />
             )}
           </div>
         )}

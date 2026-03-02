@@ -62,16 +62,16 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
       <span className="font-mono text-xs text-[#f59e0b] shrink-0">{formatTime(highlight.time)}</span>
       {isRange && (
         <>
-          <span className="text-[#555] text-xs shrink-0">→</span>
+          <span className="text-[#999] text-xs shrink-0">→</span>
           <span className="font-mono text-xs text-[#f59e0b]/70 shrink-0">{formatTime(highlight.endTime!)}</span>
-          <span className="font-mono text-xs text-[#777] shrink-0">({formatTime(highlight.endTime! - highlight.time)})</span>
+          <span className="font-mono text-xs text-[#999] shrink-0">({formatTime(highlight.endTime! - highlight.time)})</span>
         </>
       )}
 
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         <button
           onClick={onSeek}
-          className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
+          className="rounded px-1.5 py-0.5 text-xs text-[#aaa] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
           title={HighlightListStrings.titleSeek}
         >
           ▶
@@ -79,7 +79,7 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
         {isRange && (
           <button
             onClick={onLoadIntoTimeline}
-            className="rounded px-1.5 py-0.5 text-xs text-[#888] hover:text-[#f59e0b] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
+            className="rounded px-1.5 py-0.5 text-xs text-[#aaa] hover:text-[#f59e0b] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
             title={HighlightListStrings.titleLoadIntoTimeline}
           >
             ✎
@@ -87,7 +87,7 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
         )}
         <button
           onClick={onRemove}
-          className="rounded px-1.5 py-0.5 text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
+          className="rounded px-1.5 py-0.5 text-xs text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
           title={HighlightListStrings.titleRemove}
         >
           {SharedStrings.btnClose}
@@ -122,13 +122,13 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
       <div className="flex items-center justify-between">
         <button
           onClick={() => dispatchOpen(!isOpen)}
-          className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#888] hover:text-[#ccc] transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#aaa] hover:text-[#ccc] transition-colors cursor-pointer"
           title={isOpen ? HighlightListStrings.titleCollapse : HighlightListStrings.titleExpand}
         >
           <span className="text-[10px]">{isOpen ? '▼' : '▶'}</span>
           {HighlightListStrings.sectionHeading}
           {!isOpen && hasHighlights && (
-            <span className="text-[#555] normal-case tracking-normal">({highlights.length})</span>
+            <span className="text-[#999] normal-case tracking-normal">({highlights.length})</span>
           )}
         </button>
 
@@ -139,7 +139,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
               'rounded border px-2 py-0.5 text-[11px] transition-colors cursor-pointer',
               showOnTimeline
                 ? 'border-[#f59e0b]/60 bg-[#f59e0b]/10 text-[#f59e0b]'
-                : 'border-[#444] bg-[#2a2a2e] text-[#666] hover:bg-[#3a3a3e] hover:text-[#888]',
+                : 'border-[#444] bg-[#2a2a2e] text-[#999] hover:bg-[#3a3a3e] hover:text-[#aaa]',
             ].join(' ')}
             title={showOnTimeline ? HighlightListStrings.titleHideFromTimeline : HighlightListStrings.titleShowOnTimeline}
           >
@@ -147,7 +147,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
           </button>
 
           <label
-            className="rounded border border-[#444] bg-[#2a2a2e] px-2 py-0.5 text-[11px] text-[#888] hover:bg-[#3a3a3e] hover:text-[#ccc] transition-colors cursor-pointer"
+            className="rounded border border-[#444] bg-[#2a2a2e] px-2 py-0.5 text-[11px] text-[#aaa] hover:bg-[#3a3a3e] hover:text-[#ccc] transition-colors cursor-pointer"
             title={HighlightListStrings.titleLoad}
           >
             {HighlightListStrings.btnLoad}
@@ -166,7 +166,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
           <button
             onClick={onExport}
             disabled={highlights.length === 0}
-            className="rounded border border-[#444] bg-[#2a2a2e] px-2 py-0.5 text-[11px] text-[#888] hover:bg-[#3a3a3e] hover:text-[#ccc] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="rounded border border-[#444] bg-[#2a2a2e] px-2 py-0.5 text-[11px] text-[#aaa] hover:bg-[#3a3a3e] hover:text-[#ccc] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             title={HighlightListStrings.titleExport}
           >
             {HighlightListStrings.btnExport}
@@ -177,7 +177,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
       {isOpen && (
         <div className="mt-3">
           {highlights.length === 0 ? (
-            <div className="text-center text-xs text-[#444] py-4">{HighlightListStrings.emptyState}</div>
+            <div className="text-center text-xs text-[#999] py-4">{HighlightListStrings.emptyState}</div>
           ) : (
             <div className="flex flex-col gap-1.5">
               {highlights.map((h) => (

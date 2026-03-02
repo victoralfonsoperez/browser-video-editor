@@ -3,6 +3,7 @@ import { SharedStrings, ExportQueueStrings } from '../../constants/ui';
 import { formatTime } from '../../utils/formatTime';
 import type { QueueItem } from '../../hooks/useExportQueue';
 import { FORMAT_LABELS, QUALITY_LABELS } from '../../types/exportOptions';
+import { ProgressBar } from '../shared/ProgressBar';
 
 interface ExportQueueOverlayProps {
   queue: QueueItem[];
@@ -21,18 +22,7 @@ function StatusIcon({ status }: { status: QueueItem['status'] }) {
   if (status === 'processing') return <span className="animate-spin inline-block leading-none">⟳</span>;
   if (status === 'done') return <span className="text-[#c8f55a]">✓</span>;
   if (status === 'error') return <span className="text-[#f55a5a]">✕</span>;
-  return <span className="text-[#555]">–</span>;
-}
-
-function ProgressBar({ progress, className = '' }: { progress: number; className?: string }) {
-  return (
-    <div className={`h-0.5 w-full rounded-full bg-[#2a2a2e] overflow-hidden ${className}`}>
-      <div
-        className="h-full rounded-full bg-[#c8f55a] transition-[width] duration-500 ease-out"
-        style={{ width: `${Math.round(Math.max(0, Math.min(1, progress)) * 100)}%` }}
-      />
-    </div>
-  );
+  return <span className="text-[#999]">–</span>;
 }
 
 export function ExportQueueOverlay({
@@ -82,10 +72,10 @@ export function ExportQueueOverlay({
           {isRunning && (
             <span className="animate-spin inline-block text-[#c8f55a] text-xs tablet:text-sm leading-none">⟳</span>
           )}
-          <span className="text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#888] font-medium">
+          <span className="text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#aaa] font-medium">
             {ExportQueueStrings.heading}
           </span>
-          <span className="text-[9px] tablet:text-[10px] text-[#555] font-mono">
+          <span className="text-[9px] tablet:text-[10px] text-[#999] font-mono">
             {doneCount}/{totalCount}
           </span>
         </div>
@@ -115,7 +105,7 @@ export function ExportQueueOverlay({
           {doneCount > 0 && !isRunning && (
             <button
               onClick={onClear}
-              className="rounded px-1.5 py-0.5 text-[10px] text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
+              className="rounded px-1.5 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
               title={ExportQueueStrings.titleClear}
             >
               {SharedStrings.btnClear}
@@ -124,7 +114,7 @@ export function ExportQueueOverlay({
 
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="rounded px-1.5 py-0.5 text-[10px] text-[#555] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer w-5 text-center"
+            className="rounded px-1.5 py-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer w-5 text-center"
             title={collapsed ? ExportQueueStrings.titleExpand : ExportQueueStrings.titleCollapse}
           >
             {collapsed ? '▲' : '▼'}
@@ -151,11 +141,11 @@ export function ExportQueueOverlay({
                   <span className="text-[10px] tablet:text-xs w-3 tablet:w-4 text-center shrink-0">
                     <StatusIcon status={item.status} />
                   </span>
-                  <span className={`flex-1 text-[10px] tablet:text-[11px] truncate ${item.status === 'error' ? 'text-[#f55a5a]' : 'text-[#555]'}`}>
+                  <span className={`flex-1 text-[10px] tablet:text-[11px] truncate ${item.status === 'error' ? 'text-[#f55a5a]' : 'text-[#999]'}`}>
                     {item.clip.name}
                     {item.status === 'error' && item.error ? ` — ${item.error}` : ''}
                   </span>
-                  <span className="text-[8px] tablet:text-[9px] text-[#444] font-mono shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
+                  <span className="text-[8px] tablet:text-[9px] text-[#999] font-mono shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
                   {item.status === 'error' && (
                     <button
                       onClick={() => onRetry(item.queueId)}
@@ -204,24 +194,24 @@ export function ExportQueueOverlay({
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] tablet:text-xs text-[#ccc] truncate">{item.clip.name}</p>
                     {isPending && (
-                      <p className="text-[9px] tablet:text-[10px] text-[#555] hidden mobile-landscape:block">
+                      <p className="text-[9px] tablet:text-[10px] text-[#999] hidden mobile-landscape:block">
                         {formatTime(item.clip.inPoint)} → {formatTime(item.clip.outPoint)}
                       </p>
                     )}
                     {isProcessing && (
-                      <p className="text-[9px] tablet:text-[10px] text-[#888] font-mono">
+                      <p className="text-[9px] tablet:text-[10px] text-[#aaa] font-mono">
                         {Math.round(ffmpegProgress * 100)}%
                       </p>
                     )}
                   </div>
 
                   {/* Options badge */}
-                  <span className="text-[8px] tablet:text-[9px] text-[#555] font-mono shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
+                  <span className="text-[8px] tablet:text-[9px] text-[#999] font-mono shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
 
                   {isPending && (
                     <button
                       onClick={() => onRemove(item.queueId)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity rounded px-1 py-0.5 text-[10px] text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity rounded px-1 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
                       title={ExportQueueStrings.titleRemove}
                     >
                       {SharedStrings.btnClose}
@@ -242,8 +232,8 @@ export function ExportQueueOverlay({
       {isRunning && (
         <div className="px-2 tablet:px-3 py-2 border-t border-[#2a2a2e] bg-[#0e0e10]">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[9px] tablet:text-[10px] text-[#555]">{ExportQueueStrings.labelOverall}</span>
-            <span className="text-[9px] tablet:text-[10px] text-[#888] font-mono">
+            <span className="text-[9px] tablet:text-[10px] text-[#999]">{ExportQueueStrings.labelOverall}</span>
+            <span className="text-[9px] tablet:text-[10px] text-[#aaa] font-mono">
               {Math.round(overallProgress * 100)}%
             </span>
           </div>
@@ -253,7 +243,7 @@ export function ExportQueueOverlay({
 
       {/* Collapsed summary */}
       {collapsed && (
-        <div className="px-2 tablet:px-3 py-1.5 text-[9px] tablet:text-[10px] text-[#555]">
+        <div className="px-2 tablet:px-3 py-1.5 text-[9px] tablet:text-[10px] text-[#999]">
           {isRunning
             ? ExportQueueStrings.collapsedProgress(Math.round(overallProgress * 100), doneCount, totalCount)
             : pendingCount > 0

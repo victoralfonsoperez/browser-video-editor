@@ -1,43 +1,23 @@
 import { useState, useCallback, useRef } from 'react'
 import type { Clip } from './useTrimMarkers'
-
-const THUMB_W = 80
-const THUMB_H = 45
+import { THUMB_WIDTH, THUMB_HEIGHT, THUMB_JPEG_QUALITY, seekToTime } from '../utils/thumbnails'
 
 /** Captures a single JPEG frame at `time` from a video element. */
-function captureFrame(video: HTMLVideoElement, time: number): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const originalTime = video.currentTime
-    const canvas = document.createElement('canvas')
-    canvas.width = THUMB_W
-    canvas.height = THUMB_H
-    const ctx = canvas.getContext('2d')!
+async function captureFrame(video: HTMLVideoElement, time: number): Promise<string> {
+  const originalTime = video.currentTime
+  const canvas = document.createElement('canvas')
+  canvas.width = THUMB_WIDTH
+  canvas.height = THUMB_HEIGHT
+  const ctx = canvas.getContext('2d')!
 
-    const onSeeked = () => {
-      try {
-        ctx.drawImage(video, 0, 0, THUMB_W, THUMB_H)
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7)
-        resolve(dataUrl)
-      } catch (err) {
-        reject(err)
-      } finally {
-        video.removeEventListener('seeked', onSeeked)
-        video.removeEventListener('error', onError)
-        // Restore playhead so we don't visibly jump
-        video.currentTime = originalTime
-      }
-    }
-
-    const onError = () => {
-      video.removeEventListener('seeked', onSeeked)
-      video.removeEventListener('error', onError)
-      reject(new Error('Video seek error while generating thumbnail'))
-    }
-
-    video.addEventListener('seeked', onSeeked)
-    video.addEventListener('error', onError)
-    video.currentTime = time
-  })
+  try {
+    await seekToTime(video, time)
+    ctx.drawImage(video, 0, 0, THUMB_WIDTH, THUMB_HEIGHT)
+    return canvas.toDataURL('image/jpeg', THUMB_JPEG_QUALITY)
+  } finally {
+    // Restore playhead so we don't visibly jump
+    video.currentTime = originalTime
+  }
 }
 
 /**

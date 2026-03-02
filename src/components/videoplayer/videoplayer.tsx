@@ -1,6 +1,7 @@
 import { useState, useEffect, type SyntheticEvent, forwardRef, type RefObject, useCallback } from 'react';
 import { SharedStrings, VideoPlayerStrings, AppStrings } from '../../constants/ui';
 import { formatTime } from '../../utils/formatTime';
+import { isInputFocused } from '../../utils/isInputFocused';
 import { useToast } from '../../context/ToastContext';
 
 interface VideoMetadata {
@@ -54,8 +55,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (!ref.current) return;
-      const tag = (event.target as HTMLElement).tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (isInputFocused(event)) return;
       if (isModalOpen) return;
       switch (event.code) {
         case 'Space': event.preventDefault(); togglePlay(); break;
@@ -182,8 +182,8 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
       </div>
 
       {/* Keyboard shortcuts hint */}
-      <div className="mt-1.5 rounded bg-[#1a1a1e] px-2 tablet:px-3 py-1.5 text-[10px] tablet:text-xs text-[#666] hidden mobile-landscape:block">
-        <strong className="text-[#555]">Shortcuts:</strong> {VideoPlayerStrings.shortcutsHint}
+      <div className="mt-1.5 rounded bg-[#1a1a1e] px-2 tablet:px-3 py-1.5 text-[10px] tablet:text-xs text-[#999] hidden mobile-landscape:block">
+        <strong className="text-[#999]">Shortcuts:</strong> {VideoPlayerStrings.shortcutsHint}
       </div>
     </div>
   );

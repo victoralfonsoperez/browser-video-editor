@@ -19,6 +19,7 @@ import { ExportOptionsPanel } from './components/exportoptions/ExportOptionsPane
 import { ToastContainer } from './components/toasts/ToastContainer';
 import { useToast } from './context/ToastContext';
 import { FORMAT_LABELS, QUALITY_LABELS } from './types/exportOptions';
+import { getErrorMessage } from './utils/getErrorMessage';
 import type { Clip } from './hooks/useTrimMarkers';
 import type { Highlight } from './types/highlights';
 
@@ -112,7 +113,7 @@ function App() {
       showToast(HighlightListStrings.toastLoadSuccess, 'success');
     } catch (err) {
       showToast(
-        HighlightListStrings.toastLoadError(err instanceof Error ? err.message : String(err)),
+        HighlightListStrings.toastLoadError(getErrorMessage(err, String(err))),
         'error',
       );
     }
@@ -169,23 +170,23 @@ function App() {
                 title={AppStrings.titleGlobalSettings}
               >
                 <span>⚙</span>
-                <span className="text-xs font-mono text-[#888] hidden mobile-landscape:inline">
+                <span className="text-xs font-mono text-[#aaa] hidden mobile-landscape:inline">
                   {FORMAT_LABELS[globalOptions.format]} · {QUALITY_LABELS[globalOptions.quality]}
                 </span>
               </button>
 
               {showGlobalSettings && (
                 <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl">
-                  <p className="mb-3 text-[10px] uppercase tracking-wider text-[#888]">
+                  <p className="mb-3 text-[10px] uppercase tracking-wider text-[#aaa]">
                     {AppStrings.headingDefaultSettings}
                   </p>
                   <ExportOptionsPanel options={globalOptions} onChange={setGlobalOptions} />
-                  <p className="mt-2 text-[10px] text-[#555]">
+                  <p className="mt-2 text-[10px] text-[#999]">
                     {AppStrings.helpDefaultSettings}
                   </p>
 
                   <div className="mt-3 border-t border-[#333] pt-3">
-                    <p className="mb-2 text-[10px] uppercase tracking-wider text-[#888]">
+                    <p className="mb-2 text-[10px] uppercase tracking-wider text-[#aaa]">
                       {AppStrings.headingPreferences}
                     </p>
                     <label className="flex items-center gap-2 cursor-pointer text-xs text-[#ccc]">
@@ -205,7 +206,7 @@ function App() {
             {isVideoLoaded && (
               <button
                 onClick={startTour}
-                className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm text-[#888] hover:text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+                className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm text-[#aaa] hover:text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
                 aria-label="Replay onboarding tour"
                 title="Tour"
               >
@@ -226,7 +227,7 @@ function App() {
         </div>
 
         {!isVideoLoaded ? (
-          <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-[#333] bg-[#1a1a1e] py-20 text-[#555]">
+          <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-[#333] bg-[#1a1a1e] py-20 text-[#999]">
             {/* Source tabs */}
             <div className="flex rounded border border-[#333] overflow-hidden">
               <button
@@ -235,7 +236,7 @@ function App() {
                   'px-4 py-1.5 text-sm transition-colors cursor-pointer',
                   activeTab === 'file'
                     ? 'bg-[#c8f55a] text-[#111] font-bold'
-                    : 'bg-[#1a1a1e] text-[#888] hover:text-[#ccc]',
+                    : 'bg-[#1a1a1e] text-[#aaa] hover:text-[#ccc]',
                 ].join(' ')}
               >
                 {AppStrings.tabLocalFile}
@@ -246,7 +247,7 @@ function App() {
                   'px-4 py-1.5 text-sm transition-colors cursor-pointer',
                   activeTab === 'drive'
                     ? 'bg-[#c8f55a] text-[#111] font-bold'
-                    : 'bg-[#1a1a1e] text-[#888] hover:text-[#ccc]',
+                    : 'bg-[#1a1a1e] text-[#aaa] hover:text-[#ccc]',
                 ].join(' ')}
               >
                 {AppStrings.tabGoogleDrive}

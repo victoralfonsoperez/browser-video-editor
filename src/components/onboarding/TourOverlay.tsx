@@ -138,7 +138,7 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
         onClick={(e) => e.stopPropagation()}
       >
         {/* Step counter */}
-        <div className="mb-2 text-[10px] uppercase tracking-wider text-[#555]">
+        <div className="mb-2 text-[10px] uppercase tracking-wider text-[#999]">
           {step + 1} / {totalSteps}
         </div>
 
@@ -146,7 +146,7 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
         <p className="mb-1.5 text-sm font-semibold text-[#e0e0e0]">{stepData.title}</p>
 
         {/* Body */}
-        <p className="mb-4 text-xs leading-relaxed text-[#888]">{stepData.body}</p>
+        <p className="mb-4 text-xs leading-relaxed text-[#aaa]">{stepData.body}</p>
 
         {/* Progress dots */}
         <div className="mb-4 flex items-center gap-1.5">
@@ -165,7 +165,7 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={onClose}
-            className="text-xs text-[#555] hover:text-[#888] transition-colors cursor-pointer"
+            className="text-xs text-[#999] hover:text-[#aaa] transition-colors cursor-pointer"
           >
             Skip
           </button>
@@ -174,7 +174,7 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
             {!isFirst && (
               <button
                 onClick={onPrev}
-                className="rounded border border-[#333] bg-[#111] px-3 py-1.5 text-xs text-[#888] hover:text-[#ccc] transition-colors cursor-pointer"
+                className="rounded border border-[#333] bg-[#111] px-3 py-1.5 text-xs text-[#aaa] hover:text-[#ccc] transition-colors cursor-pointer"
               >
                 Back
               </button>

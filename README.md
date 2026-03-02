@@ -41,6 +41,13 @@ All processing happens directly in the browser. No data is ever sent to a server
 - [ ] Audio waveform visualization
 - [ ] Cross-browser testing and public deployment (Phase 6)
 - [ ] Transitions, text overlays, and video filters (future)
+- [ ] Keyboard-navigable timeline scrubbing (arrow keys)
+- [ ] Keyboard-accessible trim marker adjustment
+- [ ] Keyboard alternative for clip/queue drag-to-reorder
+- [ ] Focus-visible indicators on all interactive elements
+- [ ] ARIA attributes (`aria-expanded`, `aria-pressed`, `aria-label` on icon buttons)
+- [ ] Make hover-only action buttons accessible to keyboard users
+- [ ] Focus trap for modal dialogs
 
 ## 🛠️ Tech Stack
 

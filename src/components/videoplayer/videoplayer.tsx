@@ -182,8 +182,8 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
       </div>
 
       {/* Keyboard shortcuts hint */}
-      <div className="mt-1.5 rounded bg-[#1a1a1e] px-2 tablet:px-3 py-1.5 text-[10px] tablet:text-xs text-[#666] hidden mobile-landscape:block">
-        <strong className="text-[#555]">Shortcuts:</strong> {VideoPlayerStrings.shortcutsHint}
+      <div className="mt-1.5 rounded bg-[#1a1a1e] px-2 tablet:px-3 py-1.5 text-[10px] tablet:text-xs text-[#999] hidden mobile-landscape:block">
+        <strong className="text-[#999]">Shortcuts:</strong> {VideoPlayerStrings.shortcutsHint}
       </div>
     </div>
   );

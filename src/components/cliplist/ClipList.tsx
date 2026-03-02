@@ -28,7 +28,7 @@ interface ClipListProps {
 /** Small inline badge showing format · quality */
 function OptionsBadge({ options }: { options: ExportOptions }) {
   return (
-    <span className="font-mono text-[9px] text-[#555] shrink-0">
+    <span className="font-mono text-[9px] text-[#999] shrink-0">
       {FORMAT_LABELS[options.format]} · {QUALITY_LABELS[options.quality]}
       {options.resolution !== 'original' ? ` · ${RESOLUTION_LABELS[options.resolution]}` : ''}
     </span>
@@ -41,13 +41,13 @@ function GifWarningDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCa
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="w-72 rounded-lg border border-[#333] bg-[#1a1a1e] p-4 shadow-xl">
         <p className="mb-1 text-sm font-semibold text-[#ccc]">{ClipListStrings.gifWarningHeading}</p>
-        <p className="mb-4 text-xs text-[#888]">
+        <p className="mb-4 text-xs text-[#aaa]">
           {ClipListStrings.gifWarningBody}
         </p>
         <div className="flex justify-end gap-2">
           <button
             onClick={onCancel}
-            className="rounded border border-[#333] bg-[#111] px-3 py-1.5 text-xs text-[#888] hover:text-[#ccc] transition-colors cursor-pointer"
+            className="rounded border border-[#333] bg-[#111] px-3 py-1.5 text-xs text-[#aaa] hover:text-[#ccc] transition-colors cursor-pointer"
           >
             {SharedStrings.btnCancel}
           </button>
@@ -172,8 +172,8 @@ function ClipRow({
         )}
 
         <div className="flex items-center gap-1.5 tablet:gap-2">
-          <span className="cursor-grab text-[#444] hover:text-[#888] transition-colors text-sm tablet:text-base leading-none active:cursor-grabbing shrink-0 hidden tablet:inline" title={ClipListStrings.titleDragToReorder}>⠿</span>
-          <span className="text-[9px] tablet:text-[10px] text-[#555] font-mono w-3 tablet:w-4 shrink-0">{index + 1}</span>
+          <span className="cursor-grab text-[#999] hover:text-[#aaa] transition-colors text-sm tablet:text-base leading-none active:cursor-grabbing shrink-0 hidden tablet:inline" title={ClipListStrings.titleDragToReorder}>⠿</span>
+          <span className="text-[9px] tablet:text-[10px] text-[#999] font-mono w-3 tablet:w-4 shrink-0">{index + 1}</span>
 
           <div
             className="shrink-0 w-[48px] tablet:w-[56px] h-[28px] tablet:h-[32px] rounded overflow-hidden bg-[#222] border border-[#333] cursor-pointer hover:border-[#c8f55a]/60 transition-colors"
@@ -183,7 +183,7 @@ function ClipRow({
             {clip.thumbnailDataUrl ? (
               <img src={clip.thumbnailDataUrl} alt={ClipListStrings.clipThumbnailAlt(clip.name)} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-[#444] text-[10px]">▶</div>
+              <div className="w-full h-full flex items-center justify-center text-[#999] text-[10px]">▶</div>
             )}
           </div>
 
@@ -208,14 +208,14 @@ function ClipRow({
           </div>
 
           <span className="font-mono text-[10px] tablet:text-xs text-[#c8f55a] shrink-0 hidden mobile-landscape:inline">{formatTime(clip.inPoint)}</span>
-          <span className="text-[#555] text-xs shrink-0 hidden mobile-landscape:inline">→</span>
+          <span className="text-[#999] text-xs shrink-0 hidden mobile-landscape:inline">→</span>
           <span className="font-mono text-[10px] tablet:text-xs text-[#f55a5a] shrink-0 hidden mobile-landscape:inline">{formatTime(clip.outPoint)}</span>
-          <span className="font-mono text-[10px] tablet:text-xs text-[#777] shrink-0">{formatTime(clipDuration)}</span>
+          <span className="font-mono text-[10px] tablet:text-xs text-[#999] shrink-0">{formatTime(clipDuration)}</span>
 
           <div className="flex items-center gap-0.5 tablet:gap-1 opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 transition-opacity shrink-0">
-            <button onClick={onPreview} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden tablet:inline-block" title={ClipListStrings.titlePreviewClip}>⬛▶</button>
-            <button onClick={onSeek} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#888] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-block" title={ClipListStrings.titleSeekToInPoint}>▶</button>
-            <button onClick={onEditPoints} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-block" title={ClipListStrings.titleEditPoints}>✎</button>
+            <button onClick={onPreview} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden tablet:inline-block" title={ClipListStrings.titlePreviewClip}>⬛▶</button>
+            <button onClick={onSeek} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-block" title={ClipListStrings.titleSeekToInPoint}>▶</button>
+            <button onClick={onEditPoints} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-block" title={ClipListStrings.titleEditPoints}>✎</button>
 
             {/* ⚙ per-clip settings */}
             <div className="relative hidden tablet:block" ref={settingsRef}>
@@ -223,7 +223,7 @@ function ClipRow({
                 onClick={() => setShowSettings((s) => !s)}
                 className={[
                   'rounded px-1.5 py-0.5 text-xs hover:bg-[#2a2a2e] transition-colors cursor-pointer',
-                  showSettings ? 'text-[#c8f55a]' : 'text-[#888] hover:text-[#c8f55a]',
+                  showSettings ? 'text-[#c8f55a]' : 'text-[#aaa] hover:text-[#c8f55a]',
                 ].join(' ')}
                 title={ClipListStrings.titlePerClipSettings}
               >
@@ -233,10 +233,10 @@ function ClipRow({
               {showSettings && (
                 <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl">
                   <div className="mb-2 flex items-center justify-between">
-                    <p className="text-[10px] uppercase tracking-wider text-[#888]">{ClipListStrings.headingClipSettings}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-[#aaa]">{ClipListStrings.headingClipSettings}</p>
                     <button
                       onClick={() => setClipOptions(globalOptions)}
-                      className="text-[10px] text-[#555] hover:text-[#c8f55a] transition-colors cursor-pointer"
+                      className="text-[10px] text-[#999] hover:text-[#c8f55a] transition-colors cursor-pointer"
                       title={ClipListStrings.titleReset}
                     >
                       {ClipListStrings.btnReset}
@@ -250,7 +250,7 @@ function ClipRow({
             <button
               onClick={handleExportClick}
               disabled={!canExport}
-              className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#888] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={ClipListStrings.titleExportInstant}
             >
               {isThisExporting
@@ -262,12 +262,12 @@ function ClipRow({
             <button
               onClick={handleEnqueueClick}
               disabled={!videoSource}
-              className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs font-bold text-[#888] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs font-bold text-[#aaa] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={ClipListStrings.titleAddToQueue}
             >
               +
             </button>
-            <button onClick={onRemove} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#555] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
+            <button onClick={onRemove} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
           </div>
 
           {/* Always-visible options badge */}
@@ -280,7 +280,7 @@ function ClipRow({
             {ffmpeg.status === 'loading' ? (
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 border border-[#888] border-t-transparent rounded-full animate-spin shrink-0" role="status" aria-label="Loading FFmpeg" />
-                <p className="text-[10px] text-[#888]">{ClipListStrings.loadingFfmpegFirst}</p>
+                <p className="text-[10px] text-[#aaa]">{ClipListStrings.loadingFfmpegFirst}</p>
               </div>
             ) : (
               <ProgressBar progress={ffmpeg.progress} className="flex-1" />
@@ -361,24 +361,24 @@ export function ClipList({
       )}
 
       <div className="w-full max-w-4xl mx-auto mt-3 tablet:mt-4 rounded-md border border-[#333] bg-[#1a1a1e] p-2 tablet:p-3" data-tour="clip-list">
-        <div className="text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#888] mb-2 tablet:mb-3">{ClipListStrings.sectionHeading}</div>
+        <div className="text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#aaa] mb-2 tablet:mb-3">{ClipListStrings.sectionHeading}</div>
 
         <div className="flex gap-2 tablet:gap-3 mb-3">
           <div className="flex-1 rounded border border-[#333] bg-[#111] px-2 tablet:px-3 py-1.5 tablet:py-2">
-            <div className="text-[9px] tablet:text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelInPoint}</div>
-            <div className={`font-mono text-xs tablet:text-sm ${inPoint !== null ? 'text-[#c8f55a]' : 'text-[#444]'}`}>
+            <div className="text-[9px] tablet:text-[10px] uppercase text-[#999] mb-0.5">{ClipListStrings.labelInPoint}</div>
+            <div className={`font-mono text-xs tablet:text-sm ${inPoint !== null ? 'text-[#c8f55a]' : 'text-[#999]'}`}>
               {inPoint !== null ? formatTime(inPoint) : '—'}
             </div>
           </div>
           <div className="flex-1 rounded border border-[#333] bg-[#111] px-2 tablet:px-3 py-1.5 tablet:py-2">
-            <div className="text-[9px] tablet:text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelOutPoint}</div>
-            <div className={`font-mono text-xs tablet:text-sm ${outPoint !== null ? 'text-[#f55a5a]' : 'text-[#444]'}`}>
+            <div className="text-[9px] tablet:text-[10px] uppercase text-[#999] mb-0.5">{ClipListStrings.labelOutPoint}</div>
+            <div className={`font-mono text-xs tablet:text-sm ${outPoint !== null ? 'text-[#f55a5a]' : 'text-[#999]'}`}>
               {outPoint !== null ? formatTime(outPoint) : '—'}
             </div>
           </div>
           <div className="flex-1 rounded border border-[#333] bg-[#111] px-2 tablet:px-3 py-1.5 tablet:py-2">
-            <div className="text-[9px] tablet:text-[10px] uppercase text-[#555] mb-0.5">{ClipListStrings.labelDuration}</div>
-            <div className={`font-mono text-xs tablet:text-sm ${duration !== null ? 'text-[#ccc]' : 'text-[#444]'}`}>
+            <div className="text-[9px] tablet:text-[10px] uppercase text-[#999] mb-0.5">{ClipListStrings.labelDuration}</div>
+            <div className={`font-mono text-xs tablet:text-sm ${duration !== null ? 'text-[#ccc]' : 'text-[#999]'}`}>
               {duration !== null ? formatTime(duration) : '—'}
             </div>
           </div>
@@ -404,7 +404,7 @@ export function ClipList({
         </div>
 
         {clips.length === 0 ? (
-          <div className="text-center text-xs text-[#444] py-4">
+          <div className="text-center text-xs text-[#999] py-4">
             {ClipListStrings.emptyState}
           </div>
         ) : (
@@ -464,7 +464,7 @@ export function ClipList({
             {isExportingAll && ffmpeg.status === 'loading' && (
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 border border-[#888] border-t-transparent rounded-full animate-spin shrink-0" role="status" aria-label="Loading FFmpeg" />
-                <p className="text-[10px] text-[#888]">{ClipListStrings.loadingFfmpegFirst}</p>
+                <p className="text-[10px] text-[#aaa]">{ClipListStrings.loadingFfmpegFirst}</p>
               </div>
             )}
 
@@ -474,15 +474,15 @@ export function ClipList({
           </div>
         )}
 
-        <p className="mt-3 text-[9px] tablet:text-[10px] text-[#444] hidden mobile-landscape:block">
+        <p className="mt-3 text-[9px] tablet:text-[10px] text-[#999] hidden mobile-landscape:block">
           {ClipListStrings.keyboardHintHeading}{' '}
-          <kbd className="rounded bg-[#222] px-1 py-px text-[#666]">I</kbd> set in ·{' '}
-          <kbd className="rounded bg-[#222] px-1 py-px text-[#666]">O</kbd> set out · drag{' '}
-          <span className="text-[#666]">⠿</span> to reorder · click name to rename ·{' '}
-          <span className="text-[#666]">✎</span> loads clip back into timeline ·{' '}
-          <span className="text-[#666]">⚙</span> per-clip export settings ·{' '}
-          <span className="text-[#666]">⬇</span> instant export ·{' '}
-          <span className="text-[#666]">+</span> add to queue
+          <kbd className="rounded bg-[#222] px-1 py-px text-[#999]">I</kbd> set in ·{' '}
+          <kbd className="rounded bg-[#222] px-1 py-px text-[#999]">O</kbd> set out · drag{' '}
+          <span className="text-[#999]">⠿</span> to reorder · click name to rename ·{' '}
+          <span className="text-[#999]">✎</span> loads clip back into timeline ·{' '}
+          <span className="text-[#999]">⚙</span> per-clip export settings ·{' '}
+          <span className="text-[#999]">⬇</span> instant export ·{' '}
+          <span className="text-[#999]">+</span> add to queue
         </p>
       </div>
     </>

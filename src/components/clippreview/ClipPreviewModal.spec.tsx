@@ -63,7 +63,7 @@ describe('ClipPreviewModal — rendering', () => {
     // inPoint 10, outPoint 30 → duration 0:20, shown as "(0:20)" in header
     render(<ClipPreviewModal {...baseProps} />);
     // Target specifically the span that wraps the parenthesised duration
-    const durationSpan = document.querySelector('.ml-2.text-\\[\\#444\\]');
+    const durationSpan = document.querySelector('.ml-2.text-\\[\\#999\\]');
     expect(durationSpan?.textContent).toMatch(/0:20/);
   });
 

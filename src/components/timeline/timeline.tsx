@@ -122,7 +122,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
       <div className="rounded-md border border-[#333] bg-[#1a1a1e] pb-1">
 
         {/* Header */}
-        <div className="flex justify-between items-center px-2 tablet:px-3 py-1.5 text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#888]">
+        <div className="flex justify-between items-center px-2 tablet:px-3 py-1.5 text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#aaa]">
           {isGenerating ? (
             <span className="flex items-center gap-1.5 text-[#c8f55a]">
               <span className="inline-block w-2.5 h-2.5 border-2 border-[#c8f55a44] border-t-[#c8f55a] rounded-full animate-spin" />
@@ -167,7 +167,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               />
             ))}
             {thumbnails.length === 0 && !isGenerating && (
-              <div className="flex w-full items-center justify-center bg-[#111] text-xs text-[#444]">
+              <div className="flex w-full items-center justify-center bg-[#111] text-xs text-[#999]">
                 {TimelineStrings.emptyState}
               </div>
             )}
@@ -280,7 +280,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
             {thumbnails.map((thumb) => (
               <span
                 key={thumb.time}
-                className="absolute -translate-x-1/2 text-[9px] text-[#555] whitespace-nowrap"
+                className="absolute -translate-x-1/2 text-[9px] text-[#999] whitespace-nowrap"
                 style={{ left: `${(thumb.time / duration) * 100}%` }}
               >
                 {formatTime(thumb.time)}
@@ -331,13 +331,13 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           {(trim.inPoint !== null || trim.outPoint !== null) && (
             <button
               onClick={trim.clearMarkers}
-              className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#888] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+              className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#aaa] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
             >
               {SharedStrings.btnClear}
             </button>
           )}
         </div>
-        <div className="flex gap-4 font-mono text-xs tablet:text-sm text-[#666] justify-end">
+        <div className="flex gap-4 font-mono text-xs tablet:text-sm text-[#999] justify-end">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>

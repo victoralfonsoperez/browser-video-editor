@@ -100,15 +100,15 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
             )}
             <div>
               <div className="text-sm font-medium text-[#ccc]">{clip.name}</div>
-              <div className="text-[10px] font-mono text-[#555]">
+              <div className="text-[10px] font-mono text-[#999]">
                 {formatTime(clip.inPoint)} → {formatTime(clip.outPoint)}
-                <span className="ml-2 text-[#444]">({formatTime(clipDuration)})</span>
+                <span className="ml-2 text-[#999]">({formatTime(clipDuration)})</span>
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-[#555] hover:text-[#ccc] transition-colors text-lg leading-none cursor-pointer"
+            className="text-[#999] hover:text-[#ccc] transition-colors text-lg leading-none cursor-pointer"
             title={ClipPreviewStrings.titleClose}
           >
             {SharedStrings.btnClose}
@@ -144,12 +144,12 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
             {isPlaying ? SharedStrings.btnPause : SharedStrings.btnPlay}
           </button>
 
-          <span className="font-mono text-xs text-[#666]">
+          <span className="font-mono text-xs text-[#999]">
             {formatTime(currentTime - clip.inPoint)} / {formatTime(clipDuration)}
           </span>
 
           <div className="ml-auto flex items-center gap-2">
-            <label className="flex items-center gap-1.5 text-xs text-[#666] cursor-pointer select-none">
+            <label className="flex items-center gap-1.5 text-xs text-[#999] cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={loop}
@@ -162,9 +162,9 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
         </div>
 
         {/* Keyboard hint */}
-        <div className="px-4 pb-3 text-[10px] text-[#444]">
-          <kbd className="rounded bg-[#222] px-1 py-px text-[#555]">{ClipPreviewStrings.keySpace}</kbd> {ClipPreviewStrings.hintPlayPause}{' '}
-          <kbd className="rounded bg-[#222] px-1 py-px text-[#555]">{ClipPreviewStrings.keyEsc}</kbd> {ClipPreviewStrings.hintClose}
+        <div className="px-4 pb-3 text-[10px] text-[#999]">
+          <kbd className="rounded bg-[#222] px-1 py-px text-[#999]">{ClipPreviewStrings.keySpace}</kbd> {ClipPreviewStrings.hintPlayPause}{' '}
+          <kbd className="rounded bg-[#222] px-1 py-px text-[#999]">{ClipPreviewStrings.keyEsc}</kbd> {ClipPreviewStrings.hintClose}
         </div>
       </div>
     </div>

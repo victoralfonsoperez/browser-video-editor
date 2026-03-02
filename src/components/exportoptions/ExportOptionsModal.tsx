@@ -37,7 +37,7 @@ function OptionButton<T extends string>({
         'rounded border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
         selected
           ? 'border-[#c8f55a]/70 bg-[#c8f55a]/10 text-[#c8f55a]'
-          : 'border-[#333] bg-[#111] text-[#777] hover:border-[#555] hover:text-[#aaa]',
+          : 'border-[#333] bg-[#111] text-[#999] hover:border-[#555] hover:text-[#aaa]',
       ].join(' ')}
     >
       {label}
@@ -77,12 +77,12 @@ export function ExportOptionsModal({
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2e] bg-[#1a1a1e]">
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-[#888]">{ExportOptionsStrings.modalHeading}</p>
+            <p className="text-[11px] uppercase tracking-wider text-[#aaa]">{ExportOptionsStrings.modalHeading}</p>
             <p className="text-sm font-medium text-[#ccc] mt-0.5 truncate max-w-[200px]" title={clip.name}>
               {clip.name}
             </p>
           </div>
-          <span className="text-xs text-[#555] font-mono">
+          <span className="text-xs text-[#999] font-mono">
             {formatTime(clip.inPoint)} → {formatTime(clip.outPoint)}
           </span>
         </div>
@@ -91,7 +91,7 @@ export function ExportOptionsModal({
 
           {/* Format */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#666] mb-2">{ExportOptionsStrings.labelFormat}</p>
+            <p className="text-[10px] uppercase tracking-wider text-[#999] mb-2">{ExportOptionsStrings.labelFormat}</p>
             <div className="flex flex-wrap gap-2">
               {FORMATS.map((f) => (
                 <OptionButton key={f} value={f} selected={options.format === f} label={FORMAT_LABELS[f]} onClick={(v) => set('format', v)} />
@@ -115,20 +115,20 @@ export function ExportOptionsModal({
                 </button>
               )}
               {gifWarningAcknowledged && (
-                <p className="mt-1.5 text-[10px] text-[#888]">{ExportOptionsStrings.gifAcknowledged}</p>
+                <p className="mt-1.5 text-[10px] text-[#aaa]">{ExportOptionsStrings.gifAcknowledged}</p>
               )}
             </div>
           )}
 
           {/* Quality */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#666] mb-2">{ExportOptionsStrings.labelQuality}</p>
+            <p className="text-[10px] uppercase tracking-wider text-[#999] mb-2">{ExportOptionsStrings.labelQuality}</p>
             <div className="flex gap-2">
               {QUALITIES.map((q) => (
                 <OptionButton key={q} value={q} selected={options.quality === q} label={QUALITY_LABELS[q]} onClick={(v) => set('quality', v)} />
               ))}
             </div>
-            <p className="mt-1.5 text-[10px] text-[#555]">
+            <p className="mt-1.5 text-[10px] text-[#999]">
               {options.quality === 'high' && ExportOptionsStrings.qualityHighDesc}
               {options.quality === 'medium' && ExportOptionsStrings.qualityMediumDesc}
               {options.quality === 'low' && ExportOptionsStrings.qualityLowDesc}
@@ -137,14 +137,14 @@ export function ExportOptionsModal({
 
           {/* Resolution */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#666] mb-2">{ExportOptionsStrings.labelResolution}</p>
+            <p className="text-[10px] uppercase tracking-wider text-[#999] mb-2">{ExportOptionsStrings.labelResolution}</p>
             <div className="flex flex-wrap gap-2">
               {RESOLUTIONS.map((r) => (
                 <OptionButton key={r} value={r} selected={options.resolution === r} label={RESOLUTION_LABELS[r]} onClick={(v) => set('resolution', v)} />
               ))}
             </div>
             {options.resolution !== 'original' && (
-              <p className="mt-1.5 text-[10px] text-[#555]">
+              <p className="mt-1.5 text-[10px] text-[#999]">
                 {ExportOptionsStrings.resolutionScaleNote}
               </p>
             )}
@@ -155,7 +155,7 @@ export function ExportOptionsModal({
         <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#2a2a2e] bg-[#1a1a1e]">
           <button
             onClick={onCancel}
-            className="rounded border border-[#333] bg-[#2a2a2e] px-4 py-1.5 text-sm text-[#888] hover:text-[#ccc] hover:border-[#555] transition-colors cursor-pointer"
+            className="rounded border border-[#333] bg-[#2a2a2e] px-4 py-1.5 text-sm text-[#aaa] hover:text-[#ccc] hover:border-[#555] transition-colors cursor-pointer"
           >
             {SharedStrings.btnCancel}
           </button>

@@ -138,6 +138,15 @@ function getMimeType(format: ExportOptions['format']): string {
   return 'video/mp4';
 }
 
+function classifyExportError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes('no such file') || lower.includes('does not exist'))
+    return 'Failed to read video data — the file may be corrupted.';
+  if (lower.includes('invalid data') || lower.includes('codec not found') || lower.includes('decoder'))
+    return 'Video codec not supported for export.';
+  return message;
+}
+
 // ─── hook ────────────────────────────────────────────────────────────────────
 
 export function useFFmpeg(): UseFFmpegReturn {
@@ -221,7 +230,8 @@ export function useFFmpeg(): UseFFmpegReturn {
       setProgress(1);
       scheduleReset();
     } catch (err) {
-      setError(getErrorMessage(err));
+      const msg = getErrorMessage(err);
+      setError(classifyExportError(msg));
       setStatus('error');
     } finally {
       setExportingClipId(null);
@@ -301,7 +311,8 @@ export function useFFmpeg(): UseFFmpegReturn {
       setProgress(1);
       scheduleReset();
     } catch (err) {
-      setError(getErrorMessage(err));
+      const msg = getErrorMessage(err);
+      setError(classifyExportError(msg));
       setStatus('error');
     } finally {
       setExportingClipId(null);

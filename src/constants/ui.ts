@@ -54,8 +54,13 @@ export const VideoPlayerStrings = {
   titleMute: 'Mute',
   titleUnmute: 'Unmute',
   shortcutsHint: 'Space/K = Play/Pause | ←/→ = ±5s | J/L = ±10s | ,/. = Frame | Home/End | M = Mute',
-  errorVideoLoad: 'Video failed to load — the format or codec may not be supported by your browser.',
+  errorVideoAborted: 'Video loading was aborted.',
   errorVideoNetwork: 'Network error — could not fetch the video. Check the URL or try again.',
+  errorVideoDecode: 'Video is corrupted or uses an unsupported codec.',
+  errorVideoUnsupported: 'Video failed to load — the format or codec may not be supported by your browser.',
+  errorVideoUnknown: 'An unknown error occurred while loading the video.',
+  errorVideoNoDuration: 'Video has no playable content.',
+  errorVideoAudioOnly: 'File appears to be audio-only.',
   loadingVideo: 'Loading...',
 } as const;
 

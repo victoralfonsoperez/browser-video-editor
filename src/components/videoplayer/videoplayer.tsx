@@ -10,7 +10,14 @@ interface VideoMetadata {
   height: number;
 }
 
-const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined, videoFile: File | null, handleTimeUpdate: () => void, handleLoadMetadata: (value: number) => void, currentTime: number, isModalOpen: boolean }>(({ videoURL, videoFile, currentTime, handleTimeUpdate, handleLoadMetadata, isModalOpen }, forwardedRef) => {
+const MEDIA_ERROR_MESSAGES: Record<number, string> = {
+  1: VideoPlayerStrings.errorVideoAborted,
+  2: VideoPlayerStrings.errorVideoNetwork,
+  3: VideoPlayerStrings.errorVideoDecode,
+  4: VideoPlayerStrings.errorVideoUnsupported,
+};
+
+const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined, videoFile: File | null, handleTimeUpdate: () => void, handleLoadMetadata: (value: number) => void, currentTime: number, isModalOpen: boolean, onVideoError?: () => void }>(({ videoURL, videoFile, currentTime, handleTimeUpdate, handleLoadMetadata, isModalOpen, onVideoError }, forwardedRef) => {
   const ref = forwardedRef as RefObject<HTMLVideoElement>;
   const { showToast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -28,6 +35,19 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
 
   const handleVideoMetadata = (event: SyntheticEvent<HTMLVideoElement>) => {
     const video = event.currentTarget;
+
+    if (!video.duration || !isFinite(video.duration) || video.duration <= 0) {
+      showToast(VideoPlayerStrings.errorVideoNoDuration, 'error');
+      onVideoError?.();
+      return;
+    }
+
+    if (video.videoWidth === 0 && video.videoHeight === 0) {
+      showToast(VideoPlayerStrings.errorVideoAudioOnly, 'error');
+      onVideoError?.();
+      return;
+    }
+
     handleLoadMetadata(video.duration);
     setVideoMetadata({
       duration: video.duration,
@@ -128,13 +148,10 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
           onEnded={() => setIsPlaying(false)}
           onError={(e) => {
             setIsVideoLoading(false);
-            // code 2 = MEDIA_ERR_NETWORK (proxy/fetch failure)
-            // code 4 = MEDIA_ERR_SRC_NOT_SUPPORTED (bad format or unreachable URL)
-            const code = e.currentTarget.error?.code
-            showToast(
-              code === 2 ? VideoPlayerStrings.errorVideoNetwork : VideoPlayerStrings.errorVideoLoad,
-              'error',
-            )
+            const code = e.currentTarget.error?.code;
+            const message = (code != null ? MEDIA_ERROR_MESSAGES[code] : undefined) ?? VideoPlayerStrings.errorVideoUnknown;
+            showToast(message, 'error');
+            onVideoError?.();
           }}
           className="w-full h-full object-contain bg-black block"
         />

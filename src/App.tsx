@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type ChangeEvent } from 'react';
+import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
 import { useTour, TOUR_KEY } from './hooks/useTour';
 import { TourOverlay } from './components/onboarding/TourOverlay';
 import { AppStrings, HighlightListStrings } from './constants/ui';
@@ -89,6 +89,15 @@ function App() {
   const handleLoadedMetadata = (value: number) => {
     if (value) setDuration(value);
   };
+
+  const handleVideoError = useCallback(() => {
+    if (videoURL) URL.revokeObjectURL(videoURL);
+    setVideoFile(null);
+    setVideoURL(undefined);
+    setIsDriveSource(false);
+    setDriveInputUrl('');
+    clearHighlights();
+  }, [videoURL, clearHighlights]);
 
   const handleSeekToClip = (clip: Clip) => {
     handleTimelineSeek(clip.inPoint);
@@ -291,6 +300,7 @@ function App() {
               handleLoadMetadata={handleLoadedMetadata}
               currentTime={currentTime}
               isModalOpen={!!previewClip}
+              onVideoError={handleVideoError}
             />
             <Timeline
               currentTime={currentTime}

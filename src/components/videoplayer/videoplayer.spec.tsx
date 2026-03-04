@@ -225,7 +225,7 @@ describe('VideoPlayer', () => {
       renderVideoPlayer();
       const video = document.querySelector('video')!;
       fireEvent.error(video);
-      expect(screen.getByText(/Video failed to load/i)).toBeInTheDocument();
+      expect(screen.getByText(/An unknown error occurred/i)).toBeInTheDocument();
     });
   });
 
@@ -262,6 +262,8 @@ describe('VideoPlayer', () => {
       const { ref } = renderVideoPlayer({ currentTime: 10 });
       const video = document.querySelector('video')!;
       Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      Object.defineProperty(video, 'videoWidth', { value: 1920, configurable: true });
+      Object.defineProperty(video, 'videoHeight', { value: 1080, configurable: true });
       fireEvent.loadedMetadata(video);
       fireEvent.keyDown(window, { code: 'ArrowRight' });
       expect(ref.current?.currentTime).toBe(15);
@@ -271,6 +273,8 @@ describe('VideoPlayer', () => {
       const { ref } = renderVideoPlayer({ currentTime: 58 });
       const video = document.querySelector('video')!;
       Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      Object.defineProperty(video, 'videoWidth', { value: 1920, configurable: true });
+      Object.defineProperty(video, 'videoHeight', { value: 1080, configurable: true });
       fireEvent.loadedMetadata(video);
       fireEvent.keyDown(window, { code: 'ArrowRight' });
       expect(ref.current?.currentTime).toBe(60);
@@ -307,6 +311,8 @@ describe('VideoPlayer', () => {
       const { ref } = renderVideoPlayer({ currentTime: 10 });
       const video = document.querySelector('video')!;
       Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      Object.defineProperty(video, 'videoWidth', { value: 1920, configurable: true });
+      Object.defineProperty(video, 'videoHeight', { value: 1080, configurable: true });
       fireEvent.loadedMetadata(video);
       fireEvent.keyDown(window, { code: 'End' });
       expect(ref.current?.currentTime).toBe(60);
@@ -322,6 +328,8 @@ describe('VideoPlayer', () => {
       const { ref } = renderVideoPlayer({ currentTime: 1 });
       const video = document.querySelector('video')!;
       Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      Object.defineProperty(video, 'videoWidth', { value: 1920, configurable: true });
+      Object.defineProperty(video, 'videoHeight', { value: 1080, configurable: true });
       fireEvent.loadedMetadata(video);
       fireEvent.keyDown(window, { code: 'Period' });
       expect(ref.current?.currentTime).toBeCloseTo(1 + 1 / 30);
@@ -351,6 +359,8 @@ describe('VideoPlayer', () => {
       const { ref } = renderVideoPlayer({ currentTime: 10 });
       const video = document.querySelector('video')!;
       Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      Object.defineProperty(video, 'videoWidth', { value: 1920, configurable: true });
+      Object.defineProperty(video, 'videoHeight', { value: 1080, configurable: true });
       fireEvent.loadedMetadata(video);
       fireEvent.keyDown(window, { code: 'KeyL' });
       expect(ref.current?.currentTime).toBe(20);
@@ -360,6 +370,8 @@ describe('VideoPlayer', () => {
       const { ref } = renderVideoPlayer({ currentTime: 55 });
       const video = document.querySelector('video')!;
       Object.defineProperty(video, 'duration', { value: 60, configurable: true });
+      Object.defineProperty(video, 'videoWidth', { value: 1920, configurable: true });
+      Object.defineProperty(video, 'videoHeight', { value: 1080, configurable: true });
       fireEvent.loadedMetadata(video);
       fireEvent.keyDown(window, { code: 'KeyL' });
       expect(ref.current?.currentTime).toBe(60);

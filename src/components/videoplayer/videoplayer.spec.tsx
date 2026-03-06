@@ -229,6 +229,29 @@ describe('VideoPlayer', () => {
     });
   });
 
+  describe('ARIA attributes', () => {
+    it('sets aria-pressed on mute button', () => {
+      renderVideoPlayer();
+      const muteBtn = screen.getByTitle(/mute/i);
+      expect(muteBtn).toHaveAttribute('aria-pressed', 'false');
+      fireEvent.click(muteBtn);
+      expect(muteBtn).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('sets aria-label on volume slider', () => {
+      renderVideoPlayer();
+      expect(screen.getByRole('slider', { name: 'Volume' })).toBeInTheDocument();
+    });
+
+    it('updates aria-label on mute button when toggled', () => {
+      renderVideoPlayer();
+      const muteBtn = screen.getByTitle(/mute/i);
+      expect(muteBtn).toHaveAttribute('aria-label', 'Mute');
+      fireEvent.click(muteBtn);
+      expect(muteBtn).toHaveAttribute('aria-label', 'Unmute');
+    });
+  });
+
   describe('keyboard shortcuts', () => {
     it('triggers play on Space key', () => {
       renderVideoPlayer();

@@ -156,6 +156,36 @@ describe('ClipList — clip rows', () => {
   });
 });
 
+// ─── ARIA attributes ─────────────────────────────────────────────────────────
+
+describe('ClipList — ARIA attributes', () => {
+  const clips = [makeClip({ id: 'c1', name: 'Intro', inPoint: 0, outPoint: 5 })];
+
+  it('sets aria-expanded on settings toggle', async () => {
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
+    const settingsBtn = screen.getByRole('button', { name: /per-clip export settings/i });
+    expect(settingsBtn).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(settingsBtn);
+    expect(settingsBtn).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('sets aria-label on icon-only buttons', () => {
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
+    expect(screen.getByRole('button', { name: /preview clip/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /seek to in-point/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /load in\/out points/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /export this clip instantly/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /add to export queue/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /remove clip/i })).toBeInTheDocument();
+  });
+
+  it('sets aria-roledescription on drag handle', () => {
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
+    const grip = screen.getByTitle('Drag to reorder');
+    expect(grip).toHaveAttribute('aria-roledescription', 'sortable');
+  });
+});
+
 // ─── Inline rename ────────────────────────────────────────────────────────────
 
 describe('ClipList — inline rename', () => {
@@ -424,7 +454,8 @@ describe('ClipList — swipe-to-delete', () => {
 
     // Start swipe on the row (not the grip)
     fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
-    // Move left past the 10px direction threshold, then past 100px delete threshold
+    // First move establishes horizontal direction (dx > 10), second move applies offset
+    fireEvent.touchMove(window, { touches: [{ clientX: 185, clientY: 10 }] });
     fireEvent.touchMove(window, { touches: [{ clientX: 85, clientY: 10 }] });
 
     expect(screen.getByText('Release to delete')).toBeInTheDocument();
@@ -435,7 +466,8 @@ describe('ClipList — swipe-to-delete', () => {
     const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
 
     fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
-    // Move left past direction threshold but under 100px delete threshold
+    // First move establishes horizontal direction, second move applies offset
+    fireEvent.touchMove(window, { touches: [{ clientX: 185, clientY: 10 }] });
     fireEvent.touchMove(window, { touches: [{ clientX: 150, clientY: 10 }] });
 
     expect(screen.getByText('Swipe to delete')).toBeInTheDocument();
@@ -447,6 +479,7 @@ describe('ClipList — swipe-to-delete', () => {
     const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
 
     fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
+    fireEvent.touchMove(window, { touches: [{ clientX: 185, clientY: 10 }] });
     fireEvent.touchMove(window, { touches: [{ clientX: 85, clientY: 10 }] });
     fireEvent.touchEnd(window);
 
@@ -484,6 +517,8 @@ describe('ClipList — swipe-to-delete', () => {
     const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
 
     fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
+    // First move establishes horizontal direction, second move applies offset
+    fireEvent.touchMove(window, { touches: [{ clientX: 185, clientY: 10 }] });
     fireEvent.touchMove(window, { touches: [{ clientX: 150, clientY: 10 }] });
 
     expect(firstRow.style.transform).toContain('translateX');

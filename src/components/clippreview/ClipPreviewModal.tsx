@@ -110,6 +110,7 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
             onClick={onClose}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[#999] hover:text-[#ccc] transition-colors text-lg leading-none cursor-pointer"
             title={ClipPreviewStrings.titleClose}
+            aria-label={ClipPreviewStrings.titleClose}
           >
             {SharedStrings.btnClose}
           </button>

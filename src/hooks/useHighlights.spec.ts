@@ -119,7 +119,11 @@ describe('useHighlights', () => {
       expect(anchor.click).toHaveBeenCalledOnce();
 
       const blob: Blob = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls.at(-1)![0];
-      const text = await blob.text();
+      const text = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsText(blob);
+      });
       const parsed = JSON.parse(text);
       expect(parsed.version).toBe(1);
       expect(parsed.highlights[0]).toMatchObject({ label: 'Test', time: 10, endTime: 15 });

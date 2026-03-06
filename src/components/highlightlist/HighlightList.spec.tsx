@@ -263,6 +263,47 @@ describe('HighlightList — collapsible', () => {
   });
 });
 
+// ─── ARIA attributes ─────────────────────────────────────────────────────────
+
+describe('HighlightList — ARIA attributes', () => {
+  it('sets aria-expanded on the section toggle', () => {
+    render(<HighlightList {...baseProps} highlights={[pointHighlight]} />);
+    const toggle = screen.getByTitle('Collapse');
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('sets aria-expanded=false when section is collapsed', async () => {
+    const user = userEvent.setup();
+    render(<HighlightList {...baseProps} highlights={[pointHighlight]} />);
+    const toggle = screen.getByTitle('Collapse');
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('sets aria-pressed on the timeline toggle button', () => {
+    render(<HighlightList {...baseProps} showOnTimeline={true} />);
+    const btn = screen.getByRole('button', { name: /timeline/i });
+    expect(btn).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('sets aria-pressed=false when showOnTimeline is false', () => {
+    render(<HighlightList {...baseProps} showOnTimeline={false} />);
+    const btn = screen.getByRole('button', { name: /timeline/i });
+    expect(btn).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('sets aria-label on icon-only buttons', () => {
+    render(<HighlightList {...baseProps} highlights={[pointHighlight]} />);
+    expect(screen.getByRole('button', { name: /seek to highlight/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /remove highlight/i })).toBeInTheDocument();
+  });
+
+  it('sets aria-label on load-into-timeline button for range highlights', () => {
+    render(<HighlightList {...baseProps} highlights={[rangeHighlight]} />);
+    expect(screen.getByRole('button', { name: /load range into timeline/i })).toBeInTheDocument();
+  });
+});
+
 // ─── Timeline toggle ──────────────────────────────────────────────────────────
 
 describe('HighlightList — timeline toggle', () => {

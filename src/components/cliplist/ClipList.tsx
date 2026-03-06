@@ -194,6 +194,7 @@ function ClipRow({
             className="cursor-grab text-[#999] hover:text-[#aaa] transition-colors text-sm tablet:text-base leading-none active:cursor-grabbing shrink-0 min-w-[44px] min-h-[44px] tablet:min-w-0 tablet:min-h-0 flex items-center justify-center touch-none"
             title={ClipListStrings.titleDragToReorder}
             onTouchStart={(e) => { e.stopPropagation(); onTouchDragStart(index, e.touches[0].clientY); }}
+            aria-roledescription="sortable"
           >⠿</span>
           <span className="text-[9px] tablet:text-[10px] text-[#999] font-mono w-3 tablet:w-4 shrink-0">{index + 1}</span>
 
@@ -235,9 +236,9 @@ function ClipRow({
           <span className="font-mono text-[10px] tablet:text-xs text-[#999] shrink-0">{formatTime(clipDuration)}</span>
 
           <div className="flex items-center gap-0.5 tablet:gap-1 opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 transition-opacity shrink-0">
-            <button onClick={onPreview} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden tablet:inline-flex" title={ClipListStrings.titlePreviewClip}>⬛▶</button>
-            <button onClick={onSeek} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-flex" title={ClipListStrings.titleSeekToInPoint}>▶</button>
-            <button onClick={onEditPoints} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-flex" title={ClipListStrings.titleEditPoints}>✎</button>
+            <button onClick={onPreview} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden tablet:inline-flex" title={ClipListStrings.titlePreviewClip} aria-label={ClipListStrings.titlePreviewClip}>⬛▶</button>
+            <button onClick={onSeek} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-flex" title={ClipListStrings.titleSeekToInPoint} aria-label={ClipListStrings.titleSeekToInPoint}>▶</button>
+            <button onClick={onEditPoints} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-flex" title={ClipListStrings.titleEditPoints} aria-label={ClipListStrings.titleEditPoints}>✎</button>
 
             {/* ⚙ per-clip settings */}
             <div className="relative hidden tablet:block" ref={settingsRef}>
@@ -248,6 +249,8 @@ function ClipRow({
                   showSettings ? 'text-[#c8f55a]' : 'text-[#aaa] hover:text-[#c8f55a]',
                 ].join(' ')}
                 title={ClipListStrings.titlePerClipSettings}
+                aria-expanded={showSettings}
+                aria-label={ClipListStrings.titlePerClipSettings}
               >
                 ⚙
               </button>
@@ -274,6 +277,7 @@ function ClipRow({
               disabled={!canExport}
               className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={ClipListStrings.titleExportInstant}
+              aria-label={ClipListStrings.titleExportInstant}
             >
               {isThisExporting
                 ? ffmpeg.status === 'loading'
@@ -286,10 +290,11 @@ function ClipRow({
               disabled={!videoSource}
               className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs font-bold text-[#aaa] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={ClipListStrings.titleAddToQueue}
+              aria-label={ClipListStrings.titleAddToQueue}
             >
               +
             </button>
-            <button onClick={onRemove} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
+            <button onClick={onRemove} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip} aria-label={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
           </div>
 
           {/* Always-visible options badge */}

@@ -225,6 +225,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               onMouseDown={(e) => handleMarkerMouseDown(e, 'in')}
               onTouchStart={(e) => handleMarkerTouchStart(e, 'in')}
               title={TimelineStrings.titleInMarker}
+              aria-label={TimelineStrings.titleInMarker}
             >
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-5 tablet:w-3 tablet:h-3 bg-[#c8f55a] rounded-sm flex items-center justify-center">
                 <span className="text-[8px] text-black font-bold leading-none">I</span>
@@ -240,6 +241,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               onMouseDown={(e) => handleMarkerMouseDown(e, 'out')}
               onTouchStart={(e) => handleMarkerTouchStart(e, 'out')}
               title={TimelineStrings.titleOutMarker}
+              aria-label={TimelineStrings.titleOutMarker}
             >
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-5 tablet:w-3 tablet:h-3 bg-[#f55a5a] rounded-sm flex items-center justify-center">
                 <span className="text-[8px] text-black font-bold leading-none">O</span>
@@ -314,6 +316,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           <button
             onClick={() => handleFrameSeek('backward')}
             className="min-h-[44px] tablet:min-h-0 rounded border border-[#444] bg-[#2a2a2e] px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+            aria-label={TimelineStrings.ariaFrameBack}
           >
             <span className="hidden tablet:inline">{TimelineStrings.btnFrameBack}</span>
             <span className="tablet:hidden">◀◀</span>
@@ -321,6 +324,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           <button
             onClick={() => handleFrameSeek('forward')}
             className="min-h-[44px] tablet:min-h-0 rounded border border-[#444] bg-[#2a2a2e] px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+            aria-label={TimelineStrings.ariaFrameForward}
           >
             <span className="hidden tablet:inline">{TimelineStrings.btnFrameForward}</span>
             <span className="tablet:hidden">▶▶</span>

@@ -140,6 +140,25 @@ describe('ExportQueueOverlay — header controls', () => {
   });
 });
 
+// ─── ARIA attributes ─────────────────────────────────────────────────────────
+
+describe('ExportQueueOverlay — ARIA attributes', () => {
+  const pendingItem = makeItem();
+
+  it('sets aria-expanded on the collapse toggle', async () => {
+    render(<ExportQueueOverlay {...baseProps} queue={[pendingItem]} />);
+    const toggle = screen.getByRole('button', { name: /collapse/i });
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await userEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('sets aria-label on the remove button', () => {
+    render(<ExportQueueOverlay {...baseProps} queue={[pendingItem]} />);
+    expect(screen.getByRole('button', { name: /remove from queue/i })).toBeInTheDocument();
+  });
+});
+
 // ─── Item statuses ────────────────────────────────────────────────────────────
 
 describe('ExportQueueOverlay — item statuses', () => {

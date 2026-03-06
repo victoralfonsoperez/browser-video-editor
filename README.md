@@ -49,6 +49,15 @@ All processing happens directly in the browser. No data is ever sent to a server
 - [ ] Make hover-only action buttons accessible to keyboard users
 - [ ] Focus trap for modal dialogs
 
+### Future Enhancements (Post-MVP)
+- [ ] Audio waveform visualization
+- [ ] Transitions between clips
+- [ ] Text overlays
+- [ ] Filters and effects
+- [ ] Multi-track editing
+- [ ] Cloud storage integration
+- [ ] Collaborative editing
+
 ## 🛠️ Tech Stack
 
 | Layer | Technology |

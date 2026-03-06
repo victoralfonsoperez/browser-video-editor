@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { SharedStrings, ClipListStrings } from '../../constants/ui';
 import { formatTime } from '../../utils/formatTime';
 import type { Clip } from '../../hooks/useTrimMarkers';
@@ -71,10 +71,14 @@ interface ClipRowProps {
   videoSource: File | string | null;
   ffmpeg: UseFFmpegReturn;
   globalOptions: ExportOptions;
+  isTouchDragging: boolean;
+  swipeOffset: number;
   onDragStart: (index: number) => void;
   onDragEnter: (index: number, side: 'top' | 'bottom') => void;
   onDragEnd: () => void;
   onDrop: (targetIndex: number) => void;
+  onTouchDragStart: (index: number, y: number) => void;
+  onSwipeStart: (index: number, x: number) => void;
   onRemove: () => void;
   onSeek: () => void;
   onPreview: () => void;
@@ -88,7 +92,9 @@ function ClipRow({
   clip, index, isDragOver, dragOverSide,
   videoSource, ffmpeg,
   globalOptions,
+  isTouchDragging, swipeOffset,
   onDragStart, onDragEnter, onDragEnd, onDrop,
+  onTouchDragStart, onSwipeStart,
   onRemove, onSeek, onPreview, onRename, onEditPoints, onEnqueue, onInstantExport,
 }: ClipRowProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -148,6 +154,15 @@ function ClipRow({
         />
       )}
 
+      <div className="relative overflow-hidden rounded">
+        {/* Swipe-to-delete background */}
+        {swipeOffset < 0 && (
+          <div className="absolute inset-0 flex items-center justify-end px-4 bg-[#f55a5a]/20 rounded">
+            <span className={`text-xs font-medium ${swipeOffset < -100 ? 'text-[#f55a5a]' : 'text-[#999]'}`}>
+              {swipeOffset < -100 ? 'Release to delete' : 'Swipe to delete'}
+            </span>
+          </div>
+        )}
       <div
         draggable
         onDragStart={() => onDragStart(index)}
@@ -159,10 +174,13 @@ function ClipRow({
         }}
         onDragEnd={onDragEnd}
         onDrop={(e) => { e.preventDefault(); onDrop(index); }}
+        onTouchStart={(e) => onSwipeStart(index, e.touches[0].clientX)}
         className={[
           'relative flex flex-col rounded border bg-[#111] px-2 py-2 transition-colors group select-none',
           isDragOver ? 'border-[#c8f55a]/60 bg-[#c8f55a]/5' : 'border-[#2a2a2e] hover:border-[#444]',
+          isTouchDragging ? 'opacity-50 scale-95' : '',
         ].join(' ')}
+        style={swipeOffset !== 0 ? { transform: `translateX(${swipeOffset}px)`, transition: 'none' } : undefined}
       >
         {isDragOver && dragOverSide === 'top' && (
           <div className="pointer-events-none absolute -top-px left-0 right-0 h-0.5 rounded-full bg-[#c8f55a]" />
@@ -172,7 +190,11 @@ function ClipRow({
         )}
 
         <div className="flex items-center gap-1.5 tablet:gap-2">
-          <span className="cursor-grab text-[#999] hover:text-[#aaa] transition-colors text-sm tablet:text-base leading-none active:cursor-grabbing shrink-0 hidden tablet:inline" title={ClipListStrings.titleDragToReorder}>⠿</span>
+          <span
+            className="cursor-grab text-[#999] hover:text-[#aaa] transition-colors text-sm tablet:text-base leading-none active:cursor-grabbing shrink-0 min-w-[44px] min-h-[44px] tablet:min-w-0 tablet:min-h-0 flex items-center justify-center touch-none"
+            title={ClipListStrings.titleDragToReorder}
+            onTouchStart={(e) => { e.stopPropagation(); onTouchDragStart(index, e.touches[0].clientY); }}
+          >⠿</span>
           <span className="text-[9px] tablet:text-[10px] text-[#999] font-mono w-3 tablet:w-4 shrink-0">{index + 1}</span>
 
           <div
@@ -213,9 +235,9 @@ function ClipRow({
           <span className="font-mono text-[10px] tablet:text-xs text-[#999] shrink-0">{formatTime(clipDuration)}</span>
 
           <div className="flex items-center gap-0.5 tablet:gap-1 opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 transition-opacity shrink-0">
-            <button onClick={onPreview} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden tablet:inline-block" title={ClipListStrings.titlePreviewClip}>⬛▶</button>
-            <button onClick={onSeek} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-block" title={ClipListStrings.titleSeekToInPoint}>▶</button>
-            <button onClick={onEditPoints} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-block" title={ClipListStrings.titleEditPoints}>✎</button>
+            <button onClick={onPreview} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden tablet:inline-flex" title={ClipListStrings.titlePreviewClip}>⬛▶</button>
+            <button onClick={onSeek} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-flex" title={ClipListStrings.titleSeekToInPoint}>▶</button>
+            <button onClick={onEditPoints} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-flex" title={ClipListStrings.titleEditPoints}>✎</button>
 
             {/* ⚙ per-clip settings */}
             <div className="relative hidden tablet:block" ref={settingsRef}>
@@ -250,7 +272,7 @@ function ClipRow({
             <button
               onClick={handleExportClick}
               disabled={!canExport}
-              className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={ClipListStrings.titleExportInstant}
             >
               {isThisExporting
@@ -262,12 +284,12 @@ function ClipRow({
             <button
               onClick={handleEnqueueClick}
               disabled={!videoSource}
-              className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs font-bold text-[#aaa] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs font-bold text-[#aaa] hover:text-[#a0c4ff] hover:bg-[#2a2a2e] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={ClipListStrings.titleAddToQueue}
             >
               +
             </button>
-            <button onClick={onRemove} className="rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
+            <button onClick={onRemove} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
           </div>
 
           {/* Always-visible options badge */}
@@ -293,6 +315,7 @@ function ClipRow({
           <p className="mt-1 text-[10px] text-[#f55a5a]">{ClipListStrings.exportError(ffmpeg.error!)}</p>
         )}
       </div>
+      </div>
     </>
   );
 }
@@ -310,6 +333,105 @@ export function ClipList({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dragOverSide, setDragOverSide] = useState<'top' | 'bottom' | null>(null);
   const [gifExportAllPending, setGifExportAllPending] = useState(false);
+
+  // Touch drag reorder state
+  const [touchDragIndex, setTouchDragIndex] = useState<number | null>(null);
+  const touchDragStartY = useRef(0);
+  const clipListRef = useRef<HTMLDivElement>(null);
+
+  // Swipe-to-delete state
+  const [swipeIndex, setSwipeIndex] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const swipeStartX = useRef(0);
+  const swipeDirection = useRef<'horizontal' | 'vertical' | null>(null);
+
+  const handleTouchDragStart = useCallback((index: number, y: number) => {
+    setTouchDragIndex(index);
+    touchDragStartY.current = y;
+  }, []);
+
+  const handleSwipeStart = useCallback((index: number, x: number) => {
+    setSwipeIndex(index);
+    swipeStartX.current = x;
+    swipeDirection.current = null;
+  }, []);
+
+  // Touch move/end for reorder and swipe
+  useEffect(() => {
+    if (touchDragIndex === null && swipeIndex === null) return;
+
+    const onTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+
+      // Handle drag reorder (initiated from grip handle)
+      if (touchDragIndex !== null) {
+        e.preventDefault();
+        if (!clipListRef.current) return;
+        const children = clipListRef.current.children;
+        for (let i = 0; i < children.length; i++) {
+          const rect = children[i].getBoundingClientRect();
+          if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+            const side = touch.clientY < rect.top + rect.height / 2 ? 'top' : 'bottom';
+            setDragOverIndex(i);
+            setDragOverSide(side);
+            break;
+          }
+        }
+        return;
+      }
+
+      // Handle swipe-to-delete (initiated from row body)
+      if (swipeIndex !== null) {
+        const dx = touch.clientX - swipeStartX.current;
+        const dy = touch.clientY - touchDragStartY.current;
+
+        // Determine direction on first significant move
+        if (swipeDirection.current === null) {
+          if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            swipeDirection.current = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
+          }
+          return;
+        }
+
+        if (swipeDirection.current === 'horizontal') {
+          e.preventDefault();
+          // Only allow left swipe (negative)
+          setSwipeOffset(Math.min(0, dx));
+        }
+      }
+    };
+
+    const onTouchEnd = () => {
+      // Finalize drag reorder
+      if (touchDragIndex !== null && dragOverIndex !== null) {
+        let to = dragOverSide === 'bottom' ? dragOverIndex + 1 : dragOverIndex;
+        if (to > touchDragIndex) to -= 1;
+        if (to !== touchDragIndex) onReorderClips(touchDragIndex, to);
+      }
+      setTouchDragIndex(null);
+      setDragOverIndex(null);
+      setDragOverSide(null);
+
+      // Finalize swipe-to-delete
+      if (swipeIndex !== null) {
+        if (swipeOffset < -100) {
+          // Threshold reached — delete
+          const clipToRemove = clips[swipeIndex];
+          if (clipToRemove) onRemoveClip(clipToRemove.id);
+        }
+        setSwipeOffset(0);
+        setSwipeIndex(null);
+        swipeDirection.current = null;
+      }
+    };
+
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
+    return () => {
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [touchDragIndex, swipeIndex, swipeOffset, dragOverIndex, dragOverSide, clips, onReorderClips, onRemoveClip]);
 
   const duration = inPoint !== null && outPoint !== null ? outPoint - inPoint : null;
   const canAdd = inPoint !== null && outPoint !== null;
@@ -397,7 +519,7 @@ export function ClipList({
           <button
             onClick={handleAdd}
             disabled={!canAdd || isAddingClip}
-            className="rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-3 tablet:px-4 py-1.5 text-xs tablet:text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap"
+            className="min-h-[44px] tablet:min-h-0 rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-4 tablet:px-4 py-1.5 text-xs tablet:text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap"
           >
             {isAddingClip ? ClipListStrings.addingClip : ClipListStrings.btnAddClip}
           </button>
@@ -408,7 +530,7 @@ export function ClipList({
             {ClipListStrings.emptyState}
           </div>
         ) : (
-          <div className="flex flex-col gap-1.5 tablet:overflow-visible overflow-x-auto -mx-2 tablet:mx-0 px-2 tablet:px-0">
+          <div ref={clipListRef} className="flex flex-col gap-1.5 tablet:overflow-visible overflow-x-auto -mx-2 tablet:mx-0 px-2 tablet:px-0">
             {clips.map((clip, i) => (
               <ClipRow
                 key={clip.id}
@@ -419,10 +541,14 @@ export function ClipList({
                 videoSource={videoSource}
                 ffmpeg={ffmpeg}
                 globalOptions={globalOptions}
+                isTouchDragging={touchDragIndex === i}
+                swipeOffset={swipeIndex === i ? swipeOffset : 0}
                 onDragStart={(idx) => setDragFromIndex(idx)}
                 onDragEnter={(idx, side) => { setDragOverIndex(idx); setDragOverSide(side); }}
                 onDragEnd={handleDragEnd}
                 onDrop={handleDrop}
+                onTouchDragStart={handleTouchDragStart}
+                onSwipeStart={handleSwipeStart}
                 onRemove={() => onRemoveClip(clip.id)}
                 onSeek={() => onSeekToClip(clip)}
                 onPreview={() => onPreviewClip(clip)}

@@ -108,7 +108,7 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
           </div>
           <button
             onClick={onClose}
-            className="text-[#999] hover:text-[#ccc] transition-colors text-lg leading-none cursor-pointer"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[#999] hover:text-[#ccc] transition-colors text-lg leading-none cursor-pointer"
             title={ClipPreviewStrings.titleClose}
           >
             {SharedStrings.btnClose}
@@ -139,7 +139,7 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
         <div className="flex items-center gap-3 px-4 py-3 bg-[#1a1a1e]">
           <button
             onClick={togglePlay}
-            className="rounded border border-[#444] bg-[#2a2a2e] px-4 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer min-w-[80px]"
+            className="min-h-[44px] rounded border border-[#444] bg-[#2a2a2e] px-4 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer min-w-[80px]"
           >
             {isPlaying ? SharedStrings.btnPause : SharedStrings.btnPlay}
           </button>

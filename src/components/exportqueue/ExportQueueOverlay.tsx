@@ -86,7 +86,7 @@ export function ExportQueueOverlay({
               <button
                 onClick={onPause}
                 disabled={isRunning}
-                className="rounded px-2 py-0.5 text-[10px] font-medium text-[#f5a623] border border-[#f5a623]/30 hover:bg-[#f5a623]/10 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="min-h-[44px] tablet:min-h-0 rounded px-2 py-0.5 text-[10px] font-medium text-[#f5a623] border border-[#f5a623]/30 hover:bg-[#f5a623]/10 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 title={ExportQueueStrings.titlePause}
               >
                 {ExportQueueStrings.btnPause}
@@ -94,7 +94,7 @@ export function ExportQueueOverlay({
             ) : (
               <button
                 onClick={onStart}
-                className="rounded px-2 py-0.5 text-[10px] font-medium text-[#c8f55a] border border-[#c8f55a]/30 hover:bg-[#c8f55a]/10 transition-colors cursor-pointer"
+                className="min-h-[44px] tablet:min-h-0 rounded px-2 py-0.5 text-[10px] font-medium text-[#c8f55a] border border-[#c8f55a]/30 hover:bg-[#c8f55a]/10 transition-colors cursor-pointer"
                 title={ExportQueueStrings.titleStart}
               >
                 {pendingCount > 0 ? ExportQueueStrings.btnStart : ExportQueueStrings.btnResume}
@@ -105,7 +105,7 @@ export function ExportQueueOverlay({
           {doneCount > 0 && !isRunning && (
             <button
               onClick={onClear}
-              className="rounded px-1.5 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
+              className="min-h-[44px] tablet:min-h-0 rounded px-1.5 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
               title={ExportQueueStrings.titleClear}
             >
               {SharedStrings.btnClear}
@@ -114,7 +114,7 @@ export function ExportQueueOverlay({
 
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="rounded px-1.5 py-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer w-5 text-center"
+            className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1.5 py-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer w-5 tablet:w-5"
             title={collapsed ? ExportQueueStrings.titleExpand : ExportQueueStrings.titleCollapse}
           >
             {collapsed ? '▲' : '▼'}
@@ -211,7 +211,7 @@ export function ExportQueueOverlay({
                   {isPending && (
                     <button
                       onClick={() => onRemove(item.queueId)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity rounded px-1 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
+                      className="opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 transition-opacity min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
                       title={ExportQueueStrings.titleRemove}
                     >
                       {SharedStrings.btnClose}

@@ -58,7 +58,7 @@ function App() {
       showToast(AppStrings.alertNotVideoFile, 'warning');
       return;
     }
-    if (file.size > 500 * 1024 * 1024) { showToast(AppStrings.alertFileTooLarge, 'error'); return; }
+    if (file.size > 1500 * 1024 * 1024) { showToast(AppStrings.alertFileTooLarge, 'error'); return; }
     if (videoURL) URL.revokeObjectURL(videoURL);
     setVideoFile(file);
     setVideoURL(URL.createObjectURL(file));

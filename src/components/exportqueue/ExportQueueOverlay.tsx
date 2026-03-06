@@ -116,6 +116,8 @@ export function ExportQueueOverlay({
             onClick={() => setCollapsed((c) => !c)}
             className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1.5 py-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer w-5 tablet:w-5"
             title={collapsed ? ExportQueueStrings.titleExpand : ExportQueueStrings.titleCollapse}
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? ExportQueueStrings.titleExpand : ExportQueueStrings.titleCollapse}
           >
             {collapsed ? '▲' : '▼'}
           </button>
@@ -213,6 +215,7 @@ export function ExportQueueOverlay({
                       onClick={() => onRemove(item.queueId)}
                       className="opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 transition-opacity min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
                       title={ExportQueueStrings.titleRemove}
+                      aria-label={ExportQueueStrings.titleRemove}
                     >
                       {SharedStrings.btnClose}
                     </button>

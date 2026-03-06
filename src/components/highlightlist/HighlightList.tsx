@@ -73,6 +73,7 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
           onClick={onSeek}
           className="rounded px-1.5 py-0.5 text-xs text-[#aaa] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
           title={HighlightListStrings.titleSeek}
+          aria-label={HighlightListStrings.titleSeek}
         >
           ▶
         </button>
@@ -81,6 +82,7 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
             onClick={onLoadIntoTimeline}
             className="rounded px-1.5 py-0.5 text-xs text-[#aaa] hover:text-[#f59e0b] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
             title={HighlightListStrings.titleLoadIntoTimeline}
+            aria-label={HighlightListStrings.titleLoadIntoTimeline}
           >
             ✎
           </button>
@@ -89,6 +91,7 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
           onClick={onRemove}
           className="rounded px-1.5 py-0.5 text-xs text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
           title={HighlightListStrings.titleRemove}
+          aria-label={HighlightListStrings.titleRemove}
         >
           {SharedStrings.btnClose}
         </button>
@@ -124,6 +127,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
           onClick={() => dispatchOpen(!isOpen)}
           className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#aaa] hover:text-[#ccc] transition-colors cursor-pointer"
           title={isOpen ? HighlightListStrings.titleCollapse : HighlightListStrings.titleExpand}
+          aria-expanded={isOpen}
         >
           <span className="text-[10px]">{isOpen ? '▼' : '▶'}</span>
           {HighlightListStrings.sectionHeading}
@@ -142,6 +146,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
                 : 'border-[#444] bg-[#2a2a2e] text-[#999] hover:bg-[#3a3a3e] hover:text-[#aaa]',
             ].join(' ')}
             title={showOnTimeline ? HighlightListStrings.titleHideFromTimeline : HighlightListStrings.titleShowOnTimeline}
+            aria-pressed={showOnTimeline}
           >
             {HighlightListStrings.btnTimeline}
           </button>

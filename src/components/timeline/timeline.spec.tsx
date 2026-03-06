@@ -79,6 +79,32 @@ describe('Timeline — highlight markers', () => {
   })
 })
 
+// ─── ARIA attributes ─────────────────────────────────────────────────────────
+
+describe('Timeline — ARIA attributes', () => {
+  it('sets aria-label on frame back button', () => {
+    render(<Timeline {...baseProps} />)
+    expect(screen.getByRole('button', { name: 'Step back one frame' })).toBeInTheDocument()
+  })
+
+  it('sets aria-label on frame forward button', () => {
+    render(<Timeline {...baseProps} />)
+    expect(screen.getByRole('button', { name: 'Step forward one frame' })).toBeInTheDocument()
+  })
+
+  it('sets aria-label on in-point marker', () => {
+    const trimWithMarkers = { ...mockTrim, inPoint: 25, outPoint: 75 }
+    render(<Timeline {...baseProps} trim={trimWithMarkers} />)
+    expect(screen.getByLabelText('In point (drag or press I)')).toBeInTheDocument()
+  })
+
+  it('sets aria-label on out-point marker', () => {
+    const trimWithMarkers = { ...mockTrim, inPoint: 25, outPoint: 75 }
+    render(<Timeline {...baseProps} trim={trimWithMarkers} />)
+    expect(screen.getByLabelText('Out point (drag or press O)')).toBeInTheDocument()
+  })
+})
+
 // ─── Touch interactions ──────────────────────────────────────────────────────
 
 describe('Timeline — touch scrubbing', () => {
@@ -121,13 +147,13 @@ describe('Timeline — touch trim marker dragging', () => {
 
   it('renders in-point marker with touch-none class for touch dragging', () => {
     render(<Timeline {...baseProps} trim={trimWithMarkers} />)
-    const inMarker = screen.getByTitle('Drag to adjust in-point')
+    const inMarker = screen.getByTitle('In point (drag or press I)')
     expect(inMarker.className).toContain('touch-none')
   })
 
   it('renders out-point marker with touch-none class for touch dragging', () => {
     render(<Timeline {...baseProps} trim={trimWithMarkers} />)
-    const outMarker = screen.getByTitle('Drag to adjust out-point')
+    const outMarker = screen.getByTitle('Out point (drag or press O)')
     expect(outMarker.className).toContain('touch-none')
   })
 
@@ -135,7 +161,7 @@ describe('Timeline — touch trim marker dragging', () => {
     const setIn = vi.fn()
     const trim = { ...trimWithMarkers, setIn }
     render(<Timeline {...baseProps} trim={trim} />)
-    const inMarker = screen.getByTitle('Drag to adjust in-point')
+    const inMarker = screen.getByTitle('In point (drag or press I)')
     fireEvent.touchStart(inMarker, { touches: [{ clientX: 25 }] })
     // After touchStart sets draggingMarker, the effect attaches global listeners
     // Fire touchmove on window to simulate the drag
@@ -147,7 +173,7 @@ describe('Timeline — touch trim marker dragging', () => {
     const setOut = vi.fn()
     const trim = { ...trimWithMarkers, setOut }
     render(<Timeline {...baseProps} trim={trim} />)
-    const outMarker = screen.getByTitle('Drag to adjust out-point')
+    const outMarker = screen.getByTitle('Out point (drag or press O)')
     fireEvent.touchStart(outMarker, { touches: [{ clientX: 75 }] })
     fireEvent.touchMove(window, { touches: [{ clientX: 60 }] })
     expect(setOut).toHaveBeenCalled()
@@ -157,7 +183,7 @@ describe('Timeline — touch trim marker dragging', () => {
     const setIn = vi.fn()
     const trim = { ...trimWithMarkers, setIn }
     render(<Timeline {...baseProps} trim={trim} />)
-    const inMarker = screen.getByTitle('Drag to adjust in-point')
+    const inMarker = screen.getByTitle('In point (drag or press I)')
     fireEvent.touchStart(inMarker, { touches: [{ clientX: 25 }] })
     fireEvent.touchEnd(window)
     setIn.mockClear()

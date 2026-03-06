@@ -35,6 +35,7 @@ All processing happens directly in the browser. No data is ever sent to a server
 - ✅ Loading states and progress indicators throughout
 - ✅ Responsive design for mobile, tablet, and desktop
 - ✅ Mobile touch-optimized interactions (larger touch targets, swipe gestures)
+- ✅ ARIA attributes (`aria-expanded`, `aria-pressed`, `aria-label` on icon buttons)
 
 ### Roadmap
 - [ ] Horizontally scrollable timeline for very long videos
@@ -45,7 +46,6 @@ All processing happens directly in the browser. No data is ever sent to a server
 - [ ] Keyboard-accessible trim marker adjustment
 - [ ] Keyboard alternative for clip/queue drag-to-reorder
 - [ ] Focus-visible indicators on all interactive elements
-- [ ] ARIA attributes (`aria-expanded`, `aria-pressed`, `aria-label` on icon buttons)
 - [ ] Make hover-only action buttons accessible to keyboard users
 - [ ] Focus trap for modal dialogs
 

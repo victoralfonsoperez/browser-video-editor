@@ -67,7 +67,7 @@ beforeEach(() => {
   globalThis.URL.revokeObjectURL = vi.fn();
 
   // Patch createElement directly on the instance — avoids spy recursion
-  const realCreateElement = HTMLDocument.prototype.createElement.bind(document);
+  const realCreateElement = Document.prototype.createElement.bind(document);
   document.createElement = function (tag: string, ...args: []) {
     const el = realCreateElement(tag, ...args);
     if (tag === 'a') el.click = anchorClickMock;

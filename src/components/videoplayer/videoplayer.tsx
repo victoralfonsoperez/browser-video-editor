@@ -183,6 +183,8 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
             onClick={toggleMute}
             className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center text-base tablet:text-lg leading-none cursor-pointer"
             title={isMuted ? VideoPlayerStrings.titleUnmute : VideoPlayerStrings.titleMute}
+            aria-label={isMuted ? VideoPlayerStrings.titleUnmute : VideoPlayerStrings.titleMute}
+            aria-pressed={isMuted}
           >
             {isMuted ? '🔇' : '🔊'}
           </button>
@@ -194,6 +196,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
             className="min-h-[44px] tablet:min-h-0 w-12 tablet:w-20 cursor-pointer accent-[#c8f55a]"
+            aria-label={VideoPlayerStrings.ariaVolume}
           />
         </div>
       </div>

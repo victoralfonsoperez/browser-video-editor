@@ -177,6 +177,8 @@ function App() {
                     : 'border-[#444] bg-[#2a2a2e] text-[#ccc] hover:bg-[#3a3a3e]',
                 ].join(' ')}
                 title={AppStrings.titleGlobalSettings}
+                aria-expanded={showGlobalSettings}
+                aria-label={AppStrings.titleGlobalSettings}
               >
                 <span>⚙</span>
                 <span className="text-xs font-mono text-[#aaa] hidden mobile-landscape:inline">

@@ -79,6 +79,93 @@ describe('Timeline — highlight markers', () => {
   })
 })
 
+// ─── Touch interactions ──────────────────────────────────────────────────────
+
+describe('Timeline — touch scrubbing', () => {
+  it('calls onSeek on touchStart on the track', () => {
+    const onSeek = vi.fn()
+    render(<Timeline {...baseProps} onSeek={onSeek} />)
+    const track = document.querySelector('.cursor-crosshair') as HTMLElement
+    fireEvent.touchStart(track, { touches: [{ clientX: 50 }] })
+    expect(onSeek).toHaveBeenCalled()
+  })
+
+  it('calls onSeek on touchMove while dragging the track', () => {
+    const onSeek = vi.fn()
+    render(<Timeline {...baseProps} onSeek={onSeek} />)
+    const track = document.querySelector('.cursor-crosshair') as HTMLElement
+    fireEvent.touchStart(track, { touches: [{ clientX: 50 }] })
+    onSeek.mockClear()
+    fireEvent.touchMove(track, { touches: [{ clientX: 80 }] })
+    expect(onSeek).toHaveBeenCalled()
+  })
+
+  it('stops calling onSeek after touchEnd', () => {
+    const onSeek = vi.fn()
+    render(<Timeline {...baseProps} onSeek={onSeek} />)
+    const track = document.querySelector('.cursor-crosshair') as HTMLElement
+    fireEvent.touchStart(track, { touches: [{ clientX: 50 }] })
+    fireEvent.touchEnd(track)
+    onSeek.mockClear()
+    fireEvent.touchMove(track, { touches: [{ clientX: 80 }] })
+    expect(onSeek).not.toHaveBeenCalled()
+  })
+})
+
+describe('Timeline — touch trim marker dragging', () => {
+  const trimWithMarkers = {
+    ...mockTrim,
+    inPoint: 25,
+    outPoint: 75,
+  }
+
+  it('renders in-point marker with touch-none class for touch dragging', () => {
+    render(<Timeline {...baseProps} trim={trimWithMarkers} />)
+    const inMarker = screen.getByTitle('Drag to adjust in-point')
+    expect(inMarker.className).toContain('touch-none')
+  })
+
+  it('renders out-point marker with touch-none class for touch dragging', () => {
+    render(<Timeline {...baseProps} trim={trimWithMarkers} />)
+    const outMarker = screen.getByTitle('Drag to adjust out-point')
+    expect(outMarker.className).toContain('touch-none')
+  })
+
+  it('calls trim.setIn when in-point marker is touch-dragged', () => {
+    const setIn = vi.fn()
+    const trim = { ...trimWithMarkers, setIn }
+    render(<Timeline {...baseProps} trim={trim} />)
+    const inMarker = screen.getByTitle('Drag to adjust in-point')
+    fireEvent.touchStart(inMarker, { touches: [{ clientX: 25 }] })
+    // After touchStart sets draggingMarker, the effect attaches global listeners
+    // Fire touchmove on window to simulate the drag
+    fireEvent.touchMove(window, { touches: [{ clientX: 50 }] })
+    expect(setIn).toHaveBeenCalled()
+  })
+
+  it('calls trim.setOut when out-point marker is touch-dragged', () => {
+    const setOut = vi.fn()
+    const trim = { ...trimWithMarkers, setOut }
+    render(<Timeline {...baseProps} trim={trim} />)
+    const outMarker = screen.getByTitle('Drag to adjust out-point')
+    fireEvent.touchStart(outMarker, { touches: [{ clientX: 75 }] })
+    fireEvent.touchMove(window, { touches: [{ clientX: 60 }] })
+    expect(setOut).toHaveBeenCalled()
+  })
+
+  it('stops dragging marker after touchEnd', () => {
+    const setIn = vi.fn()
+    const trim = { ...trimWithMarkers, setIn }
+    render(<Timeline {...baseProps} trim={trim} />)
+    const inMarker = screen.getByTitle('Drag to adjust in-point')
+    fireEvent.touchStart(inMarker, { touches: [{ clientX: 25 }] })
+    fireEvent.touchEnd(window)
+    setIn.mockClear()
+    fireEvent.touchMove(window, { touches: [{ clientX: 50 }] })
+    expect(setIn).not.toHaveBeenCalled()
+  })
+})
+
 // ─── Mark button + H key ──────────────────────────────────────────────────────
 
 describe('Timeline — Mark button and H key', () => {

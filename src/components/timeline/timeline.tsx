@@ -83,11 +83,23 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
     setDraggingMarker(marker);
   };
 
+  const handleMarkerTouchStart = (e: React.TouchEvent, marker: 'in' | 'out') => {
+    e.stopPropagation();
+    setDraggingMarker(marker);
+  };
+
   useEffect(() => {
     if (!isDragging && !draggingMarker) return;
 
-    const onMove = (e: MouseEvent) => {
+    const onMouseMove = (e: MouseEvent) => {
       const t = getTimeFromPosition(e.clientX);
+      if (isDragging) onSeek(t);
+      if (draggingMarker === 'in') trim.setIn(t);
+      if (draggingMarker === 'out') trim.setOut(t);
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (draggingMarker) e.preventDefault();
+      const t = getTimeFromPosition(e.touches[0].clientX);
       if (isDragging) onSeek(t);
       if (draggingMarker === 'in') trim.setIn(t);
       if (draggingMarker === 'out') trim.setOut(t);
@@ -96,11 +108,15 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
       setIsDragging(false);
       setDraggingMarker(null);
     };
-    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onUp);
     return () => {
-      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onUp);
     };
   }, [isDragging, draggingMarker, duration, getTimeFromPosition, onSeek, trim]);
 
@@ -204,12 +220,13 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           {/* In-point marker */}
           {trim.inPoint !== null && duration > 0 && (
             <div
-              className="absolute top-0 bottom-0 z-20 w-1 bg-[#c8f55a] cursor-ew-resize group"
+              className="absolute top-0 bottom-0 z-20 w-5 tablet:w-1 bg-[#c8f55a]/40 tablet:bg-[#c8f55a] cursor-ew-resize group touch-none"
               style={{ left: pct(trim.inPoint), transform: 'translateX(-50%)' }}
               onMouseDown={(e) => handleMarkerMouseDown(e, 'in')}
+              onTouchStart={(e) => handleMarkerTouchStart(e, 'in')}
               title={TimelineStrings.titleInMarker}
             >
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#c8f55a] rounded-sm flex items-center justify-center">
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-5 tablet:w-3 tablet:h-3 bg-[#c8f55a] rounded-sm flex items-center justify-center">
                 <span className="text-[8px] text-black font-bold leading-none">I</span>
               </div>
             </div>
@@ -218,12 +235,13 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           {/* Out-point marker */}
           {trim.outPoint !== null && duration > 0 && (
             <div
-              className="absolute top-0 bottom-0 z-20 w-1 bg-[#f55a5a] cursor-ew-resize group"
+              className="absolute top-0 bottom-0 z-20 w-5 tablet:w-1 bg-[#f55a5a]/40 tablet:bg-[#f55a5a] cursor-ew-resize group touch-none"
               style={{ left: pct(trim.outPoint), transform: 'translateX(-50%)' }}
               onMouseDown={(e) => handleMarkerMouseDown(e, 'out')}
+              onTouchStart={(e) => handleMarkerTouchStart(e, 'out')}
               title={TimelineStrings.titleOutMarker}
             >
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#f55a5a] rounded-sm flex items-center justify-center">
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-5 tablet:w-3 tablet:h-3 bg-[#f55a5a] rounded-sm flex items-center justify-center">
                 <span className="text-[8px] text-black font-bold leading-none">O</span>
               </div>
             </div>
@@ -295,35 +313,35 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
         <div className="flex gap-1 tablet:gap-2 flex-wrap">
           <button
             onClick={() => handleFrameSeek('backward')}
-            className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+            className="min-h-[44px] tablet:min-h-0 rounded border border-[#444] bg-[#2a2a2e] px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
           >
             <span className="hidden tablet:inline">{TimelineStrings.btnFrameBack}</span>
             <span className="tablet:hidden">◀◀</span>
           </button>
           <button
             onClick={() => handleFrameSeek('forward')}
-            className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+            className="min-h-[44px] tablet:min-h-0 rounded border border-[#444] bg-[#2a2a2e] px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
           >
             <span className="hidden tablet:inline">{TimelineStrings.btnFrameForward}</span>
             <span className="tablet:hidden">▶▶</span>
           </button>
           <button
             onClick={() => trim.setIn(currentTime)}
-            className="rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer"
+            className="min-h-[44px] tablet:min-h-0 rounded border border-[#c8f55a]/40 bg-[#2a2a2e] px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-[#c8f55a] hover:bg-[#c8f55a]/10 transition-colors cursor-pointer"
             title={TimelineStrings.titleSetIn}
           >
             {TimelineStrings.btnSetIn}
           </button>
           <button
             onClick={() => trim.setOut(currentTime)}
-            className="rounded border border-[#f55a5a]/40 bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#f55a5a] hover:bg-[#f55a5a]/10 transition-colors cursor-pointer"
+            className="min-h-[44px] tablet:min-h-0 rounded border border-[#f55a5a]/40 bg-[#2a2a2e] px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-[#f55a5a] hover:bg-[#f55a5a]/10 transition-colors cursor-pointer"
             title={TimelineStrings.titleSetOut}
           >
             {TimelineStrings.btnSetOut}
           </button>
           <button
             onClick={onMark}
-            className="rounded border border-[#f59e0b]/40 bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#f59e0b] hover:bg-[#f59e0b]/10 transition-colors cursor-pointer hidden tablet:inline-block"
+            className="min-h-[44px] tablet:min-h-0 rounded border border-[#f59e0b]/40 bg-[#2a2a2e] px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-[#f59e0b] hover:bg-[#f59e0b]/10 transition-colors cursor-pointer hidden tablet:inline-block"
             title={TimelineStrings.titleMark}
           >
             {TimelineStrings.btnMark}
@@ -331,7 +349,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           {(trim.inPoint !== null || trim.outPoint !== null) && (
             <button
               onClick={trim.clearMarkers}
-              className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#aaa] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+              className="min-h-[44px] tablet:min-h-0 rounded border border-[#444] bg-[#2a2a2e] px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-[#aaa] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
             >
               {SharedStrings.btnClear}
             </button>

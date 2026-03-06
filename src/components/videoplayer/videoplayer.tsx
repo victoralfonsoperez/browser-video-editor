@@ -169,7 +169,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
       <div className="mt-2 flex items-center gap-2 tablet:gap-3 rounded bg-[#2a2a2e] px-2 tablet:px-3 py-2">
         <button
           onClick={togglePlay}
-          className="rounded border border-[#444] bg-[#1a1a1e] px-2 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+          className="min-h-[44px] tablet:min-h-0 rounded border border-[#444] bg-[#1a1a1e] px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
         >
           {isPlaying ? SharedStrings.btnPause : SharedStrings.btnPlay}
         </button>
@@ -181,7 +181,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
         <div className="ml-auto flex items-center gap-1 tablet:gap-2">
           <button
             onClick={toggleMute}
-            className="text-base tablet:text-lg leading-none cursor-pointer"
+            className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center text-base tablet:text-lg leading-none cursor-pointer"
             title={isMuted ? VideoPlayerStrings.titleUnmute : VideoPlayerStrings.titleMute}
           >
             {isMuted ? '🔇' : '🔊'}
@@ -193,7 +193,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
             step="0.1"
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
-            className="w-12 tablet:w-20 cursor-pointer accent-[#c8f55a]"
+            className="min-h-[44px] tablet:min-h-0 w-12 tablet:w-20 cursor-pointer accent-[#c8f55a]"
           />
         </div>
       </div>

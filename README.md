@@ -34,9 +34,9 @@ All processing happens directly in the browser. No data is ever sent to a server
 - ✅ Toast notifications for errors, warnings, and feedback
 - ✅ Loading states and progress indicators throughout
 - ✅ Responsive design for mobile, tablet, and desktop
+- ✅ Mobile touch-optimized interactions (larger touch targets, swipe gestures)
 
 ### Roadmap
-- [ ] Mobile touch-optimized interactions (larger touch targets, swipe gestures)
 - [ ] Horizontally scrollable timeline for very long videos
 - [ ] Audio waveform visualization
 - [ ] Cross-browser testing and public deployment (Phase 6)
@@ -48,6 +48,15 @@ All processing happens directly in the browser. No data is ever sent to a server
 - [ ] ARIA attributes (`aria-expanded`, `aria-pressed`, `aria-label` on icon buttons)
 - [ ] Make hover-only action buttons accessible to keyboard users
 - [ ] Focus trap for modal dialogs
+
+### Future Enhancements (Post-MVP)
+- [ ] Audio waveform visualization
+- [ ] Transitions between clips
+- [ ] Text overlays
+- [ ] Filters and effects
+- [ ] Multi-track editing
+- [ ] Cloud storage integration
+- [ ] Collaborative editing
 
 ## 🛠️ Tech Stack
 

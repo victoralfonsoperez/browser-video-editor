@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ClipList } from './ClipList';
@@ -317,5 +317,187 @@ describe('ClipList — in/out point display', () => {
   it('shows formatted inPoint when set', () => {
     render(<ClipList {...baseProps} inPoint={90} outPoint={null} />);
     expect(screen.getByText('1:30')).toBeInTheDocument();
+  });
+});
+
+// ─── Touch reorder via grip handle ───────────────────────────────────────────
+
+describe('ClipList — touch reorder', () => {
+  const clips = [
+    makeClip({ id: 'c1', name: 'First', inPoint: 0, outPoint: 5 }),
+    makeClip({ id: 'c2', name: 'Second', inPoint: 10, outPoint: 20 }),
+    makeClip({ id: 'c3', name: 'Third', inPoint: 20, outPoint: 30 }),
+  ];
+
+  it('renders grip handles with touch-none class', () => {
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
+    const grips = screen.getAllByTitle('Drag to reorder');
+    for (const grip of grips) {
+      expect(grip.className).toContain('touch-none');
+    }
+  });
+
+  it('applies opacity style to the clip being touch-dragged', () => {
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
+    const grips = screen.getAllByTitle('Drag to reorder');
+    // Touch start on first grip to initiate drag
+    fireEvent.touchStart(grips[0], { touches: [{ clientX: 10, clientY: 10 }] });
+    // The first clip row should have opacity-50 class
+    const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
+    expect(firstRow.className).toContain('opacity-50');
+  });
+
+  it('calls onReorderClips when touch drag completes over a different row', () => {
+    const onReorderClips = vi.fn();
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} onReorderClips={onReorderClips} />);
+    const grips = screen.getAllByTitle('Drag to reorder');
+
+    // Start touch drag on first grip
+    fireEvent.touchStart(grips[0], { touches: [{ clientX: 10, clientY: 10 }] });
+
+    // Simulate moving over the third clip row
+    // We need to mock getBoundingClientRect for the clip list children
+    const clipListContainer = document.querySelector('[class*="flex flex-col gap-1.5"]') as HTMLElement;
+    const children = clipListContainer.children;
+    for (let i = 0; i < children.length; i++) {
+      vi.spyOn(children[i], 'getBoundingClientRect').mockReturnValue({
+        top: i * 50,
+        bottom: (i + 1) * 50,
+        left: 0,
+        right: 300,
+        width: 300,
+        height: 50,
+        x: 0,
+        y: i * 50,
+        toJSON: vi.fn(),
+      });
+    }
+
+    // Move to the bottom half of the third item (index 2)
+    fireEvent.touchMove(window, { touches: [{ clientX: 10, clientY: 130 }] });
+    // Release
+    fireEvent.touchEnd(window);
+    expect(onReorderClips).toHaveBeenCalledWith(0, 2);
+  });
+
+  it('does not call onReorderClips when touch drag ends at same position', () => {
+    const onReorderClips = vi.fn();
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} onReorderClips={onReorderClips} />);
+    const grips = screen.getAllByTitle('Drag to reorder');
+
+    fireEvent.touchStart(grips[0], { touches: [{ clientX: 10, clientY: 10 }] });
+
+    const clipListContainer = document.querySelector('[class*="flex flex-col gap-1.5"]') as HTMLElement;
+    const children = clipListContainer.children;
+    for (let i = 0; i < children.length; i++) {
+      vi.spyOn(children[i], 'getBoundingClientRect').mockReturnValue({
+        top: i * 50,
+        bottom: (i + 1) * 50,
+        left: 0,
+        right: 300,
+        width: 300,
+        height: 50,
+        x: 0,
+        y: i * 50,
+        toJSON: vi.fn(),
+      });
+    }
+
+    // Move within the first item (top half)
+    fireEvent.touchMove(window, { touches: [{ clientX: 10, clientY: 10 }] });
+    fireEvent.touchEnd(window);
+    expect(onReorderClips).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Swipe-to-delete ─────────────────────────────────────────────────────────
+
+describe('ClipList — swipe-to-delete', () => {
+  const clips = [
+    makeClip({ id: 'c1', name: 'First', inPoint: 0, outPoint: 5 }),
+    makeClip({ id: 'c2', name: 'Second', inPoint: 10, outPoint: 20 }),
+  ];
+
+  it('shows swipe-to-delete background when swiping left past threshold', () => {
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
+    const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
+
+    // Start swipe on the row (not the grip)
+    fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
+    // Move left past the 10px direction threshold, then past 100px delete threshold
+    fireEvent.touchMove(window, { touches: [{ clientX: 85, clientY: 10 }] });
+
+    expect(screen.getByText('Release to delete')).toBeInTheDocument();
+  });
+
+  it('shows "Swipe to delete" hint when swiping left but not past threshold', () => {
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
+    const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
+
+    fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
+    // Move left past direction threshold but under 100px delete threshold
+    fireEvent.touchMove(window, { touches: [{ clientX: 150, clientY: 10 }] });
+
+    expect(screen.getByText('Swipe to delete')).toBeInTheDocument();
+  });
+
+  it('calls onRemoveClip when swipe exceeds threshold and touch ends', () => {
+    const onRemoveClip = vi.fn();
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} onRemoveClip={onRemoveClip} />);
+    const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
+
+    fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
+    fireEvent.touchMove(window, { touches: [{ clientX: 85, clientY: 10 }] });
+    fireEvent.touchEnd(window);
+
+    expect(onRemoveClip).toHaveBeenCalledWith('c1');
+  });
+
+  it('does not call onRemoveClip when swipe does not exceed threshold', () => {
+    const onRemoveClip = vi.fn();
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} onRemoveClip={onRemoveClip} />);
+    const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
+
+    fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
+    // Move left but not past 100px
+    fireEvent.touchMove(window, { touches: [{ clientX: 150, clientY: 10 }] });
+    fireEvent.touchEnd(window);
+
+    expect(onRemoveClip).not.toHaveBeenCalled();
+  });
+
+  it('does not swipe when vertical movement is dominant', () => {
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
+    const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
+
+    fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
+    // Move mostly vertically
+    fireEvent.touchMove(window, { touches: [{ clientX: 195, clientY: 80 }] });
+
+    // No swipe UI should appear
+    expect(screen.queryByText('Swipe to delete')).not.toBeInTheDocument();
+    expect(screen.queryByText('Release to delete')).not.toBeInTheDocument();
+  });
+
+  it('applies translateX style to the clip row while swiping', () => {
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
+    const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
+
+    fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
+    fireEvent.touchMove(window, { touches: [{ clientX: 150, clientY: 10 }] });
+
+    expect(firstRow.style.transform).toContain('translateX');
+  });
+
+  it('resets swipe offset after touch ends without exceeding threshold', () => {
+    render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
+    const firstRow = screen.getByText('First').closest('[draggable]') as HTMLElement;
+
+    fireEvent.touchStart(firstRow, { touches: [{ clientX: 200, clientY: 10 }] });
+    fireEvent.touchMove(window, { touches: [{ clientX: 150, clientY: 10 }] });
+    fireEvent.touchEnd(window);
+
+    // After touch end, transform should be cleared (no inline style)
+    expect(firstRow.style.transform).toBe('');
   });
 });

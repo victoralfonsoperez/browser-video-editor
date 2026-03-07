@@ -45,7 +45,7 @@ All processing happens directly in the browser. No data is ever sent to a server
 - [ ] Keyboard-navigable timeline scrubbing (arrow keys)
 - [ ] Keyboard-accessible trim marker adjustment
 - [ ] Keyboard alternative for clip/queue drag-to-reorder
-- [ ] Focus-visible indicators on all interactive elements
+- [x] Focus-visible indicators on all interactive elements
 - [ ] Make hover-only action buttons accessible to keyboard users
 - [ ] Focus trap for modal dialogs
 

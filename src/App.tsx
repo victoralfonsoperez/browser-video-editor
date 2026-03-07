@@ -281,7 +281,7 @@ function App() {
                   value={driveInputUrl}
                   onChange={(e) => setDriveInputUrl(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleDriveLoad()}
-                  className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2 text-sm text-[#ccc] placeholder-[#444] outline-none focus:border-[#c8f55a]/60"
+                  className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2 text-sm text-[#ccc] placeholder-[#444] focus:border-[#c8f55a]/60"
                 />
                 <button
                   onClick={handleDriveLoad}

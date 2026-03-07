@@ -221,7 +221,7 @@ function ClipRow({
                   if (e.key === 'Enter') commitRename();
                   if (e.key === 'Escape') { setEditValue(clip.name); setIsEditing(false); }
                 }}
-                className="w-full rounded border border-[#c8f55a]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-xs tablet:text-sm text-[#ccc] outline-none focus:border-[#c8f55a]"
+                className="w-full rounded border border-[#c8f55a]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-xs tablet:text-sm text-[#ccc] focus:border-[#c8f55a]"
               />
             ) : (
               <button onClick={startEdit} className="block w-full text-left text-xs tablet:text-sm text-[#ccc] truncate hover:text-white transition-colors cursor-text" title={ClipListStrings.titleClickToRename}>
@@ -518,7 +518,7 @@ export function ClipList({
             value={clipName}
             onChange={(e) => setClipName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && canAdd && handleAdd()}
-            className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-1.5 text-sm text-[#ccc] placeholder-[#444] outline-none focus:border-[#c8f55a]/60"
+            className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-1.5 text-sm text-[#ccc] placeholder-[#444] focus:border-[#c8f55a]/60"
             disabled={!canAdd}
           />
           <button

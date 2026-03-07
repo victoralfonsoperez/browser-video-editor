@@ -9,6 +9,9 @@
 // ---------------------------------------------------------------------------
 // Shared — strings that appear in more than one component
 // ---------------------------------------------------------------------------
+/** Maximum allowed video file size in bytes (500 MB). */
+export const MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024;
+
 export const SharedStrings = {
   btnPlay: '▶ Play',
   btnPause: '⏸ Pause',

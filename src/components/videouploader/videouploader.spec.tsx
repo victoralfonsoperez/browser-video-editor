@@ -1,6 +1,7 @@
 import { render, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import VideoUpload from './videouploader';
+import { MAX_FILE_SIZE_BYTES } from '../../constants/ui';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -43,12 +44,12 @@ describe('VideoUpload — file handling', () => {
     expect(onVideoLoaded).not.toHaveBeenCalled();
   });
 
-  it('shows an alert and does not call onVideoLoaded when a video file exceeds 1.5 GB', () => {
+  it('shows an alert and does not call onVideoLoaded when a video file exceeds the size limit', () => {
     const onVideoLoaded = vi.fn();
     const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
     render(<VideoUpload onVideoLoaded={onVideoLoaded} />);
     const file = new File(['x'], 'big.mp4', { type: 'video/mp4' });
-    Object.defineProperty(file, 'size', { value: 1501 * 1024 * 1024, configurable: true });
+    Object.defineProperty(file, 'size', { value: MAX_FILE_SIZE_BYTES + 1, configurable: true });
     Object.defineProperty(getInput(), 'files', { value: [file], configurable: true });
     fireEvent.change(getInput());
     expect(alertMock).toHaveBeenCalledTimes(1);
@@ -56,11 +57,11 @@ describe('VideoUpload — file handling', () => {
     alertMock.mockRestore();
   });
 
-  it('accepts video files right at the 1.5 GB limit', () => {
+  it('accepts video files right at the size limit', () => {
     const onVideoLoaded = vi.fn();
     render(<VideoUpload onVideoLoaded={onVideoLoaded} />);
     const file = new File(['x'], 'max.mp4', { type: 'video/mp4' });
-    Object.defineProperty(file, 'size', { value: 1500 * 1024 * 1024, configurable: true });
+    Object.defineProperty(file, 'size', { value: MAX_FILE_SIZE_BYTES, configurable: true });
     Object.defineProperty(getInput(), 'files', { value: [file], configurable: true });
     fireEvent.change(getInput());
     expect(onVideoLoaded).toHaveBeenCalledWith(file);

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
 import { useTour, TOUR_KEY } from './hooks/useTour';
 import { TourOverlay } from './components/onboarding/TourOverlay';
-import { AppStrings, HighlightListStrings } from './constants/ui';
+import { AppStrings, HighlightListStrings, MAX_FILE_SIZE_BYTES } from './constants/ui';
 import { extractGoogleDriveFileId, buildProxiedGoogleDriveUrl } from './utils/googleDrive';
 import VideoPlayer from './components/videoplayer/videoplayer';
 import Timeline from './components/timeline/timeline';
@@ -58,7 +58,7 @@ function App() {
       showToast(AppStrings.alertNotVideoFile, 'warning');
       return;
     }
-    if (file.size > 1500 * 1024 * 1024) { showToast(AppStrings.alertFileTooLarge, 'error'); return; }
+    if (file.size > MAX_FILE_SIZE_BYTES) { showToast(AppStrings.alertFileTooLarge, 'error'); return; }
     if (videoURL) URL.revokeObjectURL(videoURL);
     setVideoFile(file);
     setVideoURL(URL.createObjectURL(file));

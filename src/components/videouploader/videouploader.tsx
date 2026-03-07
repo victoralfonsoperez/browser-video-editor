@@ -1,13 +1,13 @@
 import { type ChangeEvent } from 'react';
+import { MAX_FILE_SIZE_BYTES } from '../../constants/ui';
 
 function VideoUpload({ onVideoLoaded }: { onVideoLoaded: (file: File) => void }) {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    
+
     if (file && file.type.startsWith('video/')) {
-      // Basic validation
-      if (file.size > 1500 * 1024 * 1024) { // 1.5GB
-        alert('File too large. Maximum size is 1.5GB');
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        alert('File too large (max 500MB)');
         return;
       }
       

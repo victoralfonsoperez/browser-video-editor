@@ -46,7 +46,7 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
               if (e.key === 'Enter') commitRename();
               if (e.key === 'Escape') { setEditValue(highlight.label); setIsEditing(false); }
             }}
-            className="w-full rounded border border-[#f59e0b]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-sm text-[#ccc] outline-none focus:border-[#f59e0b]"
+            className="w-full rounded border border-[#f59e0b]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-sm text-[#ccc] focus:border-[#f59e0b]"
           />
         ) : (
           <button

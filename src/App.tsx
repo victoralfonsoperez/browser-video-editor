@@ -152,6 +152,11 @@ function App() {
 
   useEffect(() => { return () => { if (videoURL) URL.revokeObjectURL(videoURL); }; }, [videoURL]);
 
+  const preloadFFmpeg = ffmpeg.preload;
+  useEffect(() => {
+    preloadFFmpeg();
+  }, [preloadFFmpeg]);
+
   useEffect(() => {
     if (isVideoLoaded && !hasAutoTriggeredTourRef.current && !localStorage.getItem(TOUR_KEY)) {
       hasAutoTriggeredTourRef.current = true;

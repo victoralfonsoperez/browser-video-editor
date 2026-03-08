@@ -17,6 +17,7 @@ export interface UseFFmpegReturn {
   exportClip: (videoSource: File | string, clip: Clip, options?: ExportOptions) => Promise<void>;
   exportAllClips: (videoSource: File | string, clips: Clip[], options?: ExportOptions) => Promise<void>;
   exportingClipId: string | null;
+  preload: () => void;
 }
 
 const RESET_DELAY_MS = 2000;
@@ -172,6 +173,15 @@ export function useFFmpeg(): UseFFmpegReturn {
     return ffmpeg;
   }, []);
 
+  const preload = useCallback(() => {
+    if (ffmpegRef.current?.loaded) return;
+    loadFFmpeg().then(() => {
+      setStatus('idle');
+    }).catch(() => {
+      // Preload failure is silent — loading will retry on first export
+    });
+  }, [loadFFmpeg]);
+
   const scheduleReset = useCallback(() => {
     setTimeout(() => {
       setStatus('idle');
@@ -319,5 +329,5 @@ export function useFFmpeg(): UseFFmpegReturn {
     }
   }, [status, loadFFmpeg, scheduleReset]);
 
-  return { status, progress, error, exportClip, exportAllClips, exportingClipId };
+  return { status, progress, error, exportClip, exportAllClips, exportingClipId, preload };
 }

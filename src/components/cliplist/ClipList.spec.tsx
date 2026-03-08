@@ -24,6 +24,7 @@ const makeFFmpeg = (overrides: Partial<UseFFmpegReturn> = {}): UseFFmpegReturn =
   exportClip: vi.fn().mockResolvedValue(undefined),
   exportAllClips: vi.fn().mockResolvedValue(undefined),
   exportingClipId: null,
+  preload: vi.fn(),
   ...overrides,
 });
 

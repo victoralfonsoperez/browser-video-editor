@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Video Editor — Trim, clip & export videos in your browser</title>
+  <meta name="description" content="A free, open-source video editor that runs entirely in your browser. No uploads, no servers — your files never leave your device.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #111114;
+      --bg-card: #1a1a1e;
+      --bg-hover: #2a2a2e;
+      --accent: #c8f55a;
+      --accent-hover: #d8ff70;
+      --text: #e0e0e0;
+      --text-muted: #999;
+      --text-dim: #666;
+      --border: #333;
+      --max-width: 960px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-hover); }
+
+    /* --- Hero --- */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 60px;
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      padding: 4px 14px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 6vw, 56px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 36px;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: var(--accent);
+      color: #111;
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 14px 36px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .cta-button:hover {
+      background: var(--accent-hover);
+      color: #111;
+      transform: translateY(-1px);
+    }
+
+    /* --- Demo --- */
+    .demo {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px 60px;
+    }
+
+    .demo h2 {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .demo-container {
+      position: relative;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 16 / 9;
+    }
+
+    .demo-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .demo-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    .demo-fallback-icon {
+      font-size: 48px;
+      opacity: 0.4;
+    }
+
+    /* --- Features --- */
+    .features {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 20px 24px 80px;
+    }
+
+    .features h2 {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px 24px;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--accent);
+    }
+
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* --- Tech --- */
+    .tech {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      text-align: center;
+    }
+
+    .tech-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      list-style: none;
+    }
+
+    .tech-list li {
+      font-size: 13px;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 14px;
+      background: var(--bg-card);
+    }
+
+    /* --- Footer --- */
+    .footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+
+    .footer a { color: var(--text-muted); }
+    .footer a:hover { color: var(--accent); }
+
+    /* --- Responsive --- */
+    @media (max-width: 600px) {
+      .hero { padding: 48px 20px 40px; }
+      .features-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <span class="hero-badge">Open Source</span>
+    <h1>Browser Video Editor</h1>
+    <p>Trim, clip, and export videos entirely in your browser. No uploads, no servers — your files never leave your device.</p>
+    <a class="cta-button" href="https://github.com/victoralfonsoperez/browser-video-editor">Launch Editor</a>
+  </section>
+
+  <!-- Demo -->
+  <section class="demo">
+    <h2>See it in action</h2>
+    <div class="demo-container" id="demo-container">
+      <video id="demo-video" controls playsinline preload="metadata" style="display:none;">
+        <source src="demo.mp4" type="video/mp4">
+      </video>
+      <div class="demo-fallback" id="demo-fallback">
+        <div class="demo-fallback-icon">&#9654;</div>
+        <span>Demo video coming soon</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <h2>Features</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">&#128274;</div>
+        <h3>100% Private</h3>
+        <p>All processing happens locally with FFmpeg WebAssembly. Your videos are never uploaded anywhere.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#127916;</div>
+        <h3>Multiple Formats</h3>
+        <p>Export as MP4, WebM, MOV, or GIF with configurable quality and resolution settings.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#9986;</div>
+        <h3>Multi-Clip Workflow</h3>
+        <p>Create multiple named clips from a single video, reorder them, and batch export with a queue.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#9000;</div>
+        <h3>Keyboard Shortcuts</h3>
+        <p>Professional editing shortcuts — J/K/L for playback, I/O for in/out points, comma/period for frame stepping.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128421;</div>
+        <h3>Free &amp; Open Source</h3>
+        <p>No sign-up, no watermarks, no limits. Open source on GitHub under a permissive license.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128241;</div>
+        <h3>Works Everywhere</h3>
+        <p>Responsive design for desktop, tablet, and mobile with touch-optimized interactions.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech stack -->
+  <section class="tech">
+    <ul class="tech-list">
+      <li>React 19</li>
+      <li>TypeScript</li>
+      <li>FFmpeg.wasm</li>
+      <li>Vite 7</li>
+      <li>Tailwind CSS v4</li>
+      <li>Vitest</li>
+    </ul>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>
+      Built by <a href="https://github.com/victoralfonsoperez">Victor P&eacute;rez</a>
+      &middot;
+      <a href="https://github.com/victoralfonsoperez/browser-video-editor">GitHub</a>
+    </p>
+  </footer>
+
+  <script>
+    // Show video element if demo.mp4 loads successfully, hide fallback
+    var video = document.getElementById('demo-video');
+    var fallback = document.getElementById('demo-fallback');
+    video.addEventListener('loadedmetadata', function () {
+      video.style.display = 'block';
+      fallback.style.display = 'none';
+    });
+    video.addEventListener('error', function () {
+      video.style.display = 'none';
+      fallback.style.display = 'flex';
+    });
+    // Trigger load attempt
+    video.load();
+  </script>
+
+</body>
+</html>

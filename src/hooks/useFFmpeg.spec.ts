@@ -352,3 +352,95 @@ describe('useFFmpeg — exportAllClips', () => {
     expect(result.current.error).toBeNull();
   });
 });
+
+describe('useFFmpeg — preload', () => {
+  it('loads FFmpeg and resets status to idle', async () => {
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      result.current.preload();
+    });
+
+    expect(result.current.status).toBe('idle');
+  });
+
+  it('calls ffmpeg.load with coreURL and wasmURL', async () => {
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    const loadMock = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(FFmpeg).mockImplementationOnce(function (this) {
+      this.loaded = false;
+      this.on = vi.fn();
+      this.load = loadMock;
+      this.writeFile = vi.fn();
+      this.exec = vi.fn();
+      this.readFile = vi.fn();
+      this.deleteFile = vi.fn();
+    });
+
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      result.current.preload();
+    });
+
+    expect(loadMock).toHaveBeenCalledWith({
+      coreURL: 'mock-core-url',
+      wasmURL: 'mock-wasm-url',
+    });
+  });
+
+  it('does not reload if already loaded', async () => {
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    const shared = { loaded: false };
+    const loadMock = vi.fn<() => Promise<void>>().mockImplementation(async () => { shared.loaded = true; });
+    vi.mocked(FFmpeg).mockImplementationOnce(function (this) {
+      Object.defineProperty(this, 'loaded', {
+        get: () => shared.loaded,
+        set: (v: boolean) => { shared.loaded = v; },
+      });
+      this.on = vi.fn();
+      this.load = loadMock;
+      this.writeFile = vi.fn().mockResolvedValue(undefined);
+      this.exec = vi.fn().mockResolvedValue(0);
+      this.readFile = vi.fn().mockResolvedValue(new Uint8Array([0, 1, 2]));
+      this.deleteFile = vi.fn().mockResolvedValue(undefined);
+    });
+
+    const { result } = renderHook(() => useFFmpeg());
+
+    // First preload triggers load
+    await act(async () => {
+      result.current.preload();
+    });
+    expect(loadMock).toHaveBeenCalledTimes(1);
+
+    // Second preload should skip since already loaded
+    await act(async () => {
+      result.current.preload();
+    });
+    expect(loadMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('silently ignores preload failures', async () => {
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    vi.mocked(FFmpeg).mockImplementationOnce(function (this) {
+      this.loaded = false;
+      this.on = vi.fn();
+      this.load = vi.fn().mockRejectedValue(new Error('network error'));
+      this.writeFile = vi.fn();
+      this.exec = vi.fn();
+      this.readFile = vi.fn();
+      this.deleteFile = vi.fn();
+    });
+
+    const { result } = renderHook(() => useFFmpeg());
+
+    await act(async () => {
+      result.current.preload();
+    });
+
+    // Should not set error status — failure is silent
+    expect(result.current.status).toBe('loading');
+    expect(result.current.error).toBeNull();
+  });
+});

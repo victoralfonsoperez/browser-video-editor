@@ -392,7 +392,7 @@ describe('useFFmpeg — preload', () => {
   it('does not reload if already loaded', async () => {
     const { FFmpeg } = await import('@ffmpeg/ffmpeg');
     const shared = { loaded: false };
-    const loadMock = vi.fn<() => Promise<void>>().mockImplementation(async () => { shared.loaded = true; });
+    const loadMock = vi.fn().mockImplementation(async () => { shared.loaded = true; });
     vi.mocked(FFmpeg).mockImplementationOnce(function (this) {
       Object.defineProperty(this, 'loaded', {
         get: () => shared.loaded,

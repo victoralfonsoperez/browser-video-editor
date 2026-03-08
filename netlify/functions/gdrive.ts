@@ -1,5 +1,3 @@
-import type { Context } from "@netlify/functions";
-
 /** Maps a filename extension to a video MIME type. */
 function videoMimeFromDisposition(disposition: string): string | null {
   const m = disposition.match(/filename[^;=\n]*=\s*["']?([^"';\n]+)["']?/);
@@ -119,7 +117,7 @@ async function followRedirects(
   });
 }
 
-export default async (req: Request, _context: Context) => {
+export default async (req: Request) => {
   const url = new URL(req.url);
   // Strip the /api/gdrive prefix to get the Google Drive path
   const gdrivePath = url.pathname.replace(/^\/api\/gdrive/, '') || '/';

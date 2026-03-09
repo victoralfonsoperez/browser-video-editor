@@ -230,7 +230,7 @@ describe('ClipList — per-clip export', () => {
     const ffmpeg = makeFFmpeg({ exportClip });
     render(<ClipList {...baseProps} clips={[clip]} videoSource={mockFile} ffmpeg={ffmpeg} />);
     await userEvent.click(screen.getByTitle('Export this clip instantly'));
-    expect(exportClip).toHaveBeenCalledWith(mockFile, clip, DEFAULT_EXPORT_OPTIONS);
+    expect(exportClip).toHaveBeenCalledWith(mockFile, clip, DEFAULT_EXPORT_OPTIONS, undefined);
   });
 
   it('disables the ⬇ button while an export is in progress', () => {
@@ -274,7 +274,7 @@ describe('ClipList — Export All', () => {
     const ffmpeg = makeFFmpeg({ exportAllClips });
     render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} ffmpeg={ffmpeg} />);
     await userEvent.click(screen.getByRole('button', { name: /export all/i }));
-    expect(exportAllClips).toHaveBeenCalledWith(mockFile, clips, DEFAULT_EXPORT_OPTIONS);
+    expect(exportAllClips).toHaveBeenCalledWith(mockFile, clips, DEFAULT_EXPORT_OPTIONS, undefined);
   });
 
   it('disables Export All while another export is running', () => {

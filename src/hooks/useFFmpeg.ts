@@ -15,8 +15,8 @@ export interface UseFFmpegReturn {
   progress: number;
   error: string | null;
   loaded: boolean;
-  exportClip: (videoSource: File | string, clip: Clip, options?: ExportOptions) => Promise<void>;
-  exportAllClips: (videoSource: File | string, clips: Clip[], options?: ExportOptions) => Promise<void>;
+  exportClip: (videoSource: File | string, clip: Clip, options?: ExportOptions, filenameHint?: string | null) => Promise<void>;
+  exportAllClips: (videoSource: File | string, clips: Clip[], options?: ExportOptions, filenameHint?: string | null) => Promise<void>;
   exportingClipId: string | null;
   preload: () => void;
 }
@@ -120,10 +120,13 @@ async function exportGif(
   await ffmpeg.deleteFile(paletteName);
 }
 
-function getInputName(source: File | string): string {
-  const ext = source instanceof File
-    ? (source.name.split('.').pop() ?? 'mp4')
-    : 'mp4';
+function getInputName(source: File | string, filenameHint?: string | null): string {
+  let ext = 'mp4';
+  if (source instanceof File) {
+    ext = source.name.split('.').pop() ?? 'mp4';
+  } else if (filenameHint) {
+    ext = filenameHint.split('.').pop() ?? 'mp4';
+  }
   return `input.${ext}`;
 }
 
@@ -197,6 +200,7 @@ export function useFFmpeg(): UseFFmpegReturn {
     videoSource: File | string,
     clip: Clip,
     options: ExportOptions = DEFAULT_EXPORT_OPTIONS,
+    filenameHint?: string | null,
   ): Promise<void> => {
     if (status === 'loading' || status === 'processing') return;
 
@@ -208,7 +212,7 @@ export function useFFmpeg(): UseFFmpegReturn {
       const ffmpeg = await loadFFmpeg();
       setStatus('processing');
 
-      const inputName = getInputName(videoSource);
+      const inputName = getInputName(videoSource, filenameHint);
       const inputExt = inputName.split('.').pop()!;
       const outputExt = getOutputExt(options.format);
       const safeName = clip.name.replace(/[^a-z0-9_-]/gi, '_');
@@ -255,6 +259,7 @@ export function useFFmpeg(): UseFFmpegReturn {
     videoSource: File | string,
     clips: Clip[],
     options: ExportOptions = DEFAULT_EXPORT_OPTIONS,
+    filenameHint?: string | null,
   ): Promise<void> => {
     if (status === 'loading' || status === 'processing') return;
     if (clips.length === 0) return;
@@ -267,7 +272,7 @@ export function useFFmpeg(): UseFFmpegReturn {
       const ffmpeg = await loadFFmpeg();
       setStatus('processing');
 
-      const inputName = getInputName(videoSource);
+      const inputName = getInputName(videoSource, filenameHint);
       const inputExt = inputName.split('.').pop()!;
       const outputExt = getOutputExt(options.format);
 

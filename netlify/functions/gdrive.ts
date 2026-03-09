@@ -1,8 +1,14 @@
+/** Extracts the filename from a content-disposition header value. */
+function filenameFromDisposition(disposition: string): string | null {
+  const m = disposition.match(/filename[^;=\n]*=\s*["']?([^"';\n]+)["']?/);
+  return m ? m[1].trim() : null;
+}
+
 /** Maps a filename extension to a video MIME type. */
 function videoMimeFromDisposition(disposition: string): string | null {
-  const m = disposition.match(/filename[^;=\n]*=\s*["']?([^"';\n]+)["']?/);
-  if (!m) return null;
-  const ext = m[1].trim().split('.').pop()?.toLowerCase();
+  const name = filenameFromDisposition(disposition);
+  if (!name) return null;
+  const ext = name.split('.').pop()?.toLowerCase();
   const map: Record<string, string> = {
     mp4: 'video/mp4', m4v: 'video/mp4', m4p: 'video/mp4',
     mov: 'video/quicktime', qt: 'video/quicktime',
@@ -101,11 +107,17 @@ async function followRedirects(
     ? rawContentType
     : (videoMimeFromDisposition(disposition) ?? 'video/mp4');
 
+  const driveFilename = filenameFromDisposition(disposition);
+
   const responseHeaders: Record<string, string> = {
     'content-type': resolvedContentType,
     'accept-ranges': res.headers.get('accept-ranges') ?? 'bytes',
     'cross-origin-resource-policy': 'cross-origin',
   };
+  if (driveFilename) {
+    responseHeaders['x-drive-filename'] = driveFilename;
+    responseHeaders['access-control-expose-headers'] = 'X-Drive-Filename';
+  }
   const contentLength = res.headers.get('content-length');
   if (contentLength) responseHeaders['content-length'] = contentLength;
   const contentRange = res.headers.get('content-range');

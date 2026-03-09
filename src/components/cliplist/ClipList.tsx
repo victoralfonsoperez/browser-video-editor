@@ -24,6 +24,7 @@ interface ClipListProps {
   onUpdateClip: (id: string, patch: Partial<Pick<Clip, 'name' | 'inPoint' | 'outPoint'>>) => void;
   onReorderClips: (fromIndex: number, toIndex: number) => void;
   onEnqueueClip: (clip: Clip, options: ExportOptions) => void;
+  filenameHint?: string | null;
 }
 
 /** Small inline badge showing format · quality */
@@ -346,6 +347,7 @@ export function ClipList({
   isAddingClip = false,
   onAddClip, onRemoveClip, onSeekToClip, onPreviewClip, onUpdateClip, onReorderClips,
   onEnqueueClip,
+  filenameHint,
 }: ClipListProps) {
   const [clipName, setClipName] = useState('');
   const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
@@ -469,7 +471,7 @@ export function ClipList({
     if (isGif(globalOptions)) {
       setGifExportAllPending(true);
     } else {
-      if (videoSource) ffmpeg.exportAllClips(videoSource, clips, globalOptions);
+      if (videoSource) ffmpeg.exportAllClips(videoSource, clips, globalOptions, filenameHint);
     }
   };
 
@@ -495,7 +497,7 @@ export function ClipList({
         <GifWarningDialog
           onConfirm={() => {
             setGifExportAllPending(false);
-            if (videoSource) ffmpeg.exportAllClips(videoSource, clips, globalOptions);
+            if (videoSource) ffmpeg.exportAllClips(videoSource, clips, globalOptions, filenameHint);
           }}
           onCancel={() => setGifExportAllPending(false)}
         />
@@ -574,7 +576,7 @@ export function ClipList({
                 onRename={(name) => onUpdateClip(clip.id, { name })}
                 onEditPoints={() => onSeekToClip(clip)}
                 onEnqueue={(options) => onEnqueueClip(clip, options)}
-                onInstantExport={(options) => { if (videoSource) ffmpeg.exportClip(videoSource, clip, options); }}
+                onInstantExport={(options) => { if (videoSource) ffmpeg.exportClip(videoSource, clip, options, filenameHint); }}
                 onMoveUp={i > 0 ? () => onReorderClips(i, i - 1) : null}
                 onMoveDown={i < clips.length - 1 ? () => onReorderClips(i, i + 1) : null}
               />

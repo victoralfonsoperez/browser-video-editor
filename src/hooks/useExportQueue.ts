@@ -118,6 +118,7 @@ function reducer(state: QueueState, action: QueueAction): QueueState {
 export function useExportQueue(
   videoSource: File | string | null,
   ffmpeg: UseFFmpegReturn,
+  filenameHint?: string | null,
 ): UseExportQueueReturn {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { queue, isStarted, isProcessing } = state;
@@ -161,13 +162,13 @@ export function useExportQueue(
 
     dispatch({ type: 'PROCESS_START', queueId });
 
-    ffmpeg.exportClip(videoSource, clip, options)
+    ffmpeg.exportClip(videoSource, clip, options, filenameHint)
       .then(() => dispatch({ type: 'PROCESS_DONE', queueId }))
       .catch((err: unknown) => {
         dispatch({ type: 'PROCESS_ERROR', queueId, error: getErrorMessage(err) });
       })
       .finally(() => dispatch({ type: 'PROCESS_FINISH' }));
-  }, [queue, isStarted, isProcessing, videoSource, ffmpeg]);
+  }, [queue, isStarted, isProcessing, videoSource, ffmpeg, filenameHint]);
 
   return { queue, isRunning, isStarted, enqueue, remove, reorder, start, pause, clear, retry };
 }

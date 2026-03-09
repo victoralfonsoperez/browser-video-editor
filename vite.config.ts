@@ -5,11 +5,17 @@ import { defineConfig, type Plugin } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
+/** Extracts the filename from a content-disposition header value. */
+function filenameFromDisposition(disposition: string): string | null {
+  const m = disposition.match(/filename[^;=\n]*=\s*["']?([^"';\n]+)["']?/)
+  return m ? m[1].trim() : null
+}
+
 /** Maps a filename extension to a video MIME type. */
 function videoMimeFromDisposition(disposition: string): string | null {
-  const m = disposition.match(/filename[^;=\n]*=\s*["']?([^"';\n]+)["']?/)
-  if (!m) return null
-  const ext = m[1].trim().split('.').pop()?.toLowerCase()
+  const name = filenameFromDisposition(disposition)
+  if (!name) return null
+  const ext = name.split('.').pop()?.toLowerCase()
   const map: Record<string, string> = {
     mp4: 'video/mp4', m4v: 'video/mp4', m4p: 'video/mp4',
     mov: 'video/quicktime', qt: 'video/quicktime',
@@ -151,11 +157,17 @@ function googleDriveProxyPlugin(): Plugin {
                 ? rawContentType
                 : (videoMimeFromDisposition(disposition) ?? 'video/mp4')
 
+              const driveFilename = filenameFromDisposition(disposition)
+
               const responseHeaders: Record<string, string> = {
                 'content-type': resolvedContentType,
                 'accept-ranges': headers['accept-ranges'] ?? 'bytes',
                 // Required so COEP allows the response as a sub-resource
                 'cross-origin-resource-policy': 'cross-origin',
+              }
+              if (driveFilename) {
+                responseHeaders['x-drive-filename'] = driveFilename
+                responseHeaders['access-control-expose-headers'] = 'X-Drive-Filename'
               }
               if (headers['content-length'])
                 responseHeaders['content-length'] = headers['content-length']

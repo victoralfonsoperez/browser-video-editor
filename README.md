@@ -115,17 +115,24 @@ npm run test
 
 Dependency vulnerabilities are checked automatically via the [Security workflow](.github/workflows/security.yml) on every push, pull request, and weekly on Mondays (`npm audit --audit-level=high`).
 
+The workflow also runs:
+- **Gitleaks** — scans for accidentally committed secrets
+- **Semgrep** — static analysis with `p/react`, `p/typescript`, and `p/secrets` rulesets
+
 Run the audit locally:
 ```bash
 npm audit
 ```
 
-### Pending security tasks
+### Production headers (`public/_headers`)
 
-- [ ] Configure `Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy` headers for the production host (currently dev-only in `vite.config.ts`) — required for FFmpeg WASM multithreading in production
-- [ ] Add a `Content-Security-Policy` header for production
-- [ ] Evaluate adding [Semgrep](https://semgrep.dev) static analysis to the Security workflow (`p/react`, `p/typescript`, `p/secrets` rulesets)
-- [ ] Consider installing the [Socket.dev GitHub App](https://socket.dev) for supply-chain monitoring
+- [x] `Cross-Origin-Opener-Policy` / `Cross-Origin-Embedder-Policy` — required for FFmpeg WASM multithreading
+- [x] `Content-Security-Policy` — restricts scripts, styles, images, and connections to trusted origins
+- [x] `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` — standard hardening headers
+
+### Recommendations
+
+- Consider installing the [Socket.dev GitHub App](https://socket.dev) for supply-chain monitoring of npm dependencies
 
 ## 📊 Project Status
 

@@ -1,5 +1,7 @@
 # Browser Video Editor
 
+**[Live Demo](https://fancy-marshmallow-dfbde8.netlify.app/)**
+
 A browser-based video clip editor for creating and exporting clips from video files. Built with React and powered by client-side video processing — no server required.
 
 ## 🎯 Project Overview
@@ -32,6 +34,7 @@ All processing happens directly in the browser. No data is ever sent to a server
 - ✅ Keyboard shortcuts (Space/K, J/L, ←/→, ,/., I/O, M, Home/End)
 - ✅ Guided onboarding tour for first-time users
 - ✅ Toast notifications for errors, warnings, and feedback
+- ✅ FFmpeg WASM loading indicator (spinner during download, "Ready" confirmation)
 - ✅ Loading states and progress indicators throughout
 - ✅ Responsive design for mobile, tablet, and desktop
 - ✅ Mobile touch-optimized interactions (larger touch targets, swipe gestures)
@@ -46,14 +49,8 @@ All processing happens directly in the browser. No data is ever sent to a server
 ### Roadmap
 - [ ] Horizontally scrollable timeline for very long videos
 - [ ] Audio waveform visualization
-- [ ] Cross-browser testing and public deployment (Phase 6)
-- [ ] Transitions, text overlays, and video filters (future)
-
-### Future Enhancements (Post-MVP)
-- [ ] Audio waveform visualization
-- [ ] Transitions between clips
-- [ ] Text overlays
-- [ ] Filters and effects
+- [ ] Cross-browser testing and public deployment
+- [ ] Transitions between clips, text overlays, and filters/effects
 - [ ] Multi-track editing
 - [ ] Cloud storage integration
 - [ ] Collaborative editing
@@ -118,25 +115,30 @@ npm run test
 
 Dependency vulnerabilities are checked automatically via the [Security workflow](.github/workflows/security.yml) on every push, pull request, and weekly on Mondays (`npm audit --audit-level=high`).
 
+The workflow also runs:
+- **Gitleaks** — scans for accidentally committed secrets
+- **Semgrep** — static analysis with `p/react`, `p/typescript`, and `p/secrets` rulesets
+
 Run the audit locally:
 ```bash
 npm audit
 ```
 
-### Pending security tasks
+### Production headers (`public/_headers`)
 
-- [ ] Configure `Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy` headers for the production host (currently dev-only in `vite.config.ts`) — required for FFmpeg WASM multithreading in production
-- [ ] Add a `Content-Security-Policy` header for production
-- [ ] Evaluate adding [Semgrep](https://semgrep.dev) static analysis to the Security workflow (`p/react`, `p/typescript`, `p/secrets` rulesets)
-- [ ] Consider installing the [Socket.dev GitHub App](https://socket.dev) for supply-chain monitoring
+- [x] `Cross-Origin-Opener-Policy` / `Cross-Origin-Embedder-Policy` — required for FFmpeg WASM multithreading
+- [x] `Content-Security-Policy` — restricts scripts, styles, images, and connections to trusted origins
+- [x] `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` — standard hardening headers
+
+### Recommendations
+
+- Consider installing the [Socket.dev GitHub App](https://socket.dev) for supply-chain monitoring of npm dependencies
 
 ## 📊 Project Status
 
-**Current Phase:** 5 of 6 — Polish & UX (~90% complete)
-**Overall Progress:** ~85%
 **Version:** 0.1.0
 **Started:** February 2026
-**Target Completion:** May–June 2026 (on track, likely to finish early)
+**Deployed:** [Netlify](https://fancy-marshmallow-dfbde8.netlify.app/)
 
 ---
 

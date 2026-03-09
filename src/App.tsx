@@ -30,6 +30,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<'file' | 'drive'>('file');
   const [driveInputUrl, setDriveInputUrl] = useState('');
   const [isDriveSource, setIsDriveSource] = useState(false);
+  const [driveFilename, setDriveFilename] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [previewClip, setPreviewClip] = useState<Clip | null>(null);
@@ -45,7 +46,9 @@ function App() {
   const isVideoLoaded = videoFile !== null || isDriveSource;
   const videoSource: File | string | null = videoFile ?? videoURL ?? null;
 
-  const exportQueue = useExportQueue(videoSource, ffmpeg);
+  const videoName = videoFile?.name ?? driveFilename ?? null;
+
+  const exportQueue = useExportQueue(videoSource, ffmpeg, driveFilename);
   const { tourState, startTour, nextStep, prevStep, closeTour } = useTour();
   // Declare ref BEFORE the useEffect that reads it (immutability rule)
   const hasAutoTriggeredTourRef = useRef<boolean>(false);
@@ -63,19 +66,30 @@ function App() {
     setVideoFile(file);
     setVideoURL(URL.createObjectURL(file));
     setIsDriveSource(false);
+    setDriveFilename(null);
     trim.clearMarkers();
     clearHighlights();
   };
 
-  const handleDriveLoad = () => {
+  const handleDriveLoad = async () => {
     const fileId = extractGoogleDriveFileId(driveInputUrl);
     if (!fileId) { showToast(AppStrings.errorInvalidDriveUrl, 'error'); return; }
     if (videoURL) URL.revokeObjectURL(videoURL);
+    const url = buildProxiedGoogleDriveUrl(fileId);
     setVideoFile(null);
-    setVideoURL(buildProxiedGoogleDriveUrl(fileId));
+    setDriveFilename(null);
+    setVideoURL(url);
     setIsDriveSource(true);
     trim.clearMarkers();
     clearHighlights();
+
+    try {
+      const res = await fetch(url, { method: 'HEAD' });
+      const name = res.headers.get('x-drive-filename');
+      if (name) setDriveFilename(name);
+    } catch {
+      // Filename fetch is best-effort; video still loads via the src attribute
+    }
   };
 
   const handleTimelineSeek = (newTime: number) => {
@@ -95,6 +109,7 @@ function App() {
     setVideoFile(null);
     setVideoURL(undefined);
     setIsDriveSource(false);
+    setDriveFilename(null);
     setDriveInputUrl('');
     clearHighlights();
   }, [videoURL, clearHighlights]);
@@ -112,7 +127,8 @@ function App() {
   };
 
   const handleExportHighlights = () => {
-    exportJSON(videoFile ? videoFile.name.replace(/\.[^.]+$/, '') : undefined);
+    const name = videoFile?.name ?? driveFilename;
+    exportJSON(name ? name.replace(/\.[^.]+$/, '') : undefined);
     showToast(HighlightListStrings.toastExportSuccess, 'success');
   };
 
@@ -251,7 +267,7 @@ function App() {
 
             {isVideoLoaded && (
               <button
-                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveInputUrl(''); clearHighlights(); }}
+                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveFilename(null); setDriveInputUrl(''); clearHighlights(); }}
                 className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer flex-1 mobile-landscape:flex-initial"
               >
                 <span className="hidden tablet:inline">{AppStrings.btnLoadDifferentVideo}</span>
@@ -322,6 +338,7 @@ function App() {
               ref={videoRef}
               videoURL={videoURL}
               videoFile={videoFile}
+              videoName={videoName}
               handleTimeUpdate={handleTimeUpdate}
               handleLoadMetadata={handleLoadedMetadata}
               currentTime={currentTime}
@@ -370,6 +387,7 @@ function App() {
             onReorderClips={trim.reorderClips}
             onPreviewClip={setPreviewClip}
             onEnqueueClip={exportQueue.enqueue}
+            filenameHint={driveFilename}
           />
         )}
       </div>

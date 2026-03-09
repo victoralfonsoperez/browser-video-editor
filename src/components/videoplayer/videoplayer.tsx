@@ -17,7 +17,7 @@ const MEDIA_ERROR_MESSAGES: Record<number, string> = {
   4: VideoPlayerStrings.errorVideoUnsupported,
 };
 
-const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined, videoFile: File | null, handleTimeUpdate: () => void, handleLoadMetadata: (value: number) => void, currentTime: number, isModalOpen: boolean, onVideoError?: () => void }>(({ videoURL, videoFile, currentTime, handleTimeUpdate, handleLoadMetadata, isModalOpen, onVideoError }, forwardedRef) => {
+const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined, videoFile: File | null, videoName: string | null, handleTimeUpdate: () => void, handleLoadMetadata: (value: number) => void, currentTime: number, isModalOpen: boolean, onVideoError?: () => void }>(({ videoURL, videoFile, videoName, currentTime, handleTimeUpdate, handleLoadMetadata, isModalOpen, onVideoError }, forwardedRef) => {
   const ref = forwardedRef as RefObject<HTMLVideoElement>;
   const { showToast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -123,7 +123,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
     <div className="w-full max-w-4xl mx-auto">
       {/* File info */}
       <div className="mb-2 flex flex-wrap gap-x-2 tablet:gap-x-4 gap-y-1 text-xs tablet:text-sm text-[#aaa]">
-        <span className="truncate max-w-full mobile-landscape:max-w-none"><strong className="text-[#ccc]">{VideoPlayerStrings.labelFile}</strong> {videoFile?.name ?? AppStrings.driveLabelSource}</span>
+        <span className="truncate max-w-full mobile-landscape:max-w-none"><strong className="text-[#ccc]">{VideoPlayerStrings.labelFile}</strong> {videoName ?? AppStrings.driveLabelSource}</span>
         {videoFile && <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelSize}</strong> {(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>}
         {videoFile && <span className="hidden mobile-landscape:inline"><strong className="text-[#ccc]">{VideoPlayerStrings.labelType}</strong> {videoFile.type}</span>}
         {videoMetadata && (

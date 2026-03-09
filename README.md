@@ -19,7 +19,7 @@ All processing happens directly in the browser. No data is ever sent to a server
 
 ### Implemented
 - ✅ Local file upload with format and size validation
-- ✅ Google Drive URL loading (server-side proxy for COEP compliance)
+- ✅ Google Drive URL loading (server-side proxy for COEP compliance, filename detection)
 - ✅ Multi-format video playback (MP4, WebM, MOV, and more)
 - ✅ Interactive timeline with auto-generated thumbnail strip
 - ✅ Draggable in/out point markers with keyboard shortcuts (I / O)

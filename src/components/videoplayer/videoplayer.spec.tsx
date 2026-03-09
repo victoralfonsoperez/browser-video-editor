@@ -13,6 +13,7 @@ beforeEach(() => {
 const defaultProps = {
   videoURL: 'blob:http://localhost/test-video',
   videoFile: new File([''], 'test-video.mp4', { type: 'video/mp4' }),
+  videoName: 'test-video.mp4',
   currentTime: 0,
   handleTimeUpdate: vi.fn(),
   handleLoadMetadata: vi.fn(),

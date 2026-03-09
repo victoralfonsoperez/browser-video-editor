@@ -1,5 +1,7 @@
 # Browser Video Editor
 
+**[Live Demo](https://fancy-marshmallow-dfbde8.netlify.app/)**
+
 A browser-based video clip editor for creating and exporting clips from video files. Built with React and powered by client-side video processing — no server required.
 
 ## 🎯 Project Overview
@@ -32,6 +34,7 @@ All processing happens directly in the browser. No data is ever sent to a server
 - ✅ Keyboard shortcuts (Space/K, J/L, ←/→, ,/., I/O, M, Home/End)
 - ✅ Guided onboarding tour for first-time users
 - ✅ Toast notifications for errors, warnings, and feedback
+- ✅ FFmpeg WASM loading indicator (spinner during download, "Ready" confirmation)
 - ✅ Loading states and progress indicators throughout
 - ✅ Responsive design for mobile, tablet, and desktop
 - ✅ Mobile touch-optimized interactions (larger touch targets, swipe gestures)
@@ -46,14 +49,8 @@ All processing happens directly in the browser. No data is ever sent to a server
 ### Roadmap
 - [ ] Horizontally scrollable timeline for very long videos
 - [ ] Audio waveform visualization
-- [ ] Cross-browser testing and public deployment (Phase 6)
-- [ ] Transitions, text overlays, and video filters (future)
-
-### Future Enhancements (Post-MVP)
-- [ ] Audio waveform visualization
-- [ ] Transitions between clips
-- [ ] Text overlays
-- [ ] Filters and effects
+- [ ] Cross-browser testing and public deployment
+- [ ] Transitions between clips, text overlays, and filters/effects
 - [ ] Multi-track editing
 - [ ] Cloud storage integration
 - [ ] Collaborative editing
@@ -132,11 +129,9 @@ npm audit
 
 ## 📊 Project Status
 
-**Current Phase:** 5 of 6 — Polish & UX (~90% complete)
-**Overall Progress:** ~85%
 **Version:** 0.1.0
 **Started:** February 2026
-**Target Completion:** May–June 2026 (on track, likely to finish early)
+**Deployed:** [Netlify](https://fancy-marshmallow-dfbde8.netlify.app/)
 
 ---
 

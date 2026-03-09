@@ -307,7 +307,10 @@ export function useFFmpeg(): UseFFmpegReturn {
       const concatList = segmentNames.map((n) => `file '${n}'`).join('\n');
       await ffmpeg.writeFile('concat_list.txt', new TextEncoder().encode(concatList));
 
-      const outputName = `output.${outputExt}`;
+      const baseName = filenameHint
+        ? filenameHint.replace(/\.[^.]+$/, '').replace(/[^a-z0-9_-]/gi, '_')
+        : 'output';
+      const outputName = `${baseName}.${outputExt}`;
       await ffmpeg.exec([
         '-f', 'concat',
         '-safe', '0',

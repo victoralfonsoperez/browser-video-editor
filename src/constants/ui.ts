@@ -43,6 +43,8 @@ export const AppStrings = {
   btnLoadFromDrive: 'Load',
   errorInvalidDriveUrl: 'Not a valid Google Drive sharing URL',
   driveLabelSource: 'Google Drive',
+  driveFilenamePlaceholder: 'Enter a filename for exports…',
+  driveFilenameLabel: 'Filename not detected.',
 } as const;
 
 // ---------------------------------------------------------------------------

@@ -46,9 +46,12 @@ function App() {
   const isVideoLoaded = videoFile !== null || isDriveSource;
   const videoSource: File | string | null = videoFile ?? videoURL ?? null;
 
-  const videoName = videoFile?.name ?? driveFilename ?? null;
+  const [customFilename, setCustomFilename] = useState('');
+  const needsFilename = isDriveSource && !driveFilename;
+  const effectiveFilenameHint = driveFilename ?? (customFilename.trim() || null);
+  const videoName = videoFile?.name ?? effectiveFilenameHint ?? null;
 
-  const exportQueue = useExportQueue(videoSource, ffmpeg, driveFilename);
+  const exportQueue = useExportQueue(videoSource, ffmpeg, effectiveFilenameHint);
   const { tourState, startTour, nextStep, prevStep, closeTour } = useTour();
   // Declare ref BEFORE the useEffect that reads it (immutability rule)
   const hasAutoTriggeredTourRef = useRef<boolean>(false);
@@ -67,6 +70,7 @@ function App() {
     setVideoURL(URL.createObjectURL(file));
     setIsDriveSource(false);
     setDriveFilename(null);
+    setCustomFilename('');
     trim.clearMarkers();
     clearHighlights();
   };
@@ -78,6 +82,7 @@ function App() {
     const url = buildProxiedGoogleDriveUrl(fileId);
     setVideoFile(null);
     setDriveFilename(null);
+    setCustomFilename('');
     setVideoURL(url);
     setIsDriveSource(true);
     trim.clearMarkers();
@@ -110,6 +115,7 @@ function App() {
     setVideoURL(undefined);
     setIsDriveSource(false);
     setDriveFilename(null);
+    setCustomFilename('');
     setDriveInputUrl('');
     clearHighlights();
   }, [videoURL, clearHighlights]);
@@ -267,7 +273,7 @@ function App() {
 
             {isVideoLoaded && (
               <button
-                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveFilename(null); setDriveInputUrl(''); clearHighlights(); }}
+                onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveFilename(null); setCustomFilename(''); setDriveInputUrl(''); clearHighlights(); }}
                 className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer flex-1 mobile-landscape:flex-initial"
               >
                 <span className="hidden tablet:inline">{AppStrings.btnLoadDifferentVideo}</span>
@@ -345,6 +351,18 @@ function App() {
               isModalOpen={!!previewClip}
               onVideoError={handleVideoError}
             />
+            {needsFilename && (
+              <div className="flex items-center gap-2 mt-2 rounded border border-[#333] bg-[#1a1a1e] px-3 py-2">
+                <span className="text-xs text-[#999] shrink-0">{AppStrings.driveFilenameLabel}</span>
+                <input
+                  type="text"
+                  placeholder={AppStrings.driveFilenamePlaceholder}
+                  value={customFilename}
+                  onChange={(e) => setCustomFilename(e.target.value)}
+                  className="flex-1 rounded border border-[#333] bg-[#111] px-2 py-1 text-sm text-[#ccc] placeholder-[#444] focus:border-[#c8f55a]/60"
+                />
+              </div>
+            )}
             <Timeline
               currentTime={currentTime}
               duration={duration}
@@ -387,7 +405,7 @@ function App() {
             onReorderClips={trim.reorderClips}
             onPreviewClip={setPreviewClip}
             onEnqueueClip={exportQueue.enqueue}
-            filenameHint={driveFilename}
+            filenameHint={effectiveFilenameHint}
           />
         )}
       </div>

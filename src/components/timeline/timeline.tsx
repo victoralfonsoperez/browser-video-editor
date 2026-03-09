@@ -163,13 +163,29 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
         {/* Track */}
         <div
           ref={timelineRef}
-          className="relative h-[44px] tablet:h-[54px] w-full cursor-crosshair overflow-hidden"
+          className="relative h-[44px] tablet:h-[54px] w-full cursor-crosshair overflow-hidden focus:outline focus:outline-2 focus:outline-[#c8f55a]/60 focus:outline-offset-[-2px] rounded"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          tabIndex={0}
+          role="slider"
+          aria-label="Timeline scrubber"
+          aria-valuenow={Math.round(currentTime * 10) / 10}
+          aria-valuemin={0}
+          aria-valuemax={Math.round(duration * 10) / 10}
+          aria-valuetext={formatTime(currentTime)}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+              e.preventDefault();
+              e.stopPropagation();
+              const step = e.shiftKey ? 5 : 1;
+              const delta = e.key === 'ArrowLeft' ? -step : step;
+              onSeek(Math.max(0, Math.min(duration, currentTime + delta)));
+            }
+          }}
         >
           <div className="flex h-full gap-px bg-[#111]">
             {thumbnails.map((thumb) => (
@@ -220,12 +236,27 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           {/* In-point marker */}
           {trim.inPoint !== null && duration > 0 && (
             <div
-              className="absolute top-0 bottom-0 z-20 w-5 tablet:w-1 bg-[#c8f55a]/40 tablet:bg-[#c8f55a] cursor-ew-resize group touch-none"
+              className="absolute top-0 bottom-0 z-20 w-5 tablet:w-1 bg-[#c8f55a]/40 tablet:bg-[#c8f55a] cursor-ew-resize group touch-none focus:outline focus:outline-2 focus:outline-white/80 focus:outline-offset-1 rounded-sm"
               style={{ left: pct(trim.inPoint), transform: 'translateX(-50%)' }}
               onMouseDown={(e) => handleMarkerMouseDown(e, 'in')}
               onTouchStart={(e) => handleMarkerTouchStart(e, 'in')}
               title={TimelineStrings.titleInMarker}
               aria-label={TimelineStrings.titleInMarker}
+              tabIndex={0}
+              role="slider"
+              aria-valuenow={Math.round(trim.inPoint * 10) / 10}
+              aria-valuemin={0}
+              aria-valuemax={Math.round(duration * 10) / 10}
+              aria-valuetext={`In point: ${formatTime(trim.inPoint)}`}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const step = e.shiftKey ? 0.1 : 1;
+                  const delta = e.key === 'ArrowLeft' ? -step : step;
+                  trim.setIn(Math.max(0, Math.min(duration, trim.inPoint! + delta)));
+                }
+              }}
             >
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-5 tablet:w-3 tablet:h-3 bg-[#c8f55a] rounded-sm flex items-center justify-center">
                 <span className="text-[8px] text-black font-bold leading-none">I</span>
@@ -236,12 +267,27 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           {/* Out-point marker */}
           {trim.outPoint !== null && duration > 0 && (
             <div
-              className="absolute top-0 bottom-0 z-20 w-5 tablet:w-1 bg-[#f55a5a]/40 tablet:bg-[#f55a5a] cursor-ew-resize group touch-none"
+              className="absolute top-0 bottom-0 z-20 w-5 tablet:w-1 bg-[#f55a5a]/40 tablet:bg-[#f55a5a] cursor-ew-resize group touch-none focus:outline focus:outline-2 focus:outline-white/80 focus:outline-offset-1 rounded-sm"
               style={{ left: pct(trim.outPoint), transform: 'translateX(-50%)' }}
               onMouseDown={(e) => handleMarkerMouseDown(e, 'out')}
               onTouchStart={(e) => handleMarkerTouchStart(e, 'out')}
               title={TimelineStrings.titleOutMarker}
               aria-label={TimelineStrings.titleOutMarker}
+              tabIndex={0}
+              role="slider"
+              aria-valuenow={Math.round(trim.outPoint * 10) / 10}
+              aria-valuemin={0}
+              aria-valuemax={Math.round(duration * 10) / 10}
+              aria-valuetext={`Out point: ${formatTime(trim.outPoint)}`}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const step = e.shiftKey ? 0.1 : 1;
+                  const delta = e.key === 'ArrowLeft' ? -step : step;
+                  trim.setOut(Math.max(0, Math.min(duration, trim.outPoint! + delta)));
+                }
+              }}
             >
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-5 tablet:w-3 tablet:h-3 bg-[#f55a5a] rounded-sm flex items-center justify-center">
                 <span className="text-[8px] text-black font-bold leading-none">O</span>

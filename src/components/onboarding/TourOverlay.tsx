@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { TOUR_STEPS } from '../../hooks/useTour';
+import { FocusTrap } from '../common/FocusTrap';
 
 interface TourOverlayProps {
   step: number;
@@ -99,15 +100,6 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
     return () => clearTimeout(timer);
   }, [stepData.target]);
 
-  // Escape key to close
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   const isCentered = !stepData.target;
 
   return (
@@ -131,6 +123,7 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
       />
 
       {/* Card */}
+      <FocusTrap onEscape={onClose}>
       <div
         ref={cardRef}
         className="z-[72] rounded-lg border border-[#444] bg-[#1a1a1e] p-4 shadow-2xl"
@@ -188,6 +181,7 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
           </div>
         </div>
       </div>
+      </FocusTrap>
     </>
   );
 }

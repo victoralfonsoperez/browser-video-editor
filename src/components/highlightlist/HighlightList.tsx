@@ -68,7 +68,7 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
         </>
       )}
 
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity shrink-0">
         <button
           onClick={onSeek}
           className="rounded px-1.5 py-0.5 text-xs text-[#aaa] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer"

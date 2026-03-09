@@ -211,14 +211,24 @@ export function ExportQueueOverlay({
                   <span className="text-[8px] tablet:text-[9px] text-[#999] font-mono shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
 
                   {isPending && (
-                    <button
-                      onClick={() => onRemove(item.queueId)}
-                      className="opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 transition-opacity min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
-                      title={ExportQueueStrings.titleRemove}
-                      aria-label={ExportQueueStrings.titleRemove}
-                    >
-                      {SharedStrings.btnClose}
-                    </button>
+                    <div className="flex items-center gap-0.5 opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 tablet:focus-within:opacity-100 transition-opacity shrink-0">
+                      <span className="hidden tablet:flex flex-col">
+                        {i > 0 && queue[i - 1].status === 'pending' && (
+                          <button onClick={() => onReorder(i, i - 1)} className="rounded px-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer leading-tight" title="Move up" aria-label="Move item up">▲</button>
+                        )}
+                        {i < queue.length - 1 && queue[i + 1]?.status === 'pending' && (
+                          <button onClick={() => onReorder(i, i + 1)} className="rounded px-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer leading-tight" title="Move down" aria-label="Move item down">▼</button>
+                        )}
+                      </span>
+                      <button
+                        onClick={() => onRemove(item.queueId)}
+                        className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
+                        title={ExportQueueStrings.titleRemove}
+                        aria-label={ExportQueueStrings.titleRemove}
+                      >
+                        {SharedStrings.btnClose}
+                      </button>
+                    </div>
                   )}
                 </div>
 

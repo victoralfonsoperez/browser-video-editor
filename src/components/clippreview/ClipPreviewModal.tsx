@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { SharedStrings, ClipPreviewStrings } from '../../constants/ui';
 import { formatTime } from '../../utils/formatTime';
 import type { Clip } from '../../hooks/useTrimMarkers';
+import { FocusTrap } from '../common/FocusTrap';
 
 interface ClipPreviewModalProps {
   clip: Clip;
@@ -64,10 +65,9 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
     setIsPlaying(!isPlaying);
   }, [isPlaying, clip.inPoint, clip.outPoint]);
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts (Space to play/pause)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { onClose(); return; }
       if (e.key === ' ' || e.code === 'Space') {
         e.preventDefault();
         togglePlay();
@@ -75,7 +75,7 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isPlaying, onClose, togglePlay]);
+  }, [isPlaying, togglePlay]);
 
   const progress = clipDuration > 0
     ? Math.min(1, Math.max(0, (currentTime - clip.inPoint) / clipDuration))
@@ -86,6 +86,7 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
+      <FocusTrap onEscape={onClose}>
       <div className="relative w-full max-w-2xl mx-4 rounded-lg border border-[#333] bg-[#111114] shadow-2xl overflow-hidden">
 
         {/* Header */}
@@ -168,6 +169,7 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
           <kbd className="rounded bg-[#222] px-1 py-px text-[#999]">{ClipPreviewStrings.keyEsc}</kbd> {ClipPreviewStrings.hintClose}
         </div>
       </div>
+      </FocusTrap>
     </div>
   );
 }

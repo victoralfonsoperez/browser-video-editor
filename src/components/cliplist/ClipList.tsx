@@ -7,6 +7,7 @@ import type { ExportOptions } from '../../types/exportOptions';
 import { FORMAT_LABELS, QUALITY_LABELS, RESOLUTION_LABELS, isGif } from '../../types/exportOptions';
 import { ExportOptionsPanel } from '../exportoptions/ExportOptionsPanel';
 import { ProgressBar } from '../shared/ProgressBar';
+import { FocusTrap } from '../common/FocusTrap';
 
 interface ClipListProps {
   clips: Clip[];
@@ -39,26 +40,28 @@ function OptionsBadge({ options }: { options: ExportOptions }) {
 function GifWarningDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="w-72 rounded-lg border border-[#333] bg-[#1a1a1e] p-4 shadow-xl">
-        <p className="mb-1 text-sm font-semibold text-[#ccc]">{ClipListStrings.gifWarningHeading}</p>
-        <p className="mb-4 text-xs text-[#aaa]">
-          {ClipListStrings.gifWarningBody}
-        </p>
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={onCancel}
-            className="rounded border border-[#333] bg-[#111] px-3 py-1.5 text-xs text-[#aaa] hover:text-[#ccc] transition-colors cursor-pointer"
-          >
-            {SharedStrings.btnCancel}
-          </button>
-          <button
-            onClick={onConfirm}
-            className="rounded border border-[#f5a623]/40 bg-[#f5a623]/10 px-3 py-1.5 text-xs text-[#f5a623] hover:bg-[#f5a623]/20 transition-colors cursor-pointer"
-          >
-            {ClipListStrings.btnExportAnyway}
-          </button>
+      <FocusTrap onEscape={onCancel}>
+        <div className="w-72 rounded-lg border border-[#333] bg-[#1a1a1e] p-4 shadow-xl">
+          <p className="mb-1 text-sm font-semibold text-[#ccc]">{ClipListStrings.gifWarningHeading}</p>
+          <p className="mb-4 text-xs text-[#aaa]">
+            {ClipListStrings.gifWarningBody}
+          </p>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={onCancel}
+              className="rounded border border-[#333] bg-[#111] px-3 py-1.5 text-xs text-[#aaa] hover:text-[#ccc] transition-colors cursor-pointer"
+            >
+              {SharedStrings.btnCancel}
+            </button>
+            <button
+              onClick={onConfirm}
+              className="rounded border border-[#f5a623]/40 bg-[#f5a623]/10 px-3 py-1.5 text-xs text-[#f5a623] hover:bg-[#f5a623]/20 transition-colors cursor-pointer"
+            >
+              {ClipListStrings.btnExportAnyway}
+            </button>
+          </div>
         </div>
-      </div>
+      </FocusTrap>
     </div>
   );
 }
@@ -86,6 +89,8 @@ interface ClipRowProps {
   onEditPoints: () => void;
   onEnqueue: (options: ExportOptions) => void;
   onInstantExport: (options: ExportOptions) => void;
+  onMoveUp: (() => void) | null;
+  onMoveDown: (() => void) | null;
 }
 
 function ClipRow({
@@ -96,6 +101,7 @@ function ClipRow({
   onDragStart, onDragEnter, onDragEnd, onDrop,
   onTouchDragStart, onSwipeStart,
   onRemove, onSeek, onPreview, onRename, onEditPoints, onEnqueue, onInstantExport,
+  onMoveUp, onMoveDown,
 }: ClipRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(clip.name);
@@ -196,6 +202,14 @@ function ClipRow({
             onTouchStart={(e) => { e.stopPropagation(); onTouchDragStart(index, e.touches[0].clientY); }}
             aria-roledescription="sortable"
           >⠿</span>
+          <span className="hidden tablet:flex flex-col shrink-0 opacity-0 focus-within:opacity-100 group-hover:opacity-100 transition-opacity">
+            {onMoveUp && (
+              <button onClick={onMoveUp} className="rounded px-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer leading-tight" title="Move up" aria-label="Move clip up">▲</button>
+            )}
+            {onMoveDown && (
+              <button onClick={onMoveDown} className="rounded px-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer leading-tight" title="Move down" aria-label="Move clip down">▼</button>
+            )}
+          </span>
           <span className="text-[9px] tablet:text-[10px] text-[#999] font-mono w-3 tablet:w-4 shrink-0">{index + 1}</span>
 
           <div
@@ -235,7 +249,7 @@ function ClipRow({
           <span className="font-mono text-[10px] tablet:text-xs text-[#f55a5a] shrink-0 hidden mobile-landscape:inline">{formatTime(clip.outPoint)}</span>
           <span className="font-mono text-[10px] tablet:text-xs text-[#999] shrink-0">{formatTime(clipDuration)}</span>
 
-          <div className="flex items-center gap-0.5 tablet:gap-1 opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 transition-opacity shrink-0">
+          <div className="flex items-center gap-0.5 tablet:gap-1 opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 tablet:focus-within:opacity-100 transition-opacity shrink-0">
             <button onClick={onPreview} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden tablet:inline-flex" title={ClipListStrings.titlePreviewClip} aria-label={ClipListStrings.titlePreviewClip}>⬛▶</button>
             <button onClick={onSeek} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-flex" title={ClipListStrings.titleSeekToInPoint} aria-label={ClipListStrings.titleSeekToInPoint}>▶</button>
             <button onClick={onEditPoints} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-[#aaa] hover:text-[#c8f55a] hover:bg-[#2a2a2e] transition-colors cursor-pointer hidden mobile-landscape:inline-flex" title={ClipListStrings.titleEditPoints} aria-label={ClipListStrings.titleEditPoints}>✎</button>
@@ -561,6 +575,8 @@ export function ClipList({
                 onEditPoints={() => onSeekToClip(clip)}
                 onEnqueue={(options) => onEnqueueClip(clip, options)}
                 onInstantExport={(options) => { if (videoSource) ffmpeg.exportClip(videoSource, clip, options); }}
+                onMoveUp={i > 0 ? () => onReorderClips(i, i - 1) : null}
+                onMoveDown={i < clips.length - 1 ? () => onReorderClips(i, i + 1) : null}
               />
             ))}
           </div>

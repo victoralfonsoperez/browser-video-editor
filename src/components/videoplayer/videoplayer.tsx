@@ -77,6 +77,9 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
       if (!ref.current) return;
       if (isInputFocused(event)) return;
       if (isModalOpen) return;
+      // Skip arrow keys when a slider (e.g. timeline track or trim marker) is focused
+      const target = event.target as HTMLElement;
+      if (target?.getAttribute?.('role') === 'slider' && (event.code === 'ArrowLeft' || event.code === 'ArrowRight')) return;
       switch (event.code) {
         case 'Space': event.preventDefault(); togglePlay(); break;
         case 'ArrowLeft': event.preventDefault(); ref.current.currentTime = Math.max(0, currentTime - 5); break;

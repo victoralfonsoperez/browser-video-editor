@@ -355,6 +355,15 @@ function App() {
         )}
       </div>
 
+      {/* Footer */}
+      <footer className="mx-auto max-w-4xl mt-8 mb-2 flex items-center justify-center gap-2 text-[10px] tablet:text-xs text-[#666]">
+        <span>v0.1.0</span>
+        <span className="text-[#444]">·</span>
+        <span>Built by <a href="https://github.com/victoralfonsoperez" target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#c8f55a] transition-colors">Victor Pérez</a></span>
+        <span className="text-[#444]">·</span>
+        <a href="https://github.com/victoralfonsoperez/browser-video-editor" target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#c8f55a] transition-colors">GitHub</a>
+      </footer>
+
       {previewClip && videoURL && (
         <ClipPreviewModal
           clip={previewClip}

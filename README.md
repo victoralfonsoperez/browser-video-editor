@@ -37,17 +37,17 @@ All processing happens directly in the browser. No data is ever sent to a server
 - ✅ Mobile touch-optimized interactions (larger touch targets, swipe gestures)
 - ✅ ARIA attributes (`aria-expanded`, `aria-pressed`, `aria-label` on icon buttons)
 - ✅ Focus-visible indicators on all interactive elements
+- ✅ Keyboard-navigable timeline scrubbing (arrow keys ±1s, Shift ±5s)
+- ✅ Keyboard-accessible trim marker adjustment (arrow keys ±1s, Shift ±0.1s)
+- ✅ Keyboard alternative for clip/queue drag-to-reorder (▲/▼ buttons)
+- ✅ Hover-only action buttons visible on keyboard focus (`focus-within`)
+- ✅ Focus trap for modal dialogs (ClipPreview, GifWarning, Tour)
 
 ### Roadmap
 - [ ] Horizontally scrollable timeline for very long videos
 - [ ] Audio waveform visualization
 - [ ] Cross-browser testing and public deployment (Phase 6)
 - [ ] Transitions, text overlays, and video filters (future)
-- [ ] Keyboard-navigable timeline scrubbing (arrow keys)
-- [ ] Keyboard-accessible trim marker adjustment
-- [ ] Keyboard alternative for clip/queue drag-to-reorder
-- [ ] Make hover-only action buttons accessible to keyboard users
-- [ ] Focus trap for modal dialogs
 
 ### Future Enhancements (Post-MVP)
 - [ ] Audio waveform visualization
@@ -132,8 +132,9 @@ npm audit
 
 ## 📊 Project Status
 
-**Current Phase:** 5 of 6 — Polish & UX (~85% complete)
-**Overall Progress:** ~80%
+**Current Phase:** 5 of 6 — Polish & UX (~90% complete)
+**Overall Progress:** ~85%
+**Version:** 0.1.0
 **Started:** February 2026
 **Target Completion:** May–June 2026 (on track, likely to finish early)
 

@@ -14,6 +14,7 @@ export interface UseFFmpegReturn {
   status: FFmpegStatus;
   progress: number;
   error: string | null;
+  loaded: boolean;
   exportClip: (videoSource: File | string, clip: Clip, options?: ExportOptions) => Promise<void>;
   exportAllClips: (videoSource: File | string, clips: Clip[], options?: ExportOptions) => Promise<void>;
   exportingClipId: string | null;
@@ -156,6 +157,7 @@ export function useFFmpeg(): UseFFmpegReturn {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [exportingClipId, setExportingClipId] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   const loadFFmpeg = useCallback(async (): Promise<FFmpeg> => {
     if (ffmpegRef.current?.loaded) return ffmpegRef.current;
@@ -169,6 +171,7 @@ export function useFFmpeg(): UseFFmpegReturn {
 
     setStatus('loading');
     await ffmpeg.load({ coreURL, wasmURL });
+    setLoaded(true);
 
     return ffmpeg;
   }, []);
@@ -329,5 +332,5 @@ export function useFFmpeg(): UseFFmpegReturn {
     }
   }, [status, loadFFmpeg, scheduleReset]);
 
-  return { status, progress, error, exportClip, exportAllClips, exportingClipId, preload };
+  return { status, progress, error, loaded, exportClip, exportAllClips, exportingClipId, preload };
 }

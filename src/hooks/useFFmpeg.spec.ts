@@ -364,6 +364,17 @@ describe('useFFmpeg — preload', () => {
     expect(result.current.status).toBe('idle');
   });
 
+  it('sets loaded to true after successful preload', async () => {
+    const { result } = renderHook(() => useFFmpeg());
+    expect(result.current.loaded).toBe(false);
+
+    await act(async () => {
+      result.current.preload();
+    });
+
+    expect(result.current.loaded).toBe(true);
+  });
+
   it('calls ffmpeg.load with coreURL and wasmURL', async () => {
     const { FFmpeg } = await import('@ffmpeg/ffmpeg');
     const loadMock = vi.fn().mockResolvedValue(undefined);

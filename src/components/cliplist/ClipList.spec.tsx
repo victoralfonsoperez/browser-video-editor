@@ -21,6 +21,7 @@ const makeFFmpeg = (overrides: Partial<UseFFmpegReturn> = {}): UseFFmpegReturn =
   status: 'idle',
   progress: 0,
   error: null,
+  loaded: false,
   exportClip: vi.fn().mockResolvedValue(undefined),
   exportAllClips: vi.fn().mockResolvedValue(undefined),
   exportingClipId: null,

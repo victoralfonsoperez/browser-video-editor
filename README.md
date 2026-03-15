@@ -1,6 +1,6 @@
 # Browser Video Editor
 
-**[Live Demo](https://fancy-marshmallow-dfbde8.netlify.app/)**
+**[Live Demo](https://browsercut.netlify.app/)**
 
 A browser-based video clip editor for creating and exporting clips from video files. Built with React and powered by client-side video processing — no server required.
 
@@ -79,9 +79,9 @@ All processing happens directly in the browser. No data is ever sent to a server
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/victoralfonsoperez/browser-video-editor.git
+git clone https://github.com/victoralfonsoperez/browsercut.git
 
-cd browser-video-editor
+cd browsercut
 
 # Use the correct Node version (if using nvm)
 nvm use
@@ -138,7 +138,7 @@ npm audit
 
 **Version:** 0.1.0
 **Started:** February 2026
-**Deployed:** [Netlify](https://fancy-marshmallow-dfbde8.netlify.app/)
+**Deployed:** [Netlify](https://browsercut.netlify.app/)
 
 ---
 

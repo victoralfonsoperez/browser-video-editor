@@ -416,7 +416,7 @@ function App() {
         <span className="text-[#444]">·</span>
         <span>Built by <a href="https://github.com/victoralfonsoperez" target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#c8f55a] transition-colors">Victor Pérez</a></span>
         <span className="text-[#444]">·</span>
-        <a href="https://github.com/victoralfonsoperez/browser-video-editor" target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#c8f55a] transition-colors">GitHub</a>
+        <a href="https://github.com/victoralfonsoperez/browsercut" target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#c8f55a] transition-colors">GitHub</a>
       </footer>
 
       {previewClip && videoURL && (

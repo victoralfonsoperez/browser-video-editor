@@ -1,9 +1,14 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { HighlightList } from './HighlightList';
 import type { Highlight } from '../../types/highlights';
+
+/** Scopes queries to the full (tablet+) highlight rows, avoiding duplicates from the compact mobile list. */
+function fullList() {
+  return within(screen.getByTestId('highlight-list-full'));
+}
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -40,22 +45,25 @@ describe('HighlightList — empty state', () => {
 describe('HighlightList — display', () => {
   it('renders a point highlight with label and formatted time', () => {
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} />);
-    expect(screen.getByText('Opening Shot')).toBeInTheDocument();
-    expect(screen.getByText('0:10')).toBeInTheDocument();
+    const list = fullList();
+    expect(list.getByText('Opening Shot')).toBeInTheDocument();
+    expect(list.getByText('0:10')).toBeInTheDocument();
   });
 
   it('renders a range highlight with start time, end time, and duration', () => {
     render(<HighlightList {...baseProps} highlights={[rangeHighlight]} />);
-    expect(screen.getByText('Action Sequence')).toBeInTheDocument();
-    expect(screen.getByText('0:30')).toBeInTheDocument();
-    expect(screen.getByText('0:50')).toBeInTheDocument();
-    expect(screen.getByText('(0:20)')).toBeInTheDocument();
+    const list = fullList();
+    expect(list.getByText('Action Sequence')).toBeInTheDocument();
+    expect(list.getByText('0:30')).toBeInTheDocument();
+    expect(list.getByText('0:50')).toBeInTheDocument();
+    expect(list.getByText('(0:20)')).toBeInTheDocument();
   });
 
   it('renders multiple highlights', () => {
     render(<HighlightList {...baseProps} highlights={[pointHighlight, rangeHighlight]} />);
-    expect(screen.getByText('Opening Shot')).toBeInTheDocument();
-    expect(screen.getByText('Action Sequence')).toBeInTheDocument();
+    const list = fullList();
+    expect(list.getByText('Opening Shot')).toBeInTheDocument();
+    expect(list.getByText('Action Sequence')).toBeInTheDocument();
   });
 });
 
@@ -66,7 +74,7 @@ describe('HighlightList — seek', () => {
     const user = userEvent.setup();
     const onSeek = vi.fn();
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} onSeek={onSeek} />);
-    await user.click(screen.getByTitle('Seek to highlight'));
+    await user.click(fullList().getByTitle('Seek to highlight'));
     expect(onSeek).toHaveBeenCalledWith(10);
   });
 
@@ -74,7 +82,7 @@ describe('HighlightList — seek', () => {
     const user = userEvent.setup();
     const onSeek = vi.fn();
     render(<HighlightList {...baseProps} highlights={[pointHighlight, rangeHighlight]} onSeek={onSeek} />);
-    const seekBtns = screen.getAllByTitle('Seek to highlight');
+    const seekBtns = fullList().getAllByTitle('Seek to highlight');
     await user.click(seekBtns[1]);
     expect(onSeek).toHaveBeenCalledWith(30);
   });
@@ -87,7 +95,7 @@ describe('HighlightList — delete', () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} onRemove={onRemove} />);
-    await user.click(screen.getByTitle('Remove highlight'));
+    await user.click(fullList().getByTitle('Remove highlight'));
     expect(onRemove).toHaveBeenCalledWith('h1');
   });
 });
@@ -98,7 +106,7 @@ describe('HighlightList — inline rename', () => {
   it('enters edit mode when the label is clicked', async () => {
     const user = userEvent.setup();
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} />);
-    await user.click(screen.getByText('Opening Shot'));
+    await user.click(fullList().getByText('Opening Shot'));
     expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 
@@ -106,7 +114,7 @@ describe('HighlightList — inline rename', () => {
     const user = userEvent.setup();
     const onRename = vi.fn();
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} onRename={onRename} />);
-    await user.click(screen.getByText('Opening Shot'));
+    await user.click(fullList().getByText('Opening Shot'));
     const input = screen.getByRole('textbox');
     await user.clear(input);
     await user.type(input, 'New Label');
@@ -118,20 +126,21 @@ describe('HighlightList — inline rename', () => {
     const user = userEvent.setup();
     const onRename = vi.fn();
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} onRename={onRename} />);
-    await user.click(screen.getByText('Opening Shot'));
+    await user.click(fullList().getByText('Opening Shot'));
     const input = screen.getByRole('textbox');
     await user.clear(input);
     await user.type(input, 'Changed');
     await user.keyboard('{Escape}');
     expect(onRename).not.toHaveBeenCalled();
-    expect(screen.getByText('Opening Shot')).toBeInTheDocument();
+    // After escape, label reappears in both compact and full rows
+    expect(fullList().getByText('Opening Shot')).toBeInTheDocument();
   });
 
   it('commits rename on blur', async () => {
     const user = userEvent.setup();
     const onRename = vi.fn();
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} onRename={onRename} />);
-    await user.click(screen.getByText('Opening Shot'));
+    await user.click(fullList().getByText('Opening Shot'));
     const input = screen.getByRole('textbox');
     await user.clear(input);
     await user.type(input, 'Blurred Label');
@@ -143,7 +152,7 @@ describe('HighlightList — inline rename', () => {
     const user = userEvent.setup();
     const onRename = vi.fn();
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} onRename={onRename} />);
-    await user.click(screen.getByText('Opening Shot'));
+    await user.click(fullList().getByText('Opening Shot'));
     await user.keyboard('{Enter}');
     expect(onRename).not.toHaveBeenCalled();
   });
@@ -154,19 +163,19 @@ describe('HighlightList — inline rename', () => {
 describe('HighlightList — load into timeline', () => {
   it('shows load button only for range highlights', () => {
     render(<HighlightList {...baseProps} highlights={[pointHighlight, rangeHighlight]} />);
-    expect(screen.getAllByTitle('Load range into timeline')).toHaveLength(1);
+    expect(fullList().getAllByTitle('Load range into timeline')).toHaveLength(1);
   });
 
   it('does not show load button for point highlights', () => {
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} />);
-    expect(screen.queryByTitle('Load range into timeline')).not.toBeInTheDocument();
+    expect(fullList().queryByTitle('Load range into timeline')).not.toBeInTheDocument();
   });
 
   it('calls onLoadIntoTimeline with the full highlight when load button is clicked', async () => {
     const user = userEvent.setup();
     const onLoadIntoTimeline = vi.fn();
     render(<HighlightList {...baseProps} highlights={[rangeHighlight]} onLoadIntoTimeline={onLoadIntoTimeline} />);
-    await user.click(screen.getByTitle('Load range into timeline'));
+    await user.click(fullList().getByTitle('Load range into timeline'));
     expect(onLoadIntoTimeline).toHaveBeenCalledWith(rangeHighlight);
   });
 });
@@ -224,7 +233,7 @@ describe('HighlightList — collapsible', () => {
 
   it('is expanded by default when highlights exist', () => {
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} />);
-    expect(screen.getByText('Opening Shot')).toBeInTheDocument();
+    expect(fullList().getByText('Opening Shot')).toBeInTheDocument();
   });
 
   it('collapses when the header toggle is clicked while open', async () => {
@@ -259,7 +268,7 @@ describe('HighlightList — collapsible', () => {
     expect(screen.queryByText('No highlights yet')).not.toBeInTheDocument();
     // add a highlight
     rerender(<HighlightList {...baseProps} highlights={[pointHighlight]} />);
-    expect(screen.getByText('Opening Shot')).toBeInTheDocument();
+    expect(fullList().getByText('Opening Shot')).toBeInTheDocument();
   });
 });
 
@@ -294,13 +303,13 @@ describe('HighlightList — ARIA attributes', () => {
 
   it('sets aria-label on icon-only buttons', () => {
     render(<HighlightList {...baseProps} highlights={[pointHighlight]} />);
-    expect(screen.getByRole('button', { name: /seek to highlight/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /remove highlight/i })).toBeInTheDocument();
+    expect(fullList().getByRole('button', { name: /seek to highlight/i })).toBeInTheDocument();
+    expect(fullList().getByRole('button', { name: /remove highlight/i })).toBeInTheDocument();
   });
 
   it('sets aria-label on load-into-timeline button for range highlights', () => {
     render(<HighlightList {...baseProps} highlights={[rangeHighlight]} />);
-    expect(screen.getByRole('button', { name: /load range into timeline/i })).toBeInTheDocument();
+    expect(fullList().getByRole('button', { name: /load range into timeline/i })).toBeInTheDocument();
   });
 });
 

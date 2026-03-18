@@ -38,12 +38,12 @@ const baseProps = {
 describe('Timeline — rendering', () => {
   it('renders frame controls', () => {
     render(<Timeline {...baseProps} />)
-    expect(screen.getByText('◀ Frame')).toBeInTheDocument()
+    expect(screen.getByText('← Frame')).toBeInTheDocument()
   })
 
-  it('renders the Mark button', () => {
+  it('renders the Highlight button', () => {
     render(<Timeline {...baseProps} />)
-    expect(screen.getByRole('button', { name: /mark/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /highlight/i })).toBeInTheDocument()
   })
 
   it('renders without highlights prop without errors', () => {
@@ -95,13 +95,13 @@ describe('Timeline — ARIA attributes', () => {
   it('sets aria-label on in-point marker', () => {
     const trimWithMarkers = { ...mockTrim, inPoint: 25, outPoint: 75 }
     render(<Timeline {...baseProps} trim={trimWithMarkers} />)
-    expect(screen.getByLabelText('In point (drag or press I)')).toBeInTheDocument()
+    expect(screen.getByLabelText('In point — drag to adjust, or press I')).toBeInTheDocument()
   })
 
   it('sets aria-label on out-point marker', () => {
     const trimWithMarkers = { ...mockTrim, inPoint: 25, outPoint: 75 }
     render(<Timeline {...baseProps} trim={trimWithMarkers} />)
-    expect(screen.getByLabelText('Out point (drag or press O)')).toBeInTheDocument()
+    expect(screen.getByLabelText('Out point — drag to adjust, or press O')).toBeInTheDocument()
   })
 })
 
@@ -147,13 +147,13 @@ describe('Timeline — touch trim marker dragging', () => {
 
   it('renders in-point marker with touch-none class for touch dragging', () => {
     render(<Timeline {...baseProps} trim={trimWithMarkers} />)
-    const inMarker = screen.getByTitle('In point (drag or press I)')
+    const inMarker = screen.getByTitle('In point — drag to adjust, or press I')
     expect(inMarker.className).toContain('touch-none')
   })
 
   it('renders out-point marker with touch-none class for touch dragging', () => {
     render(<Timeline {...baseProps} trim={trimWithMarkers} />)
-    const outMarker = screen.getByTitle('Out point (drag or press O)')
+    const outMarker = screen.getByTitle('Out point — drag to adjust, or press O')
     expect(outMarker.className).toContain('touch-none')
   })
 
@@ -161,7 +161,7 @@ describe('Timeline — touch trim marker dragging', () => {
     const setIn = vi.fn()
     const trim = { ...trimWithMarkers, setIn }
     render(<Timeline {...baseProps} trim={trim} />)
-    const inMarker = screen.getByTitle('In point (drag or press I)')
+    const inMarker = screen.getByTitle('In point — drag to adjust, or press I')
     fireEvent.touchStart(inMarker, { touches: [{ clientX: 25 }] })
     // After touchStart sets draggingMarker, the effect attaches global listeners
     // Fire touchmove on window to simulate the drag
@@ -173,7 +173,7 @@ describe('Timeline — touch trim marker dragging', () => {
     const setOut = vi.fn()
     const trim = { ...trimWithMarkers, setOut }
     render(<Timeline {...baseProps} trim={trim} />)
-    const outMarker = screen.getByTitle('Out point (drag or press O)')
+    const outMarker = screen.getByTitle('Out point — drag to adjust, or press O')
     fireEvent.touchStart(outMarker, { touches: [{ clientX: 75 }] })
     fireEvent.touchMove(window, { touches: [{ clientX: 60 }] })
     expect(setOut).toHaveBeenCalled()
@@ -183,7 +183,7 @@ describe('Timeline — touch trim marker dragging', () => {
     const setIn = vi.fn()
     const trim = { ...trimWithMarkers, setIn }
     render(<Timeline {...baseProps} trim={trim} />)
-    const inMarker = screen.getByTitle('In point (drag or press I)')
+    const inMarker = screen.getByTitle('In point — drag to adjust, or press I')
     fireEvent.touchStart(inMarker, { touches: [{ clientX: 25 }] })
     fireEvent.touchEnd(window)
     setIn.mockClear()
@@ -194,11 +194,11 @@ describe('Timeline — touch trim marker dragging', () => {
 
 // ─── Mark button + H key ──────────────────────────────────────────────────────
 
-describe('Timeline — Mark button and H key', () => {
-  it('calls onMark when the Mark button is clicked', () => {
+describe('Timeline — Highlight button and H key', () => {
+  it('calls onMark when the Highlight button is clicked', () => {
     const onMark = vi.fn()
     render(<Timeline {...baseProps} onMark={onMark} />)
-    fireEvent.click(screen.getByRole('button', { name: /mark/i }))
+    fireEvent.click(screen.getByRole('button', { name: /highlight/i }))
     expect(onMark).toHaveBeenCalledOnce()
   })
 

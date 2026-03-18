@@ -173,9 +173,7 @@ describe('ClipList — ARIA attributes', () => {
 
   it('sets aria-label on icon-only buttons', () => {
     render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
-    expect(screen.getByRole('button', { name: /preview clip/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /seek to in-point/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /load in\/out points/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /export this clip instantly/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /add to export queue/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /remove clip/i })).toBeInTheDocument();

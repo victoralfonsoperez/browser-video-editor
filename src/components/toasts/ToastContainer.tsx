@@ -9,10 +9,10 @@ const ICONS: Record<ToastVariant, string> = {
 };
 
 const COLORS: Record<ToastVariant, string> = {
-  error: '#f55a5a',
-  success: '#c8f55a',
-  warning: '#f5a623',
-  info: '#aaa',
+  error: 'var(--color-danger)',
+  success: 'var(--color-accent)',
+  warning: 'var(--color-warn)',
+  info: 'var(--color-fg-2)',
 };
 
 export function ToastContainer() {
@@ -21,17 +21,17 @@ export function ToastContainer() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-[60] flex flex-col gap-2">
+    <div className="fixed top-3 right-3 z-[60] flex flex-col gap-2 max-w-sm">
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="flex items-center gap-2 rounded-lg border bg-[#1a1a1e] px-3 py-2.5 text-sm shadow-lg"
+          className="flex items-center gap-2 rounded-lg border bg-raised px-3 py-2.5 text-sm shadow-lg animate-slide-in-right"
           style={{ borderColor: COLORS[toast.variant] }}
         >
           <span className="shrink-0" style={{ color: COLORS[toast.variant] }}>
             {ICONS[toast.variant]}
           </span>
-          <span className="flex-1 text-[#e0e0e0]">{toast.message}</span>
+          <span className="flex-1 text-fg">{toast.message}</span>
           <button
             onClick={() => dismissToast(toast.id)}
             aria-label="Dismiss"

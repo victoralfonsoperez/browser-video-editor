@@ -106,7 +106,7 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
     <>
       {/* Backdrop — semi-opaque for centered steps, transparent for targeted (vignette from highlight shadow) */}
       <div
-        className="fixed inset-0 z-[70]"
+        className="fixed inset-0 z-[70] animate-fade-in"
         style={{ backgroundColor: isCentered ? 'rgba(0,0,0,0.6)' : 'transparent' }}
         onClick={onClose}
       />
@@ -118,7 +118,8 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
         style={{
           display: isCentered ? 'none' : 'block',
           position: 'fixed',
-          boxShadow: '0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 2px #c8f55a, 0 0 16px 4px #c8f55a44',
+          boxShadow: '0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 2px var(--color-accent), 0 0 16px 4px color-mix(in srgb, var(--color-accent) 27%, transparent)',
+          transition: 'top 300ms cubic-bezier(0.25,1,0.5,1), left 300ms cubic-bezier(0.25,1,0.5,1), width 300ms cubic-bezier(0.25,1,0.5,1), height 300ms cubic-bezier(0.25,1,0.5,1)',
         }}
       />
 
@@ -126,20 +127,20 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
       <FocusTrap onEscape={onClose}>
       <div
         ref={cardRef}
-        className="z-[72] rounded-lg border border-[#444] bg-[#1a1a1e] p-4 shadow-2xl"
+        className="z-[72] rounded-lg border border-edge-strong bg-raised p-4 shadow-2xl animate-fade-in-up"
         style={{ position: 'fixed', width: CARD_WIDTH }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Step counter */}
-        <div className="mb-2 text-[10px] uppercase tracking-wider text-[#999]">
+        <div className="mb-2 text-[10px] uppercase tracking-wider text-fg-muted">
           {step + 1} / {totalSteps}
         </div>
 
         {/* Title */}
-        <p className="mb-1.5 text-sm font-semibold text-[#e0e0e0]">{stepData.title}</p>
+        <p className="mb-1.5 text-sm font-semibold text-fg">{stepData.title}</p>
 
         {/* Body */}
-        <p className="mb-4 text-xs leading-relaxed text-[#aaa]">{stepData.body}</p>
+        <p className="mb-4 text-xs leading-relaxed text-fg-2">{stepData.body}</p>
 
         {/* Progress dots */}
         <div className="mb-4 flex items-center gap-1.5">
@@ -147,7 +148,7 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
             <div
               key={i}
               className={[
-                'h-1.5 rounded-full bg-[#c8f55a] transition-all duration-200',
+                'h-1.5 rounded-full bg-accent transition-all duration-200',
                 i === step ? 'w-4 opacity-100' : 'w-1.5 opacity-30',
               ].join(' ')}
             />
@@ -158,7 +159,7 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={onClose}
-            className="text-xs text-[#999] hover:text-[#aaa] transition-colors cursor-pointer"
+            className="text-xs text-fg-muted hover:text-fg-2 transition-colors cursor-pointer"
           >
             Skip
           </button>
@@ -167,14 +168,14 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
             {!isFirst && (
               <button
                 onClick={onPrev}
-                className="rounded border border-[#333] bg-[#111] px-3 py-1.5 text-xs text-[#aaa] hover:text-[#ccc] transition-colors cursor-pointer"
+                className="rounded border border-edge-mid bg-base px-3 py-1.5 text-xs text-fg-2 hover:text-fg-1 transition-colors cursor-pointer"
               >
                 Back
               </button>
             )}
             <button
               onClick={onNext}
-              className="rounded border border-[#c8f55a]/50 bg-[#c8f55a]/10 px-3 py-1.5 text-xs font-semibold text-[#c8f55a] hover:bg-[#c8f55a]/20 transition-colors cursor-pointer"
+              className="rounded border border-accent/50 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 transition-colors cursor-pointer"
             >
               {isLast ? 'Finish' : 'Next →'}
             </button>

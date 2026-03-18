@@ -83,33 +83,33 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <FocusTrap onEscape={onClose}>
-      <div className="relative w-full max-w-2xl mx-4 rounded-lg border border-[#333] bg-[#111114] shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-2xl mx-4 rounded-lg border border-edge-mid bg-base shadow-2xl overflow-hidden animate-scale-in">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2e]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-control">
           <div className="flex items-center gap-3">
             {clip.thumbnailDataUrl && (
               <img
                 src={clip.thumbnailDataUrl}
                 alt=""
-                className="w-10 h-[22px] rounded object-cover border border-[#333]"
+                className="w-10 h-[22px] rounded object-cover border border-edge-mid"
               />
             )}
             <div>
-              <div className="text-sm font-medium text-[#ccc]">{clip.name}</div>
-              <div className="text-[10px] font-mono text-[#999]">
+              <div className="text-sm font-medium text-fg-1">{clip.name}</div>
+              <div className="text-[10px] font-mono text-fg-muted">
                 {formatTime(clip.inPoint)} → {formatTime(clip.outPoint)}
-                <span className="ml-2 text-[#999]">({formatTime(clipDuration)})</span>
+                <span className="ml-2 text-fg-muted">({formatTime(clipDuration)})</span>
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[#999] hover:text-[#ccc] transition-colors text-lg leading-none cursor-pointer"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center text-fg-muted hover:text-fg-1 transition-colors text-lg leading-none cursor-pointer"
             title={ClipPreviewStrings.titleClose}
             aria-label={ClipPreviewStrings.titleClose}
           >
@@ -130,33 +130,33 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
         </div>
 
         {/* Progress bar — clip-relative */}
-        <div className="h-1 bg-[#222]">
+        <div className="h-1 bg-kbd">
           <div
-            className="h-full bg-[#c8f55a] transition-none"
+            className="h-full bg-accent transition-none"
             style={{ width: `${progress * 100}%` }}
           />
         </div>
 
         {/* Controls */}
-        <div className="flex items-center gap-3 px-4 py-3 bg-[#1a1a1e]">
+        <div className="flex items-center gap-3 px-4 py-3 bg-raised">
           <button
             onClick={togglePlay}
-            className="min-h-[44px] rounded border border-[#444] bg-[#2a2a2e] px-4 py-1.5 text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer min-w-[80px]"
+            className="min-h-[44px] rounded border border-edge-strong bg-control px-4 py-1.5 text-sm text-fg-1 hover:bg-control-hover transition-colors cursor-pointer min-w-[80px]"
           >
             {isPlaying ? SharedStrings.btnPause : SharedStrings.btnPlay}
           </button>
 
-          <span className="font-mono text-xs text-[#999]">
+          <span className="font-mono text-xs text-fg-muted">
             {formatTime(currentTime - clip.inPoint)} / {formatTime(clipDuration)}
           </span>
 
           <div className="ml-auto flex items-center gap-2">
-            <label className="flex items-center gap-1.5 text-xs text-[#999] cursor-pointer select-none">
+            <label className="flex items-center gap-1.5 text-xs text-fg-muted cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={loop}
                 onChange={(e) => setLoop(e.target.checked)}
-                className="accent-[#c8f55a] cursor-pointer"
+                className="accent-accent cursor-pointer"
               />
               {ClipPreviewStrings.labelLoop}
             </label>
@@ -164,9 +164,9 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
         </div>
 
         {/* Keyboard hint */}
-        <div className="px-4 pb-3 text-[10px] text-[#999]">
-          <kbd className="rounded bg-[#222] px-1 py-px text-[#999]">{ClipPreviewStrings.keySpace}</kbd> {ClipPreviewStrings.hintPlayPause}{' '}
-          <kbd className="rounded bg-[#222] px-1 py-px text-[#999]">{ClipPreviewStrings.keyEsc}</kbd> {ClipPreviewStrings.hintClose}
+        <div className="px-4 pb-3 text-[10px] text-fg-muted">
+          <kbd className="rounded bg-kbd px-1 py-px text-fg-muted">{ClipPreviewStrings.keySpace}</kbd> {ClipPreviewStrings.hintPlayPause}{' '}
+          <kbd className="rounded bg-kbd px-1 py-px text-fg-muted">{ClipPreviewStrings.keyEsc}</kbd> {ClipPreviewStrings.hintClose}
         </div>
       </div>
       </FocusTrap>

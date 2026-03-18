@@ -4,6 +4,7 @@ import { formatTime } from '../../utils/formatTime';
 import type { QueueItem } from '../../hooks/useExportQueue';
 import { FORMAT_LABELS, QUALITY_LABELS } from '../../types/exportOptions';
 import { ProgressBar } from '../shared/ProgressBar';
+import { IconRefresh } from '../shared/Icons';
 
 interface ExportQueueOverlayProps {
   queue: QueueItem[];
@@ -19,10 +20,10 @@ interface ExportQueueOverlayProps {
 }
 
 function StatusIcon({ status }: { status: QueueItem['status'] }) {
-  if (status === 'processing') return <span className="animate-spin inline-block leading-none">⟳</span>;
-  if (status === 'done') return <span className="text-[#c8f55a]">✓</span>;
-  if (status === 'error') return <span className="text-[#f55a5a]">✕</span>;
-  return <span className="text-[#999]">–</span>;
+  if (status === 'processing') return <span className="animate-spin inline-block leading-none"><IconRefresh /></span>;
+  if (status === 'done') return <span className="text-accent">✓</span>;
+  if (status === 'error') return <span className="text-danger">✕</span>;
+  return <span className="text-fg-muted">–</span>;
 }
 
 export function ExportQueueOverlay({
@@ -65,17 +66,17 @@ export function ExportQueueOverlay({
   };
 
   return (
-    <div className="fixed bottom-2 tablet:bottom-4 right-2 tablet:right-4 left-2 tablet:left-auto z-50 w-auto tablet:w-72 max-w-full tablet:max-w-none rounded-lg border border-[#333] bg-[#111] shadow-xl shadow-black/60 overflow-hidden">
+    <div className="fixed bottom-2 tablet:bottom-4 right-2 tablet:right-4 left-2 tablet:left-auto z-50 w-auto tablet:w-72 max-w-full tablet:max-w-none rounded-lg border border-edge-mid bg-base shadow-xl shadow-black/60 overflow-hidden animate-fade-in-up">
       {/* Header */}
-      <div className="flex items-center justify-between px-2 tablet:px-3 py-2 bg-[#1a1a1e] border-b border-[#2a2a2e]">
+      <div className="flex items-center justify-between px-2 tablet:px-3 py-2 bg-raised border-b border-control">
         <div className="flex items-center gap-2">
           {isRunning && (
-            <span className="animate-spin inline-block text-[#c8f55a] text-xs tablet:text-sm leading-none">⟳</span>
+            <span className="animate-spin inline-block text-accent text-xs tablet:text-sm leading-none"><IconRefresh /></span>
           )}
-          <span className="text-[9px] tablet:text-[11px] uppercase tracking-wider text-[#aaa] font-medium">
+          <span className="text-[9px] tablet:text-[11px] uppercase tracking-wider text-fg-2 font-medium">
             {ExportQueueStrings.heading}
           </span>
-          <span className="text-[9px] tablet:text-[10px] text-[#999] font-mono">
+          <span className="text-[9px] tablet:text-[10px] text-fg-muted font-mono">
             {doneCount}/{totalCount}
           </span>
         </div>
@@ -86,7 +87,7 @@ export function ExportQueueOverlay({
               <button
                 onClick={onPause}
                 disabled={isRunning}
-                className="min-h-[44px] tablet:min-h-0 rounded px-2 py-0.5 text-[10px] font-medium text-[#f5a623] border border-[#f5a623]/30 hover:bg-[#f5a623]/10 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="min-h-[44px] tablet:min-h-0 rounded px-2 py-0.5 text-[10px] font-medium text-warn border border-warn/30 hover:bg-warn/10 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 title={ExportQueueStrings.titlePause}
               >
                 {ExportQueueStrings.btnPause}
@@ -94,7 +95,7 @@ export function ExportQueueOverlay({
             ) : (
               <button
                 onClick={onStart}
-                className="min-h-[44px] tablet:min-h-0 rounded px-2 py-0.5 text-[10px] font-medium text-[#c8f55a] border border-[#c8f55a]/30 hover:bg-[#c8f55a]/10 transition-colors cursor-pointer"
+                className="min-h-[44px] tablet:min-h-0 rounded px-2 py-0.5 text-[10px] font-medium text-accent border border-accent/30 hover:bg-accent/10 transition-colors cursor-pointer"
                 title={ExportQueueStrings.titleStart}
               >
                 {pendingCount > 0 ? ExportQueueStrings.btnStart : ExportQueueStrings.btnResume}
@@ -105,7 +106,7 @@ export function ExportQueueOverlay({
           {doneCount > 0 && !isRunning && (
             <button
               onClick={onClear}
-              className="min-h-[44px] tablet:min-h-0 rounded px-1.5 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
+              className="min-h-[44px] tablet:min-h-0 rounded px-1.5 py-0.5 text-[10px] text-fg-muted hover:text-danger hover:bg-control transition-colors cursor-pointer"
               title={ExportQueueStrings.titleClear}
             >
               {SharedStrings.btnClear}
@@ -114,7 +115,7 @@ export function ExportQueueOverlay({
 
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1.5 py-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer w-5 tablet:w-5"
+            className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1.5 py-0.5 text-[10px] text-fg-muted hover:text-fg-1 hover:bg-control transition-colors cursor-pointer w-5 tablet:w-5"
             title={collapsed ? ExportQueueStrings.titleExpand : ExportQueueStrings.titleCollapse}
             aria-expanded={!collapsed}
             aria-label={collapsed ? ExportQueueStrings.titleExpand : ExportQueueStrings.titleCollapse}
@@ -138,21 +139,21 @@ export function ExportQueueOverlay({
               return (
                 <div
                   key={item.queueId}
-                  className="flex items-center gap-1.5 tablet:gap-2 px-2 tablet:px-3 py-1.5 border-b border-[#1e1e1e] last:border-0"
+                  className="flex items-center gap-1.5 tablet:gap-2 px-2 tablet:px-3 py-1.5 border-b border-edge-subtle last:border-0"
                 >
                   <span className="text-[10px] tablet:text-xs w-3 tablet:w-4 text-center shrink-0">
                     <StatusIcon status={item.status} />
                   </span>
-                  <span className={`flex-1 text-[10px] tablet:text-[11px] truncate ${item.status === 'error' ? 'text-[#f55a5a]' : 'text-[#999]'}`}>
+                  <span className={`flex-1 text-[10px] tablet:text-[11px] truncate ${item.status === 'error' ? 'text-danger' : 'text-fg-muted'}`}>
                     {item.clip.name}
                     {item.status === 'error' && item.error ? ` — ${item.error}` : ''}
                   </span>
-                  <span className="text-[8px] tablet:text-[9px] text-[#999] font-mono shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
+                  <span className="text-[8px] tablet:text-[9px] text-fg-muted shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
                   {item.status === 'error' && (
                     <button
                       onClick={() => onRetry(item.queueId)}
                       title={ExportQueueStrings.titleRetry}
-                      className="rounded border border-[#f5a623]/30 px-1.5 py-0.5 text-[10px] text-[#f5a623] hover:bg-[#f5a623]/10 transition-colors cursor-pointer shrink-0"
+                      className="rounded border border-warn/30 px-1.5 py-0.5 text-[10px] text-warn hover:bg-warn/10 transition-colors cursor-pointer shrink-0"
                     >
                       {ExportQueueStrings.btnRetry}
                     </button>
@@ -176,16 +177,16 @@ export function ExportQueueOverlay({
                 onDragEnd={() => { setDragFrom(null); setDragOver(null); setDragSide(null); }}
                 onDrop={(e) => { e.preventDefault(); handleDrop(i); }}
                 className={[
-                  'relative flex flex-col px-3 py-2 border-b border-[#1e1e1e] last:border-0 group transition-colors',
-                  isPending ? 'hover:bg-[#1a1a1e] cursor-grab active:cursor-grabbing' : '',
-                  isDragTarget ? 'bg-[#c8f55a]/5' : '',
+                  'relative flex flex-col px-3 py-2 border-b border-edge-subtle last:border-0 group transition-colors',
+                  isPending ? 'hover:bg-raised cursor-grab active:cursor-grabbing' : '',
+                  isDragTarget ? 'bg-accent/5' : '',
                 ].join(' ')}
               >
                 {isDragTarget && dragSide === 'top' && (
-                  <div className="pointer-events-none absolute -top-px left-0 right-0 h-0.5 bg-[#c8f55a] rounded-full" />
+                  <div className="pointer-events-none absolute -top-px left-0 right-0 h-0.5 bg-accent rounded-full" />
                 )}
                 {isDragTarget && dragSide === 'bottom' && (
-                  <div className="pointer-events-none absolute -bottom-px left-0 right-0 h-0.5 bg-[#c8f55a] rounded-full" />
+                  <div className="pointer-events-none absolute -bottom-px left-0 right-0 h-0.5 bg-accent rounded-full" />
                 )}
 
                 <div className="flex items-center gap-1.5 tablet:gap-2">
@@ -194,35 +195,35 @@ export function ExportQueueOverlay({
                   </span>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] tablet:text-xs text-[#ccc] truncate">{item.clip.name}</p>
+                    <p className="text-[10px] tablet:text-xs text-fg-1 truncate">{item.clip.name}</p>
                     {isPending && (
-                      <p className="text-[9px] tablet:text-[10px] text-[#999] hidden mobile-landscape:block">
+                      <p className="text-[9px] tablet:text-[10px] text-fg-muted hidden mobile-landscape:block">
                         {formatTime(item.clip.inPoint)} → {formatTime(item.clip.outPoint)}
                       </p>
                     )}
                     {isProcessing && (
-                      <p className="text-[9px] tablet:text-[10px] text-[#aaa] font-mono">
+                      <p className="text-[9px] tablet:text-[10px] text-fg-2 font-mono">
                         {Math.round(ffmpegProgress * 100)}%
                       </p>
                     )}
                   </div>
 
                   {/* Options badge */}
-                  <span className="text-[8px] tablet:text-[9px] text-[#999] font-mono shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
+                  <span className="text-[8px] tablet:text-[9px] text-fg-muted shrink-0 hidden mobile-landscape:inline">{optionsBadge}</span>
 
                   {isPending && (
                     <div className="flex items-center gap-0.5 opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100 tablet:focus-within:opacity-100 transition-opacity shrink-0">
                       <span className="hidden tablet:flex flex-col">
                         {i > 0 && queue[i - 1].status === 'pending' && (
-                          <button onClick={() => onReorder(i, i - 1)} className="rounded px-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer leading-tight" title="Move up" aria-label="Move item up">▲</button>
+                          <button onClick={() => onReorder(i, i - 1)} className="rounded px-0.5 text-[10px] text-fg-muted hover:text-fg-1 hover:bg-control transition-colors cursor-pointer leading-tight" title="Move up" aria-label="Move item up">▲</button>
                         )}
                         {i < queue.length - 1 && queue[i + 1]?.status === 'pending' && (
-                          <button onClick={() => onReorder(i, i + 1)} className="rounded px-0.5 text-[10px] text-[#999] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer leading-tight" title="Move down" aria-label="Move item down">▼</button>
+                          <button onClick={() => onReorder(i, i + 1)} className="rounded px-0.5 text-[10px] text-fg-muted hover:text-fg-1 hover:bg-control transition-colors cursor-pointer leading-tight" title="Move down" aria-label="Move item down">▼</button>
                         )}
                       </span>
                       <button
                         onClick={() => onRemove(item.queueId)}
-                        className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 py-0.5 text-[10px] text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] shrink-0 cursor-pointer"
+                        className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 py-0.5 text-[10px] text-fg-muted hover:text-danger hover:bg-control shrink-0 cursor-pointer"
                         title={ExportQueueStrings.titleRemove}
                         aria-label={ExportQueueStrings.titleRemove}
                       >
@@ -243,10 +244,10 @@ export function ExportQueueOverlay({
 
       {/* Overall progress bar */}
       {isRunning && (
-        <div className="px-2 tablet:px-3 py-2 border-t border-[#2a2a2e] bg-[#0e0e10]">
+        <div className="px-2 tablet:px-3 py-2 border-t border-control bg-inset">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[9px] tablet:text-[10px] text-[#999]">{ExportQueueStrings.labelOverall}</span>
-            <span className="text-[9px] tablet:text-[10px] text-[#aaa] font-mono">
+            <span className="text-[9px] tablet:text-[10px] text-fg-muted">{ExportQueueStrings.labelOverall}</span>
+            <span className="text-[9px] tablet:text-[10px] text-fg-2 font-mono">
               {Math.round(overallProgress * 100)}%
             </span>
           </div>
@@ -256,7 +257,7 @@ export function ExportQueueOverlay({
 
       {/* Collapsed summary */}
       {collapsed && (
-        <div className="px-2 tablet:px-3 py-1.5 text-[9px] tablet:text-[10px] text-[#999]">
+        <div className="px-2 tablet:px-3 py-1.5 text-[9px] tablet:text-[10px] text-fg-muted">
           {isRunning
             ? ExportQueueStrings.collapsedProgress(Math.round(overallProgress * 100), doneCount, totalCount)
             : pendingCount > 0

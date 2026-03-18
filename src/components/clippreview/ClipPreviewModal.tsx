@@ -101,7 +101,7 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
             )}
             <div>
               <div className="text-sm font-medium text-fg-1">{clip.name}</div>
-              <div className="text-[10px] font-mono text-fg-muted">
+              <div className="text-2xs font-mono text-fg-muted">
                 {formatTime(clip.inPoint)} → {formatTime(clip.outPoint)}
                 <span className="ml-2 text-fg-muted">({formatTime(clipDuration)})</span>
               </div>
@@ -164,7 +164,7 @@ export function ClipPreviewModal({ clip, videoURL, onClose }: ClipPreviewModalPr
         </div>
 
         {/* Keyboard hint */}
-        <div className="px-4 pb-3 text-[10px] text-fg-muted">
+        <div className="px-4 pb-3 text-2xs text-fg-muted">
           <kbd className="rounded bg-kbd px-1 py-px text-fg-muted">{ClipPreviewStrings.keySpace}</kbd> {ClipPreviewStrings.hintPlayPause}{' '}
           <kbd className="rounded bg-kbd px-1 py-px text-fg-muted">{ClipPreviewStrings.keyEsc}</kbd> {ClipPreviewStrings.hintClose}
         </div>

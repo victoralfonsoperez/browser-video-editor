@@ -33,7 +33,7 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
   const isRange = highlight.endTime !== undefined;
 
   return (
-    <div className="flex items-center gap-2 rounded border border-control bg-base px-2 py-2 hover:border-edge-strong transition-colors group select-none">
+    <div className="flex items-center gap-2 rounded bg-base/50 px-2 py-2 hover:bg-base transition-colors group select-none">
       <div className="w-1.5 h-1.5 rounded-full bg-amber shrink-0" />
 
       <div className="flex-1 min-w-0">
@@ -114,13 +114,13 @@ function HighlightRowCompact({ highlight, onSeek, onRemove }: Pick<HighlightRowP
       >
         {highlight.label}
       </button>
-      <span className="font-mono text-[10px] text-amber shrink-0">{formatTime(highlight.time)}</span>
+      <span className="font-mono text-2xs text-amber shrink-0">{formatTime(highlight.time)}</span>
       {isRange && (
-        <span className="font-mono text-[10px] text-fg-muted shrink-0">({formatTime(highlight.endTime! - highlight.time)})</span>
+        <span className="font-mono text-2xs text-fg-muted shrink-0">({formatTime(highlight.endTime! - highlight.time)})</span>
       )}
       <button
         onClick={onRemove}
-        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[10px] text-fg-muted active:text-danger cursor-pointer shrink-0"
+        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-2xs text-fg-muted active:text-danger cursor-pointer shrink-0"
         title={HighlightListStrings.titleRemove}
         aria-label={HighlightListStrings.titleRemove}
       >
@@ -155,11 +155,11 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
       <div className="flex items-center justify-between">
         <button
           onClick={() => dispatchOpen(!isOpen)}
-          className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-fg-2 hover:text-fg-1 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-fg-2 hover:text-fg-1 transition-colors cursor-pointer"
           title={isOpen ? HighlightListStrings.titleCollapse : HighlightListStrings.titleExpand}
           aria-expanded={isOpen}
         >
-          <span className="text-[10px]">{isOpen ? '▼' : '▶'}</span>
+          <span className="text-2xs">{isOpen ? '▼' : '▶'}</span>
           {HighlightListStrings.sectionHeading}
           {!isOpen && hasHighlights && (
             <span className="text-fg-muted normal-case tracking-normal">({highlights.length})</span>
@@ -170,7 +170,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
           <button
             onClick={onToggleOnTimeline}
             className={[
-              'rounded border px-2 py-0.5 text-[11px] transition-colors cursor-pointer',
+              'rounded border px-2 py-0.5 text-xs transition-colors cursor-pointer',
               showOnTimeline
                 ? 'border-amber/60 bg-amber/10 text-amber'
                 : 'border-edge-strong bg-control text-fg-muted hover:bg-control-hover hover:text-fg-2',
@@ -182,7 +182,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
           </button>
 
           <label
-            className="rounded border border-edge-strong bg-control px-2 py-0.5 text-[11px] text-fg-2 hover:bg-control-hover hover:text-fg-1 transition-colors cursor-pointer"
+            className="rounded border border-edge-strong bg-control px-2 py-0.5 text-xs text-fg-2 hover:bg-control-hover hover:text-fg-1 transition-colors cursor-pointer"
             title={HighlightListStrings.titleLoad}
           >
             {HighlightListStrings.btnLoad}
@@ -201,7 +201,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
           <button
             onClick={onExport}
             disabled={highlights.length === 0}
-            className="rounded border border-edge-strong bg-control px-2 py-0.5 text-[11px] text-fg-2 hover:bg-control-hover hover:text-fg-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="rounded border border-edge-strong bg-control px-2 py-0.5 text-xs text-fg-2 hover:bg-control-hover hover:text-fg-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             title={HighlightListStrings.titleExport}
           >
             {HighlightListStrings.btnExport}

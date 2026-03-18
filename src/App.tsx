@@ -224,16 +224,16 @@ function App() {
 
               {showGlobalSettings && (
                 <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-edge-mid bg-raised p-3 shadow-xl animate-scale-in origin-top-left">
-                  <p className="mb-3 text-[10px] uppercase tracking-wider text-fg-2">
+                  <p className="mb-3 text-2xs uppercase tracking-wider text-fg-2">
                     {AppStrings.headingDefaultSettings}
                   </p>
                   <ExportOptionsPanel options={globalOptions} onChange={setGlobalOptions} />
-                  <p className="mt-2 text-[10px] text-fg-muted">
+                  <p className="mt-2 text-2xs text-fg-muted">
                     {AppStrings.helpDefaultSettings}
                   </p>
 
                   <div className="mt-3 border-t border-edge-mid pt-3">
-                    <p className="mb-2 text-[10px] uppercase tracking-wider text-fg-2">
+                    <p className="mb-2 text-2xs uppercase tracking-wider text-fg-2">
                       {AppStrings.headingPreferences}
                     </p>
                     <label className="flex items-center gap-2 cursor-pointer text-xs text-fg-1">
@@ -303,10 +303,10 @@ function App() {
                     {i + 1}
                   </div>
                   <span className={[
-                    'text-[10px] tablet:text-xs font-semibold uppercase tracking-wider mb-0.5',
+                    'text-2xs tablet:text-xs font-semibold uppercase tracking-wider mb-0.5',
                     i === 0 ? 'text-accent' : 'text-fg-faint',
                   ].join(' ')}>{step.label}</span>
-                  <span className="text-[9px] tablet:text-[10px] text-fg-faint leading-tight hidden mobile-landscape:block">{step.desc}</span>
+                  <span className="text-2xs text-fg-faint leading-tight hidden mobile-landscape:block">{step.desc}</span>
                 </div>
               ))}
             </div>
@@ -434,7 +434,7 @@ function App() {
       </div>
 
       {/* Footer */}
-      <footer className="mx-auto max-w-4xl mt-8 mb-2 flex items-center justify-center gap-2 text-[10px] tablet:text-xs text-fg-faint">
+      <footer className="mx-auto max-w-4xl mt-8 mb-2 flex items-center justify-center gap-2 text-2xs tablet:text-xs text-fg-faint">
         <span>v0.1.0</span>
         <span className="text-edge-strong">·</span>
         <span>Built by <a href="https://github.com/victoralfonsoperez" target="_blank" rel="noopener noreferrer" className="text-fg-muted hover:text-accent transition-colors">Victor Pérez</a></span>

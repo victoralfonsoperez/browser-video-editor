@@ -132,7 +132,7 @@ export function TourOverlay({ step, onNext, onPrev, onClose }: TourOverlayProps)
         onClick={(e) => e.stopPropagation()}
       >
         {/* Step counter */}
-        <div className="mb-2 text-[10px] uppercase tracking-wider text-fg-muted">
+        <div className="mb-2 text-2xs uppercase tracking-wider text-fg-muted">
           {step + 1} / {totalSteps}
         </div>
 

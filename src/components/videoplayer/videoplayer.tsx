@@ -3,6 +3,7 @@ import { SharedStrings, VideoPlayerStrings, AppStrings } from '../../constants/u
 import { formatTime } from '../../utils/formatTime';
 import { isInputFocused } from '../../utils/isInputFocused';
 import { useToast } from '../../context/ToastContext';
+import { IconVolume, IconMuted } from '../shared/Icons';
 
 interface VideoMetadata {
   duration: number;
@@ -122,14 +123,14 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
   return (
     <div className="w-full max-w-4xl mx-auto">
       {/* File info */}
-      <div className="mb-2 flex flex-wrap gap-x-2 tablet:gap-x-4 gap-y-1 text-xs tablet:text-sm text-[#aaa]">
-        <span className="truncate max-w-full mobile-landscape:max-w-none"><strong className="text-[#ccc]">{VideoPlayerStrings.labelFile}</strong> {videoName ?? AppStrings.driveLabelSource}</span>
-        {videoFile && <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelSize}</strong> {(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>}
-        {videoFile && <span className="hidden mobile-landscape:inline"><strong className="text-[#ccc]">{VideoPlayerStrings.labelType}</strong> {videoFile.type}</span>}
+      <div className="mb-2 flex flex-wrap gap-x-2 tablet:gap-x-4 gap-y-1 text-xs tablet:text-sm text-fg-2">
+        <span className="truncate max-w-full mobile-landscape:max-w-none"><strong className="text-fg-1">{VideoPlayerStrings.labelFile}</strong> {videoName ?? AppStrings.driveLabelSource}</span>
+        {videoFile && <span><strong className="text-fg-1">{VideoPlayerStrings.labelSize}</strong> {(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>}
+        {videoFile && <span className="hidden mobile-landscape:inline"><strong className="text-fg-1">{VideoPlayerStrings.labelType}</strong> {videoFile.type}</span>}
         {videoMetadata && (
           <>
-            <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelDuration}</strong> {videoMetadata.duration.toFixed(2)}s</span>
-            <span><strong className="text-[#ccc]">{VideoPlayerStrings.labelResolution}</strong> {videoMetadata.width}x{videoMetadata.height}</span>
+            <span><strong className="text-fg-1">{VideoPlayerStrings.labelDuration}</strong> {videoMetadata.duration.toFixed(2)}s</span>
+            <span><strong className="text-fg-1">{VideoPlayerStrings.labelResolution}</strong> {videoMetadata.width}x{videoMetadata.height}</span>
           </>
         )}
       </div>
@@ -161,35 +162,35 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
         {isVideoLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none">
             <div className="flex flex-col items-center gap-2">
-              <div className="w-8 h-8 border-2 border-[#c8f55a] border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm text-[#ccc]">{VideoPlayerStrings.loadingVideo}</span>
+              <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm text-fg-1">{VideoPlayerStrings.loadingVideo}</span>
             </div>
           </div>
         )}
       </div>
 
       {/* Controls bar */}
-      <div className="mt-2 flex items-center gap-2 tablet:gap-3 rounded bg-[#2a2a2e] px-2 tablet:px-3 py-2">
+      <div className="mt-2 flex items-center gap-2 tablet:gap-3 rounded bg-control px-2 tablet:px-3 py-2">
         <button
           onClick={togglePlay}
-          className="min-h-[44px] tablet:min-h-0 rounded border border-[#444] bg-[#1a1a1e] px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+          className="min-h-[44px] tablet:min-h-0 rounded border border-edge-strong bg-raised px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-fg-1 hover:bg-control-hover transition-colors cursor-pointer"
         >
           {isPlaying ? SharedStrings.btnPause : SharedStrings.btnPlay}
         </button>
 
-        <span className="font-mono text-xs tablet:text-sm text-[#aaa]">
+        <span className="font-mono text-xs tablet:text-sm text-fg-2">
           {formatTime(currentTime)} / {formatTime(videoMetadata?.duration ?? 0)}
         </span>
 
         <div className="ml-auto flex items-center gap-1 tablet:gap-2">
           <button
             onClick={toggleMute}
-            className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center text-base tablet:text-lg leading-none cursor-pointer"
+            className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded border border-edge-strong bg-raised px-2 tablet:px-2 py-1 text-xs tablet:text-sm text-fg-1 hover:bg-control-hover transition-colors cursor-pointer"
             title={isMuted ? VideoPlayerStrings.titleUnmute : VideoPlayerStrings.titleMute}
             aria-label={isMuted ? VideoPlayerStrings.titleUnmute : VideoPlayerStrings.titleMute}
             aria-pressed={isMuted}
           >
-            {isMuted ? '🔇' : '🔊'}
+            {isMuted ? <IconMuted /> : <IconVolume />}
           </button>
           <input
             type="range"
@@ -198,15 +199,15 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
             step="0.1"
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
-            className="min-h-[44px] tablet:min-h-0 w-12 tablet:w-20 cursor-pointer accent-[#c8f55a]"
+            className="min-h-[44px] tablet:min-h-0 w-12 tablet:w-20 cursor-pointer accent-accent"
             aria-label={VideoPlayerStrings.ariaVolume}
           />
         </div>
       </div>
 
       {/* Keyboard shortcuts hint */}
-      <div className="mt-1.5 rounded bg-[#1a1a1e] px-2 tablet:px-3 py-1.5 text-[10px] tablet:text-xs text-[#999] hidden mobile-landscape:block">
-        <strong className="text-[#999]">Shortcuts:</strong> {VideoPlayerStrings.shortcutsHint}
+      <div className="mt-1.5 rounded bg-raised px-2 tablet:px-3 py-1.5 text-[10px] tablet:text-xs text-fg-muted hidden mobile-landscape:block">
+        <strong className="text-fg-muted">Shortcuts:</strong> {VideoPlayerStrings.shortcutsHint}
       </div>
     </div>
   );

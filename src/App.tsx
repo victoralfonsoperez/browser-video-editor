@@ -196,10 +196,10 @@ function App() {
   }, [isVideoLoaded, startTour]);
 
   return (
-    <div className="min-h-screen bg-[#111114] text-[#e0e0e0] p-2 mobile-landscape:p-3 tablet:p-5">
+    <div className="min-h-screen bg-base text-fg p-2 mobile-landscape:p-3 tablet:p-5">
       <div className="mx-auto max-w-4xl">
         <div className="mb-3 tablet:mb-5 flex flex-col mobile-landscape:flex-row items-start mobile-landscape:items-center justify-between gap-2 mobile-landscape:gap-0">
-          <h1 className="text-base tablet:text-xl font-bold uppercase tracking-widest text-[#ccc]">{AppStrings.title}</h1>
+          <h1 className="text-base tablet:text-xl font-bold uppercase tracking-widest text-fg-1">{AppStrings.title}</h1>
 
           <div className="flex items-center gap-2 w-full mobile-landscape:w-auto">
             {/* Global export settings */}
@@ -209,39 +209,39 @@ function App() {
                 className={[
                   'flex items-center gap-1.5 rounded border px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm transition-colors cursor-pointer flex-1 mobile-landscape:flex-initial justify-center mobile-landscape:justify-start',
                   showGlobalSettings
-                    ? 'border-[#c8f55a]/60 bg-[#c8f55a]/10 text-[#c8f55a]'
-                    : 'border-[#444] bg-[#2a2a2e] text-[#ccc] hover:bg-[#3a3a3e]',
+                    ? 'border-accent/60 bg-accent/10 text-accent'
+                    : 'border-edge-strong bg-control text-fg-1 hover:bg-control-hover',
                 ].join(' ')}
                 title={AppStrings.titleGlobalSettings}
                 aria-expanded={showGlobalSettings}
                 aria-label={AppStrings.titleGlobalSettings}
               >
                 <span>⚙</span>
-                <span className="text-xs font-mono text-[#aaa] hidden mobile-landscape:inline">
+                <span className="text-xs text-fg-2 hidden mobile-landscape:inline">
                   {FORMAT_LABELS[globalOptions.format]} · {QUALITY_LABELS[globalOptions.quality]}
                 </span>
               </button>
 
               {showGlobalSettings && (
-                <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-[#333] bg-[#1a1a1e] p-3 shadow-xl">
-                  <p className="mb-3 text-[10px] uppercase tracking-wider text-[#aaa]">
+                <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-edge-mid bg-raised p-3 shadow-xl animate-scale-in origin-top-left">
+                  <p className="mb-3 text-[10px] uppercase tracking-wider text-fg-2">
                     {AppStrings.headingDefaultSettings}
                   </p>
                   <ExportOptionsPanel options={globalOptions} onChange={setGlobalOptions} />
-                  <p className="mt-2 text-[10px] text-[#999]">
+                  <p className="mt-2 text-[10px] text-fg-muted">
                     {AppStrings.helpDefaultSettings}
                   </p>
 
-                  <div className="mt-3 border-t border-[#333] pt-3">
-                    <p className="mb-2 text-[10px] uppercase tracking-wider text-[#aaa]">
+                  <div className="mt-3 border-t border-edge-mid pt-3">
+                    <p className="mb-2 text-[10px] uppercase tracking-wider text-fg-2">
                       {AppStrings.headingPreferences}
                     </p>
-                    <label className="flex items-center gap-2 cursor-pointer text-xs text-[#ccc]">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs text-fg-1">
                       <input
                         type="checkbox"
                         checked={showHighlightsOnTimeline}
                         onChange={toggleHighlightsOnTimeline}
-                        className="accent-[#c8f55a]"
+                        className="accent-accent"
                       />
                       {AppStrings.labelShowHighlightsOnTimeline}
                     </label>
@@ -251,30 +251,31 @@ function App() {
             </div>
 
             {ffmpeg.status === 'loading' && !ffmpeg.loaded && (
-              <span className="flex items-center gap-1.5 text-xs text-[#888]">
-                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-[#888] border-t-transparent" />
+              <span className="flex items-center gap-1.5 text-xs text-fg-muted">
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-fg-muted border-t-transparent" />
                 Loading engine…
               </span>
             )}
             {showReady && (
-              <span className="text-xs text-[#c8f55a]">✓ Ready</span>
+              <span className="text-xs text-accent">✓ Ready</span>
             )}
 
             {isVideoLoaded && (
               <button
                 onClick={startTour}
-                className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm text-[#aaa] hover:text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer"
+                className="rounded border border-edge-strong bg-control px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm text-fg-2 hover:text-fg-1 hover:bg-control-hover transition-colors cursor-pointer"
                 aria-label="Replay onboarding tour"
-                title="Tour"
+                title="Replay onboarding tour"
               >
-                ?
+                <span className="hidden tablet:inline">Tour</span>
+                <span className="tablet:hidden">?</span>
               </button>
             )}
 
             {isVideoLoaded && (
               <button
                 onClick={() => { if (videoURL) URL.revokeObjectURL(videoURL); setVideoFile(null); setVideoURL(undefined); setIsDriveSource(false); setDriveFilename(null); setCustomFilename(''); setDriveInputUrl(''); clearHighlights(); }}
-                className="rounded border border-[#444] bg-[#2a2a2e] px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm text-[#ccc] hover:bg-[#3a3a3e] transition-colors cursor-pointer flex-1 mobile-landscape:flex-initial"
+                className="rounded border border-edge-strong bg-control px-2 tablet:px-3 py-1.5 text-xs tablet:text-sm text-fg-1 hover:bg-control-hover transition-colors cursor-pointer flex-1 mobile-landscape:flex-initial"
               >
                 <span className="hidden tablet:inline">{AppStrings.btnLoadDifferentVideo}</span>
                 <span className="tablet:hidden">Load New</span>
@@ -284,59 +285,83 @@ function App() {
         </div>
 
         {!isVideoLoaded ? (
-          <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-[#333] bg-[#1a1a1e] py-20 text-[#999]">
-            {/* Source tabs */}
-            <div className="flex rounded border border-[#333] overflow-hidden">
-              <button
-                onClick={() => setActiveTab('file')}
-                className={[
-                  'px-4 py-1.5 text-sm transition-colors cursor-pointer',
-                  activeTab === 'file'
-                    ? 'bg-[#c8f55a] text-[#111] font-bold'
-                    : 'bg-[#1a1a1e] text-[#aaa] hover:text-[#ccc]',
-                ].join(' ')}
-              >
-                {AppStrings.tabLocalFile}
-              </button>
-              <button
-                onClick={() => setActiveTab('drive')}
-                className={[
-                  'px-4 py-1.5 text-sm transition-colors cursor-pointer',
-                  activeTab === 'drive'
-                    ? 'bg-[#c8f55a] text-[#111] font-bold'
-                    : 'bg-[#1a1a1e] text-[#aaa] hover:text-[#ccc]',
-                ].join(' ')}
-              >
-                {AppStrings.tabGoogleDrive}
-              </button>
+          <div className="rounded-lg border border-control bg-panel py-10 tablet:py-16 px-4">
+            {/* Value proposition */}
+            <div className="text-center mb-8 tablet:mb-10">
+              <p className="text-sm tablet:text-base text-fg-1 mb-1.5">{AppStrings.emptyStateTagline}</p>
+              <p className="text-xs text-fg-faint">{AppStrings.emptyStatePrivacy}</p>
             </div>
 
-            {activeTab === 'file' ? (
-              <>
-                <p className="text-base">{AppStrings.emptyStatePrompt}</p>
-                <label className="cursor-pointer rounded bg-[#c8f55a] px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#111] hover:bg-[#d8ff70] transition-colors">
+            {/* Workflow steps */}
+            <div className="flex items-start justify-center gap-3 tablet:gap-6 mb-8 tablet:mb-10 max-w-lg mx-auto">
+              {AppStrings.workflowSteps.map((step, i) => (
+                <div key={step.label} className="flex flex-col items-center text-center flex-1 min-w-0">
+                  <div className={[
+                    'w-7 h-7 tablet:w-8 tablet:h-8 rounded-full flex items-center justify-center text-xs tablet:text-sm font-bold mb-1.5',
+                    i === 0 ? 'bg-accent text-base' : 'bg-control text-fg-faint',
+                  ].join(' ')}>
+                    {i + 1}
+                  </div>
+                  <span className={[
+                    'text-[10px] tablet:text-xs font-semibold uppercase tracking-wider mb-0.5',
+                    i === 0 ? 'text-accent' : 'text-fg-faint',
+                  ].join(' ')}>{step.label}</span>
+                  <span className="text-[9px] tablet:text-[10px] text-fg-faint leading-tight hidden mobile-landscape:block">{step.desc}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Source tabs + input */}
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex rounded border border-edge-mid overflow-hidden">
+                <button
+                  onClick={() => setActiveTab('file')}
+                  className={[
+                    'px-4 py-1.5 text-sm transition-colors cursor-pointer',
+                    activeTab === 'file'
+                      ? 'bg-accent text-base font-bold'
+                      : 'bg-raised text-fg-2 hover:text-fg-1',
+                  ].join(' ')}
+                >
+                  {AppStrings.tabLocalFile}
+                </button>
+                <button
+                  onClick={() => setActiveTab('drive')}
+                  className={[
+                    'px-4 py-1.5 text-sm transition-colors cursor-pointer',
+                    activeTab === 'drive'
+                      ? 'bg-accent text-base font-bold'
+                      : 'bg-raised text-fg-2 hover:text-fg-1',
+                  ].join(' ')}
+                >
+                  {AppStrings.tabGoogleDrive}
+                </button>
+              </div>
+
+              {activeTab === 'file' ? (
+                <label className="cursor-pointer rounded bg-accent px-5 py-2.5 text-sm font-bold uppercase tracking-wider text-base hover:bg-accent-bright transition-colors">
                   {AppStrings.btnChooseFile}
                   <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
                 </label>
-              </>
-            ) : (
-              <div className="flex flex-col tablet:flex-row w-full max-w-sm gap-2">
-                <input
-                  type="text"
-                  placeholder={AppStrings.driveUrlPlaceholder}
-                  value={driveInputUrl}
-                  onChange={(e) => setDriveInputUrl(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleDriveLoad()}
-                  className="flex-1 rounded border border-[#333] bg-[#111] px-3 py-2 text-sm text-[#ccc] placeholder-[#444] focus:border-[#c8f55a]/60"
-                />
-                <button
-                  onClick={handleDriveLoad}
-                  className="rounded bg-[#c8f55a] px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#111] hover:bg-[#d8ff70] transition-colors cursor-pointer"
-                >
-                  {AppStrings.btnLoadFromDrive}
-                </button>
-              </div>
-            )}
+              ) : (
+                <div className="flex flex-col tablet:flex-row w-full max-w-sm gap-2">
+                  <input
+                    type="text"
+                    placeholder={AppStrings.driveUrlPlaceholder}
+                    value={driveInputUrl}
+                    onChange={(e) => setDriveInputUrl(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleDriveLoad()}
+                    className="flex-1 rounded border border-edge-mid bg-base px-3 py-2 text-sm text-fg-1 placeholder-edge-strong focus:border-accent/60"
+                  />
+                  <button
+                    onClick={handleDriveLoad}
+                    className="rounded bg-accent px-4 py-2 text-sm font-bold uppercase tracking-wider text-base hover:bg-accent-bright transition-colors cursor-pointer"
+                  >
+                    {AppStrings.btnLoadFromDrive}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <>
@@ -352,14 +377,14 @@ function App() {
               onVideoError={handleVideoError}
             />
             {needsFilename && (
-              <div className="flex items-center gap-2 mt-2 rounded border border-[#333] bg-[#1a1a1e] px-3 py-2">
-                <span className="text-xs text-[#999] shrink-0">{AppStrings.driveFilenameLabel}</span>
+              <div className="flex items-center gap-2 mt-2 rounded border border-edge-mid bg-raised px-3 py-2">
+                <span className="text-xs text-fg-muted shrink-0">{AppStrings.driveFilenameLabel}</span>
                 <input
                   type="text"
                   placeholder={AppStrings.driveFilenamePlaceholder}
                   value={customFilename}
                   onChange={(e) => setCustomFilename(e.target.value)}
-                  className="flex-1 rounded border border-[#333] bg-[#111] px-2 py-1 text-sm text-[#ccc] placeholder-[#444] focus:border-[#c8f55a]/60"
+                  className="flex-1 rounded border border-edge-mid bg-base px-2 py-1 text-sm text-fg-1 placeholder-edge-strong focus:border-accent/60"
                 />
               </div>
             )}
@@ -375,19 +400,17 @@ function App() {
           </>
         )}
 
-        <div className="hidden tablet:block">
-          <HighlightList
-            highlights={highlights}
-            onSeek={handleTimelineSeek}
-            onRemove={removeHighlight}
-            onRename={(id, label) => updateHighlight(id, { label })}
-            onLoadIntoTimeline={handleLoadHighlightIntoTimeline}
-            onExport={handleExportHighlights}
-            onImport={handleImportHighlights}
-            showOnTimeline={showHighlightsOnTimeline}
-            onToggleOnTimeline={toggleHighlightsOnTimeline}
-          />
-        </div>
+        <HighlightList
+          highlights={highlights}
+          onSeek={handleTimelineSeek}
+          onRemove={removeHighlight}
+          onRename={(id, label) => updateHighlight(id, { label })}
+          onLoadIntoTimeline={handleLoadHighlightIntoTimeline}
+          onExport={handleExportHighlights}
+          onImport={handleImportHighlights}
+          showOnTimeline={showHighlightsOnTimeline}
+          onToggleOnTimeline={toggleHighlightsOnTimeline}
+        />
 
         {isVideoLoaded && (
           <ClipList
@@ -411,12 +434,12 @@ function App() {
       </div>
 
       {/* Footer */}
-      <footer className="mx-auto max-w-4xl mt-8 mb-2 flex items-center justify-center gap-2 text-[10px] tablet:text-xs text-[#666]">
+      <footer className="mx-auto max-w-4xl mt-8 mb-2 flex items-center justify-center gap-2 text-[10px] tablet:text-xs text-fg-faint">
         <span>v0.1.0</span>
-        <span className="text-[#444]">·</span>
-        <span>Built by <a href="https://github.com/victoralfonsoperez" target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#c8f55a] transition-colors">Victor Pérez</a></span>
-        <span className="text-[#444]">·</span>
-        <a href="https://github.com/victoralfonsoperez/browsercut" target="_blank" rel="noopener noreferrer" className="text-[#888] hover:text-[#c8f55a] transition-colors">GitHub</a>
+        <span className="text-edge-strong">·</span>
+        <span>Built by <a href="https://github.com/victoralfonsoperez" target="_blank" rel="noopener noreferrer" className="text-fg-muted hover:text-accent transition-colors">Victor Pérez</a></span>
+        <span className="text-edge-strong">·</span>
+        <a href="https://github.com/victoralfonsoperez/browsercut" target="_blank" rel="noopener noreferrer" className="text-fg-muted hover:text-accent transition-colors">GitHub</a>
       </footer>
 
       {previewClip && videoURL && (

@@ -11,6 +11,7 @@ interface HighlightRowProps {
   onLoadIntoTimeline: () => void;
 }
 
+/** Full highlight row — visible on tablet+ when expanded */
 function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimeline }: HighlightRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(highlight.label);
@@ -32,8 +33,8 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
   const isRange = highlight.endTime !== undefined;
 
   return (
-    <div className="flex items-center gap-2 rounded border border-[#2a2a2e] bg-[#111] px-2 py-2 hover:border-[#444] transition-colors group select-none">
-      <div className="w-1.5 h-1.5 rounded-full bg-[#f59e0b] shrink-0" />
+    <div className="flex items-center gap-2 rounded border border-control bg-base px-2 py-2 hover:border-edge-strong transition-colors group select-none">
+      <div className="w-1.5 h-1.5 rounded-full bg-amber shrink-0" />
 
       <div className="flex-1 min-w-0">
         {isEditing ? (
@@ -46,12 +47,12 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
               if (e.key === 'Enter') commitRename();
               if (e.key === 'Escape') { setEditValue(highlight.label); setIsEditing(false); }
             }}
-            className="w-full rounded border border-[#f59e0b]/50 bg-[#1a1a1e] px-1.5 py-0.5 text-sm text-[#ccc] focus:border-[#f59e0b]"
+            className="w-full rounded border border-amber/50 bg-raised px-1.5 py-0.5 text-sm text-fg-1 focus:border-amber"
           />
         ) : (
           <button
             onClick={startEdit}
-            className="block w-full text-left text-sm text-[#ccc] truncate hover:text-white transition-colors cursor-text"
+            className="block w-full text-left text-sm text-fg-1 truncate hover:text-white transition-colors cursor-text"
             title={HighlightListStrings.titleClickToRename}
           >
             {highlight.label}
@@ -59,19 +60,19 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
         )}
       </div>
 
-      <span className="font-mono text-xs text-[#f59e0b] shrink-0">{formatTime(highlight.time)}</span>
+      <span className="font-mono text-xs text-amber shrink-0">{formatTime(highlight.time)}</span>
       {isRange && (
         <>
-          <span className="text-[#999] text-xs shrink-0">→</span>
-          <span className="font-mono text-xs text-[#f59e0b]/70 shrink-0">{formatTime(highlight.endTime!)}</span>
-          <span className="font-mono text-xs text-[#999] shrink-0">({formatTime(highlight.endTime! - highlight.time)})</span>
+          <span className="text-fg-muted text-xs shrink-0">→</span>
+          <span className="font-mono text-xs text-amber/70 shrink-0">{formatTime(highlight.endTime!)}</span>
+          <span className="font-mono text-xs text-fg-muted shrink-0">({formatTime(highlight.endTime! - highlight.time)})</span>
         </>
       )}
 
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity shrink-0">
         <button
           onClick={onSeek}
-          className="rounded px-1.5 py-0.5 text-xs text-[#aaa] hover:text-[#ccc] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
+          className="rounded px-1.5 py-0.5 text-xs text-fg-2 hover:text-fg-1 hover:bg-control transition-colors cursor-pointer"
           title={HighlightListStrings.titleSeek}
           aria-label={HighlightListStrings.titleSeek}
         >
@@ -80,7 +81,7 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
         {isRange && (
           <button
             onClick={onLoadIntoTimeline}
-            className="rounded px-1.5 py-0.5 text-xs text-[#aaa] hover:text-[#f59e0b] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
+            className="rounded px-1.5 py-0.5 text-xs text-fg-2 hover:text-amber hover:bg-control transition-colors cursor-pointer"
             title={HighlightListStrings.titleLoadIntoTimeline}
             aria-label={HighlightListStrings.titleLoadIntoTimeline}
           >
@@ -89,13 +90,42 @@ function HighlightRow({ highlight, onSeek, onRemove, onRename, onLoadIntoTimelin
         )}
         <button
           onClick={onRemove}
-          className="rounded px-1.5 py-0.5 text-xs text-[#999] hover:text-[#f55a5a] hover:bg-[#2a2a2e] transition-colors cursor-pointer"
+          className="rounded px-1.5 py-0.5 text-xs text-fg-muted hover:text-danger hover:bg-control transition-colors cursor-pointer"
           title={HighlightListStrings.titleRemove}
           aria-label={HighlightListStrings.titleRemove}
         >
           {SharedStrings.btnClose}
         </button>
       </div>
+    </div>
+  );
+}
+
+/** Compact highlight row — tappable, used on mobile */
+function HighlightRowCompact({ highlight, onSeek, onRemove }: Pick<HighlightRowProps, 'highlight' | 'onSeek' | 'onRemove'>) {
+  const isRange = highlight.endTime !== undefined;
+
+  return (
+    <div className="flex items-center gap-2 px-1 py-1.5 border-b border-edge-subtle last:border-0">
+      <div className="w-1.5 h-1.5 rounded-full bg-amber shrink-0" />
+      <button
+        onClick={onSeek}
+        className="flex-1 min-w-0 text-left text-xs text-fg-1 truncate cursor-pointer active:text-white"
+      >
+        {highlight.label}
+      </button>
+      <span className="font-mono text-[10px] text-amber shrink-0">{formatTime(highlight.time)}</span>
+      {isRange && (
+        <span className="font-mono text-[10px] text-fg-muted shrink-0">({formatTime(highlight.endTime! - highlight.time)})</span>
+      )}
+      <button
+        onClick={onRemove}
+        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[10px] text-fg-muted active:text-danger cursor-pointer shrink-0"
+        title={HighlightListStrings.titleRemove}
+        aria-label={HighlightListStrings.titleRemove}
+      >
+        {SharedStrings.btnClose}
+      </button>
     </div>
   );
 }
@@ -121,29 +151,29 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
   }, [hasHighlights, dispatchOpen]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-4 rounded-md border border-[#333] bg-[#1a1a1e] p-3">
+    <div className="w-full max-w-4xl mx-auto mt-3 rounded-md border border-control bg-panel p-3">
       <div className="flex items-center justify-between">
         <button
           onClick={() => dispatchOpen(!isOpen)}
-          className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#aaa] hover:text-[#ccc] transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-fg-2 hover:text-fg-1 transition-colors cursor-pointer"
           title={isOpen ? HighlightListStrings.titleCollapse : HighlightListStrings.titleExpand}
           aria-expanded={isOpen}
         >
           <span className="text-[10px]">{isOpen ? '▼' : '▶'}</span>
           {HighlightListStrings.sectionHeading}
           {!isOpen && hasHighlights && (
-            <span className="text-[#999] normal-case tracking-normal">({highlights.length})</span>
+            <span className="text-fg-muted normal-case tracking-normal">({highlights.length})</span>
           )}
         </button>
 
-        <div className="flex gap-1.5">
+        <div className="hidden tablet:flex gap-1.5">
           <button
             onClick={onToggleOnTimeline}
             className={[
               'rounded border px-2 py-0.5 text-[11px] transition-colors cursor-pointer',
               showOnTimeline
-                ? 'border-[#f59e0b]/60 bg-[#f59e0b]/10 text-[#f59e0b]'
-                : 'border-[#444] bg-[#2a2a2e] text-[#999] hover:bg-[#3a3a3e] hover:text-[#aaa]',
+                ? 'border-amber/60 bg-amber/10 text-amber'
+                : 'border-edge-strong bg-control text-fg-muted hover:bg-control-hover hover:text-fg-2',
             ].join(' ')}
             title={showOnTimeline ? HighlightListStrings.titleHideFromTimeline : HighlightListStrings.titleShowOnTimeline}
             aria-pressed={showOnTimeline}
@@ -152,7 +182,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
           </button>
 
           <label
-            className="rounded border border-[#444] bg-[#2a2a2e] px-2 py-0.5 text-[11px] text-[#aaa] hover:bg-[#3a3a3e] hover:text-[#ccc] transition-colors cursor-pointer"
+            className="rounded border border-edge-strong bg-control px-2 py-0.5 text-[11px] text-fg-2 hover:bg-control-hover hover:text-fg-1 transition-colors cursor-pointer"
             title={HighlightListStrings.titleLoad}
           >
             {HighlightListStrings.btnLoad}
@@ -171,7 +201,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
           <button
             onClick={onExport}
             disabled={highlights.length === 0}
-            className="rounded border border-[#444] bg-[#2a2a2e] px-2 py-0.5 text-[11px] text-[#aaa] hover:bg-[#3a3a3e] hover:text-[#ccc] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="rounded border border-edge-strong bg-control px-2 py-0.5 text-[11px] text-fg-2 hover:bg-control-hover hover:text-fg-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             title={HighlightListStrings.titleExport}
           >
             {HighlightListStrings.btnExport}
@@ -180,22 +210,36 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
       </div>
 
       {isOpen && (
-        <div className="mt-3">
+        <div className="mt-2 tablet:mt-3">
           {highlights.length === 0 ? (
-            <div className="text-center text-xs text-[#999] py-4">{HighlightListStrings.emptyState}</div>
+            <div className="text-center text-xs text-fg-muted py-4">{HighlightListStrings.emptyState}</div>
           ) : (
-            <div className="flex flex-col gap-1.5">
-              {highlights.map((h) => (
-                <HighlightRow
-                  key={h.id}
-                  highlight={h}
-                  onSeek={() => onSeek(h.time)}
-                  onRemove={() => onRemove(h.id)}
-                  onRename={(label) => onRename(h.id, label)}
-                  onLoadIntoTimeline={() => onLoadIntoTimeline(h)}
-                />
-              ))}
-            </div>
+            <>
+              {/* Compact list — mobile */}
+              <div className="tablet:hidden">
+                {highlights.map((h) => (
+                  <HighlightRowCompact
+                    key={h.id}
+                    highlight={h}
+                    onSeek={() => onSeek(h.time)}
+                    onRemove={() => onRemove(h.id)}
+                  />
+                ))}
+              </div>
+              {/* Full list — tablet+ */}
+              <div className="hidden tablet:flex flex-col gap-1.5" data-testid="highlight-list-full">
+                {highlights.map((h) => (
+                  <HighlightRow
+                    key={h.id}
+                    highlight={h}
+                    onSeek={() => onSeek(h.time)}
+                    onRemove={() => onRemove(h.id)}
+                    onRename={(label) => onRename(h.id, label)}
+                    onLoadIntoTimeline={() => onLoadIntoTimeline(h)}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
       )}

@@ -77,7 +77,7 @@ export function ExportOptionsModal({
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-control bg-raised">
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-fg-2">{ExportOptionsStrings.modalHeading}</p>
+            <p className="text-xs uppercase tracking-wider text-fg-2">{ExportOptionsStrings.modalHeading}</p>
             <p className="text-sm font-medium text-fg-1 mt-0.5 truncate max-w-[200px]" title={clip.name}>
               {clip.name}
             </p>
@@ -91,7 +91,7 @@ export function ExportOptionsModal({
 
           {/* Format */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-fg-muted mb-2">{ExportOptionsStrings.labelFormat}</p>
+            <p className="text-2xs uppercase tracking-wider text-fg-muted mb-2">{ExportOptionsStrings.labelFormat}</p>
             <div className="flex flex-wrap gap-2">
               {FORMATS.map((f) => (
                 <OptionButton key={f} value={f} selected={options.format === f} label={FORMAT_LABELS[f]} onClick={(v) => set('format', v)} />
@@ -103,7 +103,7 @@ export function ExportOptionsModal({
           {options.format === 'gif' && (
             <div className="rounded border border-warn/30 bg-warn/5 px-3 py-2.5">
               <p className="text-xs text-warn font-medium mb-1">{ExportOptionsStrings.gifWarningHeading}</p>
-              <p className="text-[11px] text-[#a87830] leading-relaxed">
+              <p className="text-xs text-warn/70 leading-relaxed">
                 {ExportOptionsStrings.gifWarningBodyModal}
               </p>
               {!gifWarningAcknowledged && (
@@ -115,20 +115,20 @@ export function ExportOptionsModal({
                 </button>
               )}
               {gifWarningAcknowledged && (
-                <p className="mt-1.5 text-[10px] text-fg-2">{ExportOptionsStrings.gifAcknowledged}</p>
+                <p className="mt-1.5 text-2xs text-fg-2">{ExportOptionsStrings.gifAcknowledged}</p>
               )}
             </div>
           )}
 
           {/* Quality */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-fg-muted mb-2">{ExportOptionsStrings.labelQuality}</p>
+            <p className="text-2xs uppercase tracking-wider text-fg-muted mb-2">{ExportOptionsStrings.labelQuality}</p>
             <div className="flex gap-2">
               {QUALITIES.map((q) => (
                 <OptionButton key={q} value={q} selected={options.quality === q} label={QUALITY_LABELS[q]} onClick={(v) => set('quality', v)} />
               ))}
             </div>
-            <p className="mt-1.5 text-[10px] text-fg-muted">
+            <p className="mt-1.5 text-2xs text-fg-muted">
               {options.quality === 'high' && ExportOptionsStrings.qualityHighDesc}
               {options.quality === 'medium' && ExportOptionsStrings.qualityMediumDesc}
               {options.quality === 'low' && ExportOptionsStrings.qualityLowDesc}
@@ -137,14 +137,14 @@ export function ExportOptionsModal({
 
           {/* Resolution */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-fg-muted mb-2">{ExportOptionsStrings.labelResolution}</p>
+            <p className="text-2xs uppercase tracking-wider text-fg-muted mb-2">{ExportOptionsStrings.labelResolution}</p>
             <div className="flex flex-wrap gap-2">
               {RESOLUTIONS.map((r) => (
                 <OptionButton key={r} value={r} selected={options.resolution === r} label={RESOLUTION_LABELS[r]} onClick={(v) => set('resolution', v)} />
               ))}
             </div>
             {options.resolution !== 'original' && (
-              <p className="mt-1.5 text-[10px] text-fg-muted">
+              <p className="mt-1.5 text-2xs text-fg-muted">
                 {ExportOptionsStrings.resolutionScaleNote}
               </p>
             )}

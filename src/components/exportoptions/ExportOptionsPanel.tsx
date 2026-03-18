@@ -29,14 +29,14 @@ function OptionGroup<T extends string>({
 }) {
   return (
     <div>
-      <p className="mb-1 text-[10px] uppercase tracking-wider text-fg-muted">{label}</p>
+      <p className="mb-1 text-2xs uppercase tracking-wider text-fg-muted">{label}</p>
       <div className="flex gap-1">
         {choices.map((choice) => (
           <button
             key={choice}
             onClick={() => onChange(choice)}
             className={[
-              'rounded border px-2 py-1 text-[11px] transition-colors cursor-pointer',
+              'rounded border px-2 py-1 text-xs transition-colors cursor-pointer',
               value === choice
                 ? 'border-accent/60 bg-accent/10 text-accent'
                 : 'border-control bg-base text-fg-muted hover:border-edge-strong hover:text-fg-2',
@@ -79,7 +79,7 @@ export function ExportOptionsPanel({ options, onChange }: ExportOptionsPanelProp
         onChange={(resolution) => onChange({ ...options, resolution })}
       />
       {options.format === 'gif' && (
-        <p className="rounded border border-warn/30 bg-warn/5 px-2 py-1.5 text-[10px] text-warn">
+        <p className="rounded border border-warn/30 bg-warn/5 px-2 py-1.5 text-2xs text-warn">
           {ExportOptionsStrings.gifWarningBodyPanel}
         </p>
       )}

@@ -138,7 +138,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
       <div className="rounded-md border border-edge-mid border-t-2 border-t-accent/25 bg-panel pb-1">
 
         {/* Header */}
-        <div className="flex justify-between items-center px-2 tablet:px-3 py-1.5 text-[9px] tablet:text-[11px] uppercase tracking-wider text-fg-2">
+        <div className="flex justify-between items-center px-2 tablet:px-3 py-1.5 text-2xs tablet:text-xs uppercase tracking-wider text-fg-2">
           {isGenerating ? (
             <span className="flex items-center gap-1.5 text-accent">
               <span className="inline-block w-2.5 h-2.5 border-2 border-accent/25 border-t-accent rounded-full animate-spin" />
@@ -149,7 +149,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
             <span className="flex items-center gap-2 tablet:gap-3">
               <span className="hidden mobile-landscape:inline">{thumbnails.length > 0 ? TimelineStrings.thumbnailCount(thumbnails.length) : ''}</span>
               {(trim.inPoint !== null || trim.outPoint !== null) && (
-                <span className="text-accent/70 normal-case tracking-normal text-[8px] tablet:text-[10px]">
+                <span className="text-accent/70 normal-case tracking-normal text-2xs">
                   {trim.inPoint !== null && `${TimelineStrings.inPointPrefix} ${formatTime(trim.inPoint)}`}
                   {trim.inPoint !== null && trim.outPoint !== null && ` ${SharedStrings.separator} `}
                   {trim.outPoint !== null && `${TimelineStrings.outPointPrefix} ${formatTime(trim.outPoint)}`}
@@ -157,7 +157,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               )}
             </span>
           )}
-          <span className="text-accent tabular-nums text-[10px] tablet:text-xs font-semibold">{formatTime(currentTime)}</span>
+          <span className="text-accent tabular-nums text-2xs tablet:text-xs font-semibold">{formatTime(currentTime)}</span>
         </div>
 
         {/* Track */}
@@ -310,7 +310,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
             >
               <div className="w-0 h-0 border-x-[5px] border-x-transparent border-t-[7px] border-t-amber" />
               {hoveredHighlightId === h.id && (
-                <span className="pointer-events-none absolute left-1 top-2 z-[20] whitespace-nowrap rounded bg-black/70 px-1 py-px text-[10px] text-white">
+                <span className="pointer-events-none absolute left-1 top-2 z-[20] whitespace-nowrap rounded bg-black/70 px-1 py-px text-2xs text-white">
                   {h.label}
                 </span>
               )}
@@ -333,7 +333,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               className="pointer-events-none absolute top-0 bottom-0 z-[9] w-px -translate-x-1/2 bg-white/35"
               style={{ left: `${(hoverTime / duration) * 100}%` }}
             >
-              <span className="absolute top-0.5 left-1 whitespace-nowrap rounded bg-black/70 px-1 py-px text-[10px] text-white">
+              <span className="absolute top-0.5 left-1 whitespace-nowrap rounded bg-black/70 px-1 py-px text-2xs text-white">
                 {formatTime(hoverTime)}
               </span>
             </div>
@@ -346,7 +346,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
             {thumbnails.map((thumb) => (
               <span
                 key={thumb.time}
-                className="absolute -translate-x-1/2 text-[9px] text-fg-muted whitespace-nowrap"
+                className="absolute -translate-x-1/2 text-2xs text-fg-muted whitespace-nowrap"
                 style={{ left: `${(thumb.time / duration) * 100}%` }}
               >
                 {formatTime(thumb.time)}

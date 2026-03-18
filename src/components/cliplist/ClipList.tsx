@@ -31,7 +31,7 @@ interface ClipListProps {
 /** Small inline badge showing format · quality */
 function OptionsBadge({ options }: { options: ExportOptions }) {
   return (
-    <span className="text-[9px] text-fg-muted shrink-0">
+    <span className="text-2xs text-fg-muted shrink-0">
       {FORMAT_LABELS[options.format]} · {QUALITY_LABELS[options.quality]}
       {options.resolution !== 'original' ? ` · ${RESOLUTION_LABELS[options.resolution]}` : ''}
     </span>
@@ -183,8 +183,8 @@ function ClipRow({
         onDrop={(e) => { e.preventDefault(); onDrop(index); }}
         onTouchStart={(e) => onSwipeStart(index, e.touches[0].clientX)}
         className={[
-          'relative flex flex-col rounded border bg-base px-2 py-2 transition-colors group select-none',
-          isDragOver ? 'border-accent/60 bg-accent/5' : 'border-control hover:border-edge-strong',
+          'relative flex flex-col rounded border px-2 py-2 transition-colors group select-none',
+          isDragOver ? 'border-accent/60 bg-accent/5' : 'border-transparent hover:bg-base',
           isTouchDragging ? 'opacity-50 scale-95' : '',
         ].join(' ')}
         style={swipeOffset !== 0 ? { transform: `translateX(${swipeOffset}px)`, transition: 'none' } : undefined}
@@ -205,17 +205,17 @@ function ClipRow({
           ><IconGrip /></span>
           <span className="hidden tablet:flex flex-col shrink-0 opacity-0 focus-within:opacity-100 group-hover:opacity-100 transition-opacity pt-1">
             {onMoveUp && (
-              <button onClick={onMoveUp} className="rounded px-0.5 text-[10px] text-fg-muted hover:text-fg-1 hover:bg-control transition-colors cursor-pointer leading-tight" title="Move up" aria-label="Move clip up">▲</button>
+              <button onClick={onMoveUp} className="rounded px-0.5 text-2xs text-fg-muted hover:text-fg-1 hover:bg-control transition-colors cursor-pointer leading-tight" title="Move up" aria-label="Move clip up">▲</button>
             )}
             {onMoveDown && (
-              <button onClick={onMoveDown} className="rounded px-0.5 text-[10px] text-fg-muted hover:text-fg-1 hover:bg-control transition-colors cursor-pointer leading-tight" title="Move down" aria-label="Move clip down">▼</button>
+              <button onClick={onMoveDown} className="rounded px-0.5 text-2xs text-fg-muted hover:text-fg-1 hover:bg-control transition-colors cursor-pointer leading-tight" title="Move down" aria-label="Move clip down">▼</button>
             )}
           </span>
 
           <div className="flex-1 min-w-0 flex flex-col gap-1">
             {/* Row 1: clip identity */}
             <div className="flex items-center gap-1.5 tablet:gap-2">
-              <span className="text-[9px] tablet:text-[10px] text-fg-faint tabular-nums w-3 tablet:w-4 shrink-0">{index + 1}</span>
+              <span className="text-2xs text-fg-faint tabular-nums w-3 tablet:w-4 shrink-0">{index + 1}</span>
               <div
                 className="shrink-0 w-[48px] tablet:w-[56px] h-[28px] tablet:h-[32px] rounded overflow-hidden bg-kbd border border-edge-mid cursor-pointer hover:border-accent/60 transition-colors"
                 onClick={onPreview}
@@ -224,7 +224,7 @@ function ClipRow({
                 {clip.thumbnailDataUrl ? (
                   <img src={clip.thumbnailDataUrl} alt={ClipListStrings.clipThumbnailAlt(clip.name)} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-fg-muted text-[10px]">▶</div>
+                  <div className="w-full h-full flex items-center justify-center text-fg-muted text-2xs">▶</div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -246,18 +246,18 @@ function ClipRow({
                   </button>
                 )}
               </div>
-              <span className="font-mono text-[10px] tablet:text-xs text-fg-1 shrink-0">{formatTime(clipDuration)}</span>
+              <span className="font-mono text-2xs tablet:text-xs text-fg-1 shrink-0">{formatTime(clipDuration)}</span>
             </div>
 
             {/* Row 2: timecodes + actions */}
             <div className="flex items-center gap-1.5 tablet:gap-2">
-              <span className="font-mono text-[10px] text-accent/70 shrink-0 hidden mobile-landscape:inline">{formatTime(clip.inPoint)}</span>
-              <span className="text-fg-faint text-[10px] shrink-0 hidden mobile-landscape:inline">→</span>
-              <span className="font-mono text-[10px] text-danger/70 shrink-0 hidden mobile-landscape:inline">{formatTime(clip.outPoint)}</span>
+              <span className="font-mono text-2xs text-accent/70 shrink-0 hidden mobile-landscape:inline">{formatTime(clip.inPoint)}</span>
+              <span className="text-fg-faint text-2xs shrink-0 hidden mobile-landscape:inline">→</span>
+              <span className="font-mono text-2xs text-danger/70 shrink-0 hidden mobile-landscape:inline">{formatTime(clip.outPoint)}</span>
               <OptionsBadge options={clipOptions} />
 
               <div className="flex items-center gap-0.5 tablet:gap-1 ml-auto shrink-0">
-                <button onClick={onSeek} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-fg-2 hover:text-fg-1 hover:bg-control transition-colors cursor-pointer" title={ClipListStrings.titleSeekToInPoint} aria-label={ClipListStrings.titleSeekToInPoint}>▶</button>
+                <button onClick={onSeek} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-2xs tablet:text-xs text-fg-2 hover:text-fg-1 hover:bg-control transition-colors cursor-pointer" title={ClipListStrings.titleSeekToInPoint} aria-label={ClipListStrings.titleSeekToInPoint}>▶</button>
 
                 {/* ⚙ per-clip settings */}
                 <div className="relative hidden tablet:block" ref={settingsRef}>
@@ -275,12 +275,12 @@ function ClipRow({
                   </button>
 
                   {showSettings && (
-                    <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-lg border border-edge-mid bg-raised p-3 shadow-xl animate-scale-in origin-top-right">
+                    <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-lg bg-panel p-3 shadow-xl shadow-black/40 animate-scale-in origin-top-right">
                       <div className="mb-2 flex items-center justify-between">
-                        <p className="text-[10px] uppercase tracking-wider text-fg-2">{ClipListStrings.headingClipSettings}</p>
+                        <p className="text-2xs uppercase tracking-wider text-fg-2">{ClipListStrings.headingClipSettings}</p>
                         <button
                           onClick={() => setClipOptions(globalOptions)}
-                          className="text-[10px] text-fg-muted hover:text-accent transition-colors cursor-pointer"
+                          className="text-2xs text-fg-muted hover:text-accent transition-colors cursor-pointer"
                           title={ClipListStrings.titleReset}
                         >
                           {ClipListStrings.btnReset}
@@ -294,7 +294,7 @@ function ClipRow({
                 <button
                   onClick={handleExportClick}
                   disabled={!canExport}
-                  className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-fg-2 hover:text-accent hover:bg-control transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-2xs tablet:text-xs text-fg-2 hover:text-accent hover:bg-control transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   title={ClipListStrings.titleExportInstant}
                   aria-label={ClipListStrings.titleExportInstant}
                 >
@@ -307,13 +307,13 @@ function ClipRow({
                 <button
                   onClick={handleEnqueueClick}
                   disabled={!videoSource}
-                  className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs font-bold text-fg-2 hover:text-mark hover:bg-control transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-2xs tablet:text-xs font-bold text-fg-2 hover:text-mark hover:bg-control transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   title={ClipListStrings.titleAddToQueue}
                   aria-label={ClipListStrings.titleAddToQueue}
                 >
                   +
                 </button>
-                <button onClick={onRemove} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-[10px] tablet:text-xs text-fg-muted hover:text-danger hover:bg-control transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip} aria-label={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
+                <button onClick={onRemove} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-2xs tablet:text-xs text-fg-muted hover:text-danger hover:bg-control transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip} aria-label={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
               </div>
             </div>
           </div>
@@ -325,7 +325,7 @@ function ClipRow({
             {ffmpeg.status === 'loading' ? (
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 border border-fg-muted border-t-transparent rounded-full animate-spin shrink-0" role="status" aria-label="Loading FFmpeg" />
-                <p className="text-[10px] text-fg-2">{ClipListStrings.loadingFfmpegFirst}</p>
+                <p className="text-2xs text-fg-2">{ClipListStrings.loadingFfmpegFirst}</p>
               </div>
             ) : (
               <ProgressBar progress={ffmpeg.progress} className="flex-1" />
@@ -335,7 +335,7 @@ function ClipRow({
 
         {/* Per-clip error */}
         {ffmpeg.exportingClipId === null && ffmpeg.status === 'error' && ffmpeg.error && (
-          <p className="mt-1 text-[10px] text-danger">{ClipListStrings.exportError(ffmpeg.error!)}</p>
+          <p className="mt-1 text-2xs text-danger">{ClipListStrings.exportError(ffmpeg.error!)}</p>
         )}
       </div>
       </div>
@@ -507,21 +507,21 @@ export function ClipList({
       )}
 
       <div className="w-full max-w-4xl mx-auto mt-3 tablet:mt-4 rounded-md border border-edge-mid bg-raised p-2 tablet:p-3" data-tour="clip-list">
-        <div className="text-[9px] tablet:text-[11px] uppercase tracking-wider text-fg-2 mb-2 tablet:mb-3">{ClipListStrings.sectionHeading}</div>
+        <div className="text-2xs tablet:text-xs uppercase tracking-wider text-fg-2 mb-2 tablet:mb-3">{ClipListStrings.sectionHeading}</div>
 
         <div className="flex items-center gap-2 tablet:gap-3 mb-3 text-xs tablet:text-sm">
           <span className="flex items-center gap-1.5">
-            <span className="text-[9px] tablet:text-[10px] uppercase tracking-wider text-fg-faint">{ClipListStrings.labelInPoint}</span>
+            <span className="text-2xs uppercase tracking-wider text-fg-faint">{ClipListStrings.labelInPoint}</span>
             <span className={`font-mono ${inPoint !== null ? 'text-accent' : 'text-fg-faint'}`}>{inPoint !== null ? formatTime(inPoint) : '—'}</span>
           </span>
           <span className="text-edge-strong">→</span>
           <span className="flex items-center gap-1.5">
-            <span className="text-[9px] tablet:text-[10px] uppercase tracking-wider text-fg-faint">{ClipListStrings.labelOutPoint}</span>
+            <span className="text-2xs uppercase tracking-wider text-fg-faint">{ClipListStrings.labelOutPoint}</span>
             <span className={`font-mono ${outPoint !== null ? 'text-danger' : 'text-fg-faint'}`}>{outPoint !== null ? formatTime(outPoint) : '—'}</span>
           </span>
           <span className="text-edge-strong">·</span>
           <span className="flex items-center gap-1.5">
-            <span className="text-[9px] tablet:text-[10px] uppercase tracking-wider text-fg-faint">{ClipListStrings.labelDuration}</span>
+            <span className="text-2xs uppercase tracking-wider text-fg-faint">{ClipListStrings.labelDuration}</span>
             <span className={`font-mono ${duration !== null ? 'text-fg-1' : 'text-fg-faint'}`}>{duration !== null ? formatTime(duration) : '—'}</span>
           </span>
         </div>
@@ -588,7 +588,7 @@ export function ClipList({
             <button
               onClick={handleExportAll}
               disabled={!canExportAll}
-              className="w-full rounded border border-accent/30 bg-[#1e2a0e] px-4 py-2 text-sm font-medium text-accent hover:bg-accent/10 hover:border-accent/60 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-full rounded border border-accent/30 bg-accent/10 px-4 py-2 text-sm font-medium text-accent hover:bg-accent/15 hover:border-accent/60 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {isExportingAll
                 ? ffmpeg.status === 'loading'
@@ -611,17 +611,17 @@ export function ClipList({
             {isExportingAll && ffmpeg.status === 'loading' && (
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 border border-fg-muted border-t-transparent rounded-full animate-spin shrink-0" role="status" aria-label="Loading FFmpeg" />
-                <p className="text-[10px] text-fg-2">{ClipListStrings.loadingFfmpegFirst}</p>
+                <p className="text-2xs text-fg-2">{ClipListStrings.loadingFfmpegFirst}</p>
               </div>
             )}
 
             {!isAnyExporting && ffmpeg.status === 'error' && ffmpeg.error && ffmpeg.exportingClipId === null && (
-              <p className="text-[10px] text-danger">{ClipListStrings.exportError(ffmpeg.error!)}</p>
+              <p className="text-2xs text-danger">{ClipListStrings.exportError(ffmpeg.error!)}</p>
             )}
           </div>
         )}
 
-        <p className="mt-3 text-[9px] tablet:text-[10px] text-fg-muted hidden mobile-landscape:block">
+        <p className="mt-3 text-2xs text-fg-muted hidden mobile-landscape:block">
           {ClipListStrings.keyboardHintHeading}{' '}
           <kbd className="rounded bg-kbd px-1 py-px text-fg-muted">I</kbd> set in ·{' '}
           <kbd className="rounded bg-kbd px-1 py-px text-fg-muted">O</kbd> set out · drag{' '}

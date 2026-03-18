@@ -4,6 +4,10 @@
 @theme {
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 
+  /* Type scale */
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 1.4;
+
   /* Accent palette */
   --color-accent: #c8f55a;
   --color-accent-bright: #d8ff70;

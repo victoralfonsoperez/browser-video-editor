@@ -137,27 +137,24 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
     <div className="w-full max-w-4xl mx-auto mt-4 tablet:mt-6 select-none" data-tour="timeline">
       <div className="pb-1">
 
-        {/* Header */}
-        <div className="flex justify-between items-center py-1.5 text-2xs tablet:text-xs text-fg-2">
-          {isGenerating ? (
-            <span className="flex items-center gap-1.5 text-accent">
-              <span className="inline-block w-2.5 h-2.5 border-2 border-accent/25 border-t-accent rounded-full animate-spin" />
-              <span className="hidden mobile-landscape:inline">{TimelineStrings.generatingThumbnails}</span>
-              <span className="mobile-landscape:hidden">Loading...</span>
-            </span>
-          ) : (
-            <span className="flex items-center gap-2 tablet:gap-3">
-              {(trim.inPoint !== null || trim.outPoint !== null) && (
-                <span className="text-fg-muted normal-case text-2xs">
-                  {trim.inPoint !== null && `${TimelineStrings.inPointPrefix} ${formatTime(trim.inPoint)}`}
-                  {trim.inPoint !== null && trim.outPoint !== null && ` ${SharedStrings.separator} `}
-                  {trim.outPoint !== null && `${TimelineStrings.outPointPrefix} ${formatTime(trim.outPoint)}`}
-                </span>
-              )}
-            </span>
-          )}
-          <span className="text-fg-muted tabular-nums text-2xs tablet:text-xs">{formatTime(currentTime)}</span>
-        </div>
+        {/* Header — only rendered when there is something to show */}
+        {(isGenerating || trim.inPoint !== null || trim.outPoint !== null) && (
+          <div className="flex items-center py-1.5 text-2xs text-fg-muted">
+            {isGenerating ? (
+              <span className="flex items-center gap-1.5 text-accent">
+                <span className="inline-block w-2.5 h-2.5 border-2 border-accent/25 border-t-accent rounded-full animate-spin" />
+                <span className="hidden mobile-landscape:inline">{TimelineStrings.generatingThumbnails}</span>
+                <span className="mobile-landscape:hidden">Loading...</span>
+              </span>
+            ) : (
+              <span className="normal-case">
+                {trim.inPoint !== null && `${TimelineStrings.inPointPrefix} ${formatTime(trim.inPoint)}`}
+                {trim.inPoint !== null && trim.outPoint !== null && ` ${SharedStrings.separator} `}
+                {trim.outPoint !== null && `${TimelineStrings.outPointPrefix} ${formatTime(trim.outPoint)}`}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Track */}
         <div

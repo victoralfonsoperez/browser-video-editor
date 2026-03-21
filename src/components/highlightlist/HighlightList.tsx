@@ -1,5 +1,6 @@
 import { useReducer, useEffect, useState, useRef } from 'react';
 import { SharedStrings, HighlightListStrings } from '../../constants/ui';
+import { IconChevronDown, IconChevronRight } from '../shared/Icons';
 import { formatTime } from '../../utils/formatTime';
 import type { Highlight } from '../../types/highlights';
 
@@ -144,7 +145,7 @@ export interface HighlightListProps {
 
 export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIntoTimeline, onExport, onImport, showOnTimeline, onToggleOnTimeline }: HighlightListProps) {
   const hasHighlights = highlights.length > 0;
-  const [isOpen, dispatchOpen] = useReducer((_state: boolean, next: boolean) => next, hasHighlights);
+  const [isOpen, dispatchOpen] = useReducer((_state: boolean, next: boolean) => next, false);
 
   useEffect(() => {
     if (hasHighlights) dispatchOpen(true);
@@ -159,7 +160,7 @@ export function HighlightList({ highlights, onSeek, onRemove, onRename, onLoadIn
           title={isOpen ? HighlightListStrings.titleCollapse : HighlightListStrings.titleExpand}
           aria-expanded={isOpen}
         >
-          <span className="text-2xs">{isOpen ? '▼' : '▶'}</span>
+          {isOpen ? <IconChevronDown className="w-3 h-3 shrink-0" /> : <IconChevronRight className="w-3 h-3 shrink-0" />}
           {HighlightListStrings.sectionHeading}
           {!isOpen && hasHighlights && (
             <span className="text-fg-muted normal-case tracking-normal">({highlights.length})</span>

@@ -8,7 +8,7 @@ import { FORMAT_LABELS, QUALITY_LABELS, RESOLUTION_LABELS, isGif } from '../../t
 import { ExportOptionsPanel } from '../exportoptions/ExportOptionsPanel';
 import { ProgressBar } from '../shared/ProgressBar';
 import { FocusTrap } from '../common/FocusTrap';
-import { IconDownload, IconGrip } from '../shared/Icons';
+import { IconDownload, IconGrip, IconSettings } from '../shared/Icons';
 
 interface ClipListProps {
   clips: Clip[];
@@ -271,7 +271,7 @@ function ClipRow({
                     aria-expanded={showSettings}
                     aria-label={ClipListStrings.titlePerClipSettings}
                   >
-                    ⚙
+                    <IconSettings className="w-3.5 h-3.5" />
                   </button>
 
                   {showSettings && (
@@ -294,7 +294,7 @@ function ClipRow({
                 <button
                   onClick={handleExportClick}
                   disabled={!canExport}
-                  className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-2xs tablet:text-xs text-fg-2 hover:text-accent hover:bg-control transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center gap-1 rounded px-2 py-0.5 text-2xs tablet:text-xs text-fg-2 hover:text-accent hover:bg-control transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   title={ClipListStrings.titleExportInstant}
                   aria-label={ClipListStrings.titleExportInstant}
                 >
@@ -302,16 +302,16 @@ function ClipRow({
                     ? ffmpeg.status === 'loading'
                       ? ClipListStrings.loadingFfmpeg
                       : ClipListStrings.exportProgress(Math.round(ffmpeg.progress * 100))
-                    : <IconDownload />}
+                    : <><IconDownload className="hidden tablet:block" /><span>Export</span></>}
                 </button>
                 <button
                   onClick={handleEnqueueClick}
                   disabled={!videoSource}
-                  className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-2xs tablet:text-xs font-bold text-fg-2 hover:text-mark hover:bg-control transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-2 py-0.5 text-2xs tablet:text-xs text-fg-2 hover:text-mark hover:bg-control transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   title={ClipListStrings.titleAddToQueue}
                   aria-label={ClipListStrings.titleAddToQueue}
                 >
-                  +
+                  Queue
                 </button>
                 <button onClick={onRemove} className="min-h-[44px] min-w-[44px] tablet:min-h-0 tablet:min-w-0 flex items-center justify-center rounded px-1 tablet:px-1.5 py-0.5 text-2xs tablet:text-xs text-fg-muted hover:text-danger hover:bg-control transition-colors cursor-pointer" title={ClipListStrings.titleRemoveClip} aria-label={ClipListStrings.titleRemoveClip}>{SharedStrings.btnClose}</button>
               </div>
@@ -507,7 +507,7 @@ export function ClipList({
       )}
 
       <div className="w-full max-w-4xl mx-auto mt-3 tablet:mt-4 rounded-md border border-edge-mid bg-raised p-2 tablet:p-3" data-tour="clip-list">
-        <div className="text-2xs tablet:text-xs uppercase tracking-wider text-fg-2 mb-2 tablet:mb-3">{ClipListStrings.sectionHeading}</div>
+        <div className="text-xs tablet:text-sm font-semibold text-fg-1 mb-2 tablet:mb-3">{ClipListStrings.sectionHeading}</div>
 
         <div className="flex items-center gap-2 tablet:gap-3 mb-3 text-xs tablet:text-sm">
           <span className="flex items-center gap-1.5">

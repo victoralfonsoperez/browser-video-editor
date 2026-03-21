@@ -135,10 +135,10 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
 
   return (
     <div className="w-full max-w-4xl mx-auto mt-4 tablet:mt-6 select-none" data-tour="timeline">
-      <div className="rounded-md border border-edge-mid border-t-2 border-t-accent/25 bg-panel pb-1">
+      <div className="pb-1">
 
         {/* Header */}
-        <div className="flex justify-between items-center px-2 tablet:px-3 py-1.5 text-2xs tablet:text-xs uppercase tracking-wider text-fg-2">
+        <div className="flex justify-between items-center py-1.5 text-2xs tablet:text-xs text-fg-2">
           {isGenerating ? (
             <span className="flex items-center gap-1.5 text-accent">
               <span className="inline-block w-2.5 h-2.5 border-2 border-accent/25 border-t-accent rounded-full animate-spin" />
@@ -147,9 +147,8 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
             </span>
           ) : (
             <span className="flex items-center gap-2 tablet:gap-3">
-              <span className="hidden mobile-landscape:inline">{thumbnails.length > 0 ? TimelineStrings.thumbnailCount(thumbnails.length) : ''}</span>
               {(trim.inPoint !== null || trim.outPoint !== null) && (
-                <span className="text-accent/70 normal-case tracking-normal text-2xs">
+                <span className="text-fg-muted normal-case text-2xs">
                   {trim.inPoint !== null && `${TimelineStrings.inPointPrefix} ${formatTime(trim.inPoint)}`}
                   {trim.inPoint !== null && trim.outPoint !== null && ` ${SharedStrings.separator} `}
                   {trim.outPoint !== null && `${TimelineStrings.outPointPrefix} ${formatTime(trim.outPoint)}`}
@@ -157,7 +156,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               )}
             </span>
           )}
-          <span className="text-accent tabular-nums text-2xs tablet:text-xs font-semibold">{formatTime(currentTime)}</span>
+          <span className="text-fg-muted tabular-nums text-2xs tablet:text-xs">{formatTime(currentTime)}</span>
         </div>
 
         {/* Track */}
@@ -207,7 +206,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
 
           {/* Progress fill */}
           <div
-            className="pointer-events-none absolute top-0 left-0 h-full bg-blue-500/20 transition-[width] duration-100 ease-out"
+            className="pointer-events-none absolute top-0 left-0 h-full bg-fg-faint/15 transition-[width] duration-100 ease-out"
             style={{ width: `${playheadPct}%` }}
           />
 
@@ -247,7 +246,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               aria-valuenow={Math.round(trim.inPoint * 10) / 10}
               aria-valuemin={0}
               aria-valuemax={Math.round(duration * 10) / 10}
-              aria-valuetext={`In point: ${formatTime(trim.inPoint)}`}
+              aria-valuetext={`Start: ${formatTime(trim.inPoint)}`}
               onKeyDown={(e) => {
                 if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                   e.preventDefault();
@@ -278,7 +277,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               aria-valuenow={Math.round(trim.outPoint * 10) / 10}
               aria-valuemin={0}
               aria-valuemax={Math.round(duration * 10) / 10}
-              aria-valuetext={`Out point: ${formatTime(trim.outPoint)}`}
+              aria-valuetext={`End: ${formatTime(trim.outPoint)}`}
               onKeyDown={(e) => {
                 if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                   e.preventDefault();
@@ -320,7 +319,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           {/* Playhead */}
           {duration > 0 && (
             <div
-              className="pointer-events-none absolute top-0 bottom-0 z-10 w-0.5 -translate-x-1/2 bg-accent shadow-[0_0_6px_color-mix(in_srgb,var(--color-accent)_53%,transparent)]"
+              className="pointer-events-none absolute top-0 bottom-0 z-10 w-0.5 -translate-x-1/2 bg-accent"
               style={{ left: `${playheadPct}%` }}
             >
               <div className="absolute -top-px left-1/2 -translate-x-1/2 border-x-[5px] border-x-transparent border-t-[6px] border-t-accent" />
@@ -342,7 +341,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
 
         {/* Tick marks */}
         {thumbnails.length > 0 && (
-          <div className="relative h-[18px] mt-0.5 px-2 tablet:px-3 hidden mobile-landscape:block">
+          <div className="relative h-[18px] mt-0.5 hidden mobile-landscape:block">
             {thumbnails.map((thumb) => (
               <span
                 key={thumb.time}

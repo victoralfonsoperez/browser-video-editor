@@ -19,6 +19,7 @@ import { ExportOptionsPanel } from './components/exportoptions/ExportOptionsPane
 import { ToastContainer } from './components/toasts/ToastContainer';
 import { useToast } from './context/ToastContext';
 import { FORMAT_LABELS, QUALITY_LABELS } from './types/exportOptions';
+import { IconSettings } from './components/shared/Icons';
 import { getErrorMessage } from './utils/getErrorMessage';
 import type { Clip } from './hooks/useTrimMarkers';
 import type { Highlight } from './types/highlights';
@@ -199,7 +200,7 @@ function App() {
     <div className="min-h-screen bg-base text-fg p-2 mobile-landscape:p-3 tablet:p-5">
       <div className="mx-auto max-w-4xl">
         <div className="mb-3 tablet:mb-5 flex flex-col mobile-landscape:flex-row items-start mobile-landscape:items-center justify-between gap-2 mobile-landscape:gap-0">
-          <h1 className="text-base tablet:text-xl font-bold uppercase tracking-widest text-fg-1">{AppStrings.title}</h1>
+          <h1 className="text-xl tablet:text-2xl font-bold uppercase tracking-wider text-fg">{AppStrings.title}</h1>
 
           <div className="flex items-center gap-2 w-full mobile-landscape:w-auto">
             {/* Global export settings */}
@@ -216,7 +217,7 @@ function App() {
                 aria-expanded={showGlobalSettings}
                 aria-label={AppStrings.titleGlobalSettings}
               >
-                <span>⚙</span>
+                <IconSettings className="w-3.5 h-3.5 shrink-0" />
                 <span className="text-xs text-fg-2 hidden mobile-landscape:inline">
                   {FORMAT_LABELS[globalOptions.format]} · {QUALITY_LABELS[globalOptions.quality]}
                 </span>
@@ -400,18 +401,6 @@ function App() {
           </>
         )}
 
-        <HighlightList
-          highlights={highlights}
-          onSeek={handleTimelineSeek}
-          onRemove={removeHighlight}
-          onRename={(id, label) => updateHighlight(id, { label })}
-          onLoadIntoTimeline={handleLoadHighlightIntoTimeline}
-          onExport={handleExportHighlights}
-          onImport={handleImportHighlights}
-          showOnTimeline={showHighlightsOnTimeline}
-          onToggleOnTimeline={toggleHighlightsOnTimeline}
-        />
-
         {isVideoLoaded && (
           <ClipList
             clips={trim.clips}
@@ -431,6 +420,18 @@ function App() {
             filenameHint={effectiveFilenameHint}
           />
         )}
+
+        <HighlightList
+          highlights={highlights}
+          onSeek={handleTimelineSeek}
+          onRemove={removeHighlight}
+          onRename={(id, label) => updateHighlight(id, { label })}
+          onLoadIntoTimeline={handleLoadHighlightIntoTimeline}
+          onExport={handleExportHighlights}
+          onImport={handleImportHighlights}
+          showOnTimeline={showHighlightsOnTimeline}
+          onToggleOnTimeline={toggleHighlightsOnTimeline}
+        />
       </div>
 
       {/* Footer */}

@@ -275,7 +275,7 @@ function ClipRow({
                   </button>
 
                   {showSettings && (
-                    <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-lg bg-panel p-3 shadow-xl shadow-black/40 animate-scale-in origin-top-right">
+                    <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-lg border border-edge-mid bg-panel p-3 shadow-md animate-scale-in origin-top-right">
                       <div className="mb-2 flex items-center justify-between">
                         <p className="text-2xs uppercase tracking-wider text-fg-2">{ClipListStrings.headingClipSettings}</p>
                         <button
@@ -596,7 +596,7 @@ export function ClipList({
                   : ClipListStrings.exportAllProgress(Math.round(ffmpeg.progress * 100))
                 : ffmpeg.status === 'done' && ffmpeg.exportingClipId === null
                   ? ClipListStrings.exportDone
-                  : ClipListStrings.exportAllLabel(clips.length, FORMAT_LABELS[globalOptions.format])}
+                  : <span className="flex items-center justify-center gap-1.5"><IconDownload className="w-3.5 h-3.5 shrink-0" />{ClipListStrings.exportAllLabel(clips.length, FORMAT_LABELS[globalOptions.format])}</span>}
             </button>
 
             {isExportingAll && ffmpeg.status === 'processing' && (

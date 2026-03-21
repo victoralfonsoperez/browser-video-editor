@@ -224,7 +224,7 @@ function App() {
               </button>
 
               {showGlobalSettings && (
-                <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-edge-mid bg-raised p-3 shadow-xl animate-scale-in origin-top-left">
+                <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-edge-mid bg-raised p-3 shadow-md animate-scale-in origin-top-left">
                   <p className="mb-3 text-2xs uppercase tracking-wider text-fg-2">
                     {AppStrings.headingDefaultSettings}
                   </p>

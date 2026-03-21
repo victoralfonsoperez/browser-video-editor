@@ -123,14 +123,13 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
   return (
     <div className="w-full max-w-4xl mx-auto">
       {/* File info */}
-      <div className="mb-2 flex flex-wrap gap-x-2 tablet:gap-x-4 gap-y-1 text-xs tablet:text-sm text-fg-2">
-        <span className="truncate max-w-full mobile-landscape:max-w-none"><strong className="text-fg-1">{VideoPlayerStrings.labelFile}</strong> {videoName ?? AppStrings.driveLabelSource}</span>
-        {videoFile && <span><strong className="text-fg-1">{VideoPlayerStrings.labelSize}</strong> {(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>}
-        {videoFile && <span className="hidden mobile-landscape:inline"><strong className="text-fg-1">{VideoPlayerStrings.labelType}</strong> {videoFile.type}</span>}
+      <div className="mb-2 flex flex-wrap gap-x-3 tablet:gap-x-5 gap-y-1 text-xs text-fg-muted">
+        <span className="truncate max-w-full mobile-landscape:max-w-none text-fg-2">{videoName ?? AppStrings.driveLabelSource}</span>
+        {videoFile && <span>{(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>}
         {videoMetadata && (
           <>
-            <span><strong className="text-fg-1">{VideoPlayerStrings.labelDuration}</strong> {videoMetadata.duration.toFixed(2)}s</span>
-            <span><strong className="text-fg-1">{VideoPlayerStrings.labelResolution}</strong> {videoMetadata.width}x{videoMetadata.height}</span>
+            <span>{formatTime(videoMetadata.duration)}</span>
+            <span>{videoMetadata.width}×{videoMetadata.height}</span>
           </>
         )}
       </div>
@@ -162,7 +161,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
         {isVideoLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none">
             <div className="flex flex-col items-center gap-2">
-              <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-fg-faint border-t-fg-1 rounded-full animate-spin" />
               <span className="text-sm text-fg-1">{VideoPlayerStrings.loadingVideo}</span>
             </div>
           </div>
@@ -173,7 +172,7 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { videoURL: string | undefined,
       <div className="mt-2 flex items-center gap-2 tablet:gap-3 rounded bg-control px-2 tablet:px-3 py-2">
         <button
           onClick={togglePlay}
-          className="min-h-[44px] tablet:min-h-0 rounded border border-edge-strong bg-raised px-3 tablet:px-3 py-1 text-xs tablet:text-sm text-fg-1 hover:bg-control-hover transition-colors cursor-pointer"
+          className="min-h-[44px] tablet:min-h-0 rounded bg-accent px-3 tablet:px-4 py-1 text-xs tablet:text-sm font-bold text-base hover:bg-accent-bright transition-colors cursor-pointer"
         >
           {isPlaying ? SharedStrings.btnPause : SharedStrings.btnPlay}
         </button>

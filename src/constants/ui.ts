@@ -140,7 +140,7 @@ export const ClipListStrings = {
   exportProgress: (pct: number) => `${pct}%`,
   exportAllProgress: (pct: number) => `Exporting… ${pct}%`,
   exportAllLabel: (count: number, format: string) =>
-    `⬇ Export All (${count} clip${count === 1 ? '' : 's'}) · ${format}`,
+    `Export All (${count} clip${count === 1 ? '' : 's'}) · ${format}`,
   exportError: (msg: string) => `Export error: ${msg}`,
   clipThumbnailAlt: (name: string) => `Thumbnail for ${name}`,
   addingClip: 'Capturing...',

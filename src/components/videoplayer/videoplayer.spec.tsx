@@ -40,10 +40,9 @@ describe('VideoPlayer', () => {
       expect(video).toHaveAttribute('src', defaultProps.videoURL);
     });
 
-    it('renders file info (name, size, type)', () => {
+    it('renders file info (name, size)', () => {
       renderVideoPlayer();
       expect(screen.getByText(/test-video\.mp4/)).toBeInTheDocument();
-      expect(screen.getByText(/video\/mp4/)).toBeInTheDocument();
     });
 
     it('renders play button initially', () => {
@@ -160,8 +159,8 @@ describe('VideoPlayer', () => {
       Object.defineProperty(video, 'videoWidth', { value: 1280, configurable: true });
       Object.defineProperty(video, 'videoHeight', { value: 720, configurable: true });
       fireEvent.loadedMetadata(video);
-      expect(screen.getByText(/1280x720/)).toBeInTheDocument();
-      expect(screen.getByText(/60\.00s/)).toBeInTheDocument();
+      expect(screen.getByText(/1280×720/)).toBeInTheDocument();
+      expect(screen.getByText('1:00')).toBeInTheDocument();
     });
   });
 

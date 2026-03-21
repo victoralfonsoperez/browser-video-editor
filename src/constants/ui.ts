@@ -25,7 +25,7 @@ export const SharedStrings = {
 // App shell
 // ---------------------------------------------------------------------------
 export const AppStrings = {
-  title: 'Video Editor',
+  title: 'BrowserCut',
   titleGlobalSettings: 'Global export settings',
   headingDefaultSettings: 'Default Export Settings',
   helpDefaultSettings:
@@ -90,17 +90,17 @@ export const TimelineStrings = {
   btnFrameForward: 'Frame →',
   ariaFrameBack: 'Step back one frame',
   ariaFrameForward: 'Step forward one frame',
-  btnSetIn: 'Set In',
-  btnSetOut: 'Set Out',
+  btnSetIn: 'Set Start',
+  btnSetOut: 'Set End',
   btnMark: 'Highlight',
-  titleSetIn: 'Set in-point at playhead (I)',
-  titleSetOut: 'Set out-point at playhead (O)',
-  titleMark: 'Add a highlight at the playhead, or from current in/out range (H)',
-  titleClearMarkers: 'Clear in/out points',
-  titleInMarker: 'In point — drag to adjust, or press I',
-  titleOutMarker: 'Out point — drag to adjust, or press O',
-  inPointPrefix: 'In:',
-  outPointPrefix: 'Out:',
+  titleSetIn: 'Set start point (I)',
+  titleSetOut: 'Set end point (O)',
+  titleMark: 'Add a highlight at the playhead, or from current start/end range (H)',
+  titleClearMarkers: 'Clear start/end',
+  titleInMarker: 'Start — drag or press I',
+  titleOutMarker: 'End — drag or press O',
+  inPointPrefix: 'Start:',
+  outPointPrefix: 'End:',
   thumbnailCount: (n: number) => `${n} thumbnails`,
   thumbnailAlt: (time: number) => `t=${time}s`,
 } as const;
@@ -109,15 +109,15 @@ export const TimelineStrings = {
 // Clip list
 // ---------------------------------------------------------------------------
 export const ClipListStrings = {
-  sectionHeading: 'Clip Definition',
-  labelInPoint: 'In Point',
-  labelOutPoint: 'Out Point',
+  sectionHeading: 'Clips',
+  labelInPoint: 'Start',
+  labelOutPoint: 'End',
   labelDuration: 'Duration',
   btnAddClip: 'Add Clip',
-  emptyState: "Set in/out points and add clips — they'll appear here",
+  emptyState: "Set start/end and add clips — they'll appear here",
   titleDragToReorder: 'Drag to reorder',
   titlePreviewClip: 'Preview clip',
-  titleSeekToInPoint: 'Seek to in-point',
+  titleSeekToInPoint: 'Seek to start',
   titleClickToRename: 'Click to rename',
   titleEditPoints: 'Load in/out points into timeline for editing',
   titlePerClipSettings: 'Per-clip export settings',

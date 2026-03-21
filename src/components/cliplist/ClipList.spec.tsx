@@ -54,7 +54,7 @@ beforeEach(() => vi.clearAllMocks());
 describe('ClipList — empty state', () => {
   it('shows the empty state message when there are no clips', () => {
     render(<ClipList {...baseProps} />);
-    expect(screen.getByText(/set in\/out points and add clips/i)).toBeInTheDocument();
+    expect(screen.getByText(/set start\/end and add clips/i)).toBeInTheDocument();
   });
 
   it('disables the Add Clip button when inPoint or outPoint is null', () => {
@@ -132,7 +132,7 @@ describe('ClipList — clip rows', () => {
   it('calls onSeekToClip when the seek ▶ button is clicked', async () => {
     const onSeekToClip = vi.fn();
     render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} onSeekToClip={onSeekToClip} />);
-    await userEvent.click(screen.getAllByTitle('Seek to in-point')[0]);
+    await userEvent.click(screen.getAllByTitle('Seek to start')[0]);
     expect(onSeekToClip).toHaveBeenCalledWith(clips[0]);
   });
 
@@ -173,7 +173,7 @@ describe('ClipList — ARIA attributes', () => {
 
   it('sets aria-label on icon-only buttons', () => {
     render(<ClipList {...baseProps} clips={clips} videoSource={mockFile} />);
-    expect(screen.getByRole('button', { name: /seek to in-point/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /seek to start/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /export this clip instantly/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /add to export queue/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /remove clip/i })).toBeInTheDocument();

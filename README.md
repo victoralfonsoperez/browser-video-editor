@@ -66,15 +66,16 @@ All processing happens directly in the browser. No data is ever sent to a server
 | Testing | Vitest + Testing Library |
 | Linting | ESLint 9 + typescript-eslint |
 | Video / Canvas | HTML5 Video API + Canvas API |
-| Node Version | 22 (see `.nvmrc`) |
+| Node Version | 22 (see `.nvmrc`, managed with fnm) |
+| Package Manager | pnpm |
 
 > **Note:** Tailwind CSS v4 is integrated as a Vite plugin — no separate `tailwind.config` file needed.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 22+ (see `.nvmrc`)
-- npm
+- Node.js 22+ (see `.nvmrc`, managed with [fnm](https://github.com/Schniz/fnm))
+- [pnpm](https://pnpm.io)
 
 ### Installation
 ```bash
@@ -83,37 +84,37 @@ git clone https://github.com/victoralfonsoperez/browsercut.git
 
 cd browsercut
 
-# Use the correct Node version (if using nvm)
-nvm use
+# Use the correct Node version (if using fnm)
+fnm use
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server
-npm run dev
+pnpm dev
 ```
 
 ### Available Scripts
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start the dev server |
-| `npm run build` | Type-check and build for production |
-| `npm run preview` | Preview the production build |
-| `npm run lint` | Run ESLint |
-| `npm run test` | Run tests with Vitest |
+| `pnpm dev` | Start the dev server |
+| `pnpm build` | Type-check and build for production |
+| `pnpm preview` | Preview the production build |
+| `pnpm lint` | Run ESLint |
+| `pnpm test` | Run tests with Vitest |
 
 ## 🧪 Testing
 
 Tests use **Vitest** with **@testing-library/react**. Test files live alongside their components using the `.spec.tsx` convention.
 
 ```bash
-npm run test
+pnpm test
 ```
 
 ## 🔒 Security
 
-Dependency vulnerabilities are checked automatically via the [Security workflow](.github/workflows/security.yml) on every push, pull request, and weekly on Mondays (`npm audit --audit-level=high`).
+Dependency vulnerabilities are checked automatically via the [Security workflow](.github/workflows/security.yml) on every push, pull request, and weekly on Mondays (`pnpm audit --audit-level high`).
 
 The workflow also runs:
 - **Gitleaks** — scans for accidentally committed secrets
@@ -121,7 +122,7 @@ The workflow also runs:
 
 Run the audit locally:
 ```bash
-npm audit
+pnpm audit
 ```
 
 ### Production headers (`public/_headers`)
@@ -132,7 +133,7 @@ npm audit
 
 ### Recommendations
 
-- Consider installing the [Socket.dev GitHub App](https://socket.dev) for supply-chain monitoring of npm dependencies
+- Consider installing the [Socket.dev GitHub App](https://socket.dev) for supply-chain monitoring of pnpm dependencies
 
 ## 📊 Project Status
 

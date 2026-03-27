@@ -47,6 +47,6 @@ Closes #
 ## Checklist
 
 - [ ] My code follows the existing code style
-- [ ] I have run `npm run build` and it passes
+- [ ] I have run `pnpm build` and it passes
 - [ ] No console errors or warnings introduced
 - [ ] I have updated documentation if needed

@@ -5,15 +5,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev       # Start Vite dev server
-npm run build     # Type-check (tsc -b) + production build
-npm run lint      # ESLint (must pass with 0 errors)
-npm run test      # Run all tests with Vitest
+pnpm dev          # Start Vite dev server
+pnpm build        # Type-check (tsc -b) + production build
+pnpm lint         # ESLint (must pass with 0 errors)
+pnpm test         # Run all tests with Vitest
 ```
 
 Run a single test file:
 ```bash
-npx vitest run src/hooks/useTrimMarkers.spec.ts
+pnpm vitest run src/hooks/useTrimMarkers.spec.ts
 ```
 
 ## Architecture

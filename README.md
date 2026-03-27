@@ -74,8 +74,39 @@ All processing happens directly in the browser. No data is ever sent to a server
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 22+ (see `.nvmrc`, managed with [fnm](https://github.com/Schniz/fnm))
-- [pnpm](https://pnpm.io)
+
+**1. Install fnm** (Fast Node Manager)
+```bash
+# macOS / Linux
+curl -fsSL https://fnm.vercel.app/install | bash
+
+# macOS via Homebrew
+brew install fnm
+
+# Windows via winget
+winget install Schniz.fnm
+```
+
+Then add the shell hook to your profile so fnm activates automatically when entering a directory with a `.nvmrc`:
+```bash
+# bash (~/.bashrc or ~/.bash_profile)
+eval "$(fnm env --use-on-cd --shell bash)"
+
+# zsh (~/.zshrc)
+eval "$(fnm env --use-on-cd --shell zsh)"
+
+# fish (~/.config/fish/config.fish)
+fnm env --use-on-cd --shell fish | source
+```
+
+**2. Install pnpm**
+```bash
+# via corepack (bundled with Node.js)
+corepack enable pnpm
+
+# or via standalone installer
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
 
 ### Installation
 ```bash
@@ -84,7 +115,8 @@ git clone https://github.com/victoralfonsoperez/browsercut.git
 
 cd browsercut
 
-# Use the correct Node version (if using fnm)
+# Install and use the correct Node version
+fnm install
 fnm use
 
 # Install dependencies

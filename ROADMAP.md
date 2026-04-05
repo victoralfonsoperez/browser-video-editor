@@ -25,7 +25,7 @@ For long videos the current fixed-width timeline loses precision. Add horizontal
 - Minimap / scroll thumb showing the visible window
 - Thumbnail pool (4× density) generated once — no re-capture on zoom
 
-### Precise timecode input
+### ✅ Precise timecode input
 
 Let users type an exact time (`mm:ss.fff`) to jump to or set in/out points — useful when timestamps come from an external source (e.g. a transcript).
 

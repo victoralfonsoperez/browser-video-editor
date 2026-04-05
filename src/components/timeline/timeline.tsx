@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { SharedStrings, TimelineStrings } from '../../constants/ui';
-import { formatTime } from '../../utils/formatTime';
+import { formatTime, formatTimecode } from '../../utils/formatTime';
 import { isInputFocused } from '../../utils/isInputFocused';
 import { THUMB_WIDTH } from '../../utils/thumbnails';
 import { useVideoThumbnails } from '../../hooks/useVideoThumbnails';
 import { useTimelineZoom } from '../../hooks/useTimelineZoom';
 import { WaveformCanvas } from './WaveformCanvas';
+import { TimecodeInput } from './TimecodeInput';
 import type { useTrimMarkers } from '../../hooks/useTrimMarkers';
 import type { Highlight } from '../../types/highlights';
 
@@ -620,9 +621,9 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
             </div>
           )}
         </div>
-        <div className="flex gap-4 font-mono text-xs tablet:text-sm text-fg-muted justify-end">
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(duration)}</span>
+        <div className="flex gap-4 font-mono text-xs tablet:text-sm text-fg-muted justify-end items-center">
+          <TimecodeInput currentTime={currentTime} duration={duration} onSeek={onSeek} />
+          <span>{formatTimecode(duration)}</span>
         </div>
       </div>
     </div>

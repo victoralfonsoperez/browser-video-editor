@@ -4,6 +4,7 @@ import { formatTime } from '../../utils/formatTime';
 import { isInputFocused } from '../../utils/isInputFocused';
 import { THUMB_WIDTH } from '../../utils/thumbnails';
 import { useVideoThumbnails } from '../../hooks/useVideoThumbnails';
+import { useTimelineZoom } from '../../hooks/useTimelineZoom';
 import { WaveformCanvas } from './WaveformCanvas';
 import type { useTrimMarkers } from '../../hooks/useTrimMarkers';
 import type { Highlight } from '../../types/highlights';
@@ -28,7 +29,33 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [hoveredHighlightId, setHoveredHighlightId] = useState<string | null>(null);
   const { thumbnails, isGenerating, generateThumbnails } = useVideoThumbnails();
+  const { zoom, scrollOffset, zoomBy, pan, follow, reset: resetZoom } = useTimelineZoom();
 
+  // ---------------------------------------------------------------------------
+  // Zoom-derived view window
+  // ---------------------------------------------------------------------------
+  const viewDuration = duration > 0 ? duration / zoom : 0;
+  const viewStart = duration > 0 ? Math.max(0, Math.min(duration - viewDuration, scrollOffset)) : 0;
+  const viewEnd = viewStart + viewDuration;
+
+  // Percentage helpers (viewport-relative)
+  // pct(t)       → CSS left/position for a point in time
+  // pctWidth(dt) → CSS width for a time interval
+  const pct = (t: number) =>
+    viewDuration > 0 ? `${((t - viewStart) / viewDuration) * 100}%` : '0%';
+  const pctWidth = (dt: number) =>
+    viewDuration > 0 ? `${(dt / viewDuration) * 100}%` : '0%';
+  const playheadPct = viewDuration > 0 ? ((currentTime - viewStart) / viewDuration) * 100 : 0;
+
+  // ---------------------------------------------------------------------------
+  // Ref declarations — must precede the effects that close over them
+  // ---------------------------------------------------------------------------
+  const prevCurrentTimeRef = useRef(currentTime);
+  const prevDurationRef = useRef(duration);
+
+  // ---------------------------------------------------------------------------
+  // Thumbnail generation
+  // ---------------------------------------------------------------------------
   const generate = useCallback(() => {
     if (!videoRef?.current || !Number.isFinite(duration) || duration <= 0 || isGenerating) return;
     const width = timelineRef.current?.getBoundingClientRect().width ?? 0;
@@ -44,20 +71,59 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
     }
   }, [duration, generate, thumbnails.length, isGenerating]);
 
+  // ---------------------------------------------------------------------------
+  // Wheel handler — zoom (Ctrl+scroll) or pan (scroll)
+  // ---------------------------------------------------------------------------
+  const handleWheelEvent = useCallback((e: WheelEvent) => {
+    e.preventDefault();
+    const el = timelineRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+
+    if (e.ctrlKey || e.metaKey) {
+      // Zoom centred on cursor position
+      const fraction = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const centerTime = viewStart + fraction * viewDuration;
+      const factor = Math.pow(1.001, -e.deltaY);
+      zoomBy(factor, centerTime, duration);
+    } else {
+      // Pan — prefer horizontal delta (trackpads), fall back to vertical
+      const delta = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      const trackWidth = rect.width;
+      if (trackWidth > 0) pan((delta / trackWidth) * viewDuration, duration);
+    }
+  }, [viewStart, viewDuration, zoomBy, pan, duration]);
+
+  // Attach wheel listener — passive:false so we can preventDefault
+  useEffect(() => {
+    const el = timelineRef.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleWheelEvent, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheelEvent);
+  }, [handleWheelEvent]);
+
+  // ---------------------------------------------------------------------------
+  // Position helpers
+  // ---------------------------------------------------------------------------
   const getTimeFromPosition = useCallback((clientX: number) => {
     if (!timelineRef.current) return 0;
     const rect = timelineRef.current.getBoundingClientRect();
-    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) * duration;
-  }, [duration]);
+    const fraction = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    return viewStart + fraction * viewDuration;
+  }, [viewStart, viewDuration]);
 
-  // Keyboard bindings - need to re-bind when currentTime changes
+  // ---------------------------------------------------------------------------
+  // Keyboard bindings
+  // ---------------------------------------------------------------------------
+
+  // Trim markers (I / O)
   useEffect(() => {
     const handler = trim.bindKeyboard(currentTime);
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [currentTime, trim.bindKeyboard, trim]);
 
-  // H key — mark highlight
+  // H key — highlight
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (isInputFocused(e)) return;
@@ -67,6 +133,49 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
     return () => window.removeEventListener('keydown', handler);
   }, [onMark]);
 
+  // + / − keys — zoom (centred on playhead)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (isInputFocused(e)) return;
+      if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        zoomBy(2, currentTime, duration);
+      } else if (e.key === '-') {
+        e.preventDefault();
+        zoomBy(0.5, currentTime, duration);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [currentTime, duration, zoomBy]);
+
+  // ---------------------------------------------------------------------------
+  // Auto-scroll: keep playhead visible while video is playing
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const prev = prevCurrentTimeRef.current;
+    prevCurrentTimeRef.current = currentTime;
+    if (zoom <= 1 || duration <= 0) return;
+    // Only follow when time advances forward (playback, not a backwards seek)
+    if (currentTime > prev && currentTime > viewEnd) {
+      follow(currentTime, duration);
+    }
+  }, [currentTime, zoom, viewEnd, follow, duration]);
+
+  // ---------------------------------------------------------------------------
+  // Reset zoom when a new video is loaded
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const prev = prevDurationRef.current;
+    prevDurationRef.current = duration;
+    if (prev > 0 && duration === 0) {
+      resetZoom();
+    }
+  }, [duration, resetZoom]);
+
+  // ---------------------------------------------------------------------------
+  // Mouse / touch drag handlers
+  // ---------------------------------------------------------------------------
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     onSeek(getTimeFromPosition(e.clientX));
@@ -122,24 +231,54 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
     };
   }, [isDragging, draggingMarker, duration, getTimeFromPosition, onSeek, trim]);
 
+  // ---------------------------------------------------------------------------
+  // Frame seek
+  // ---------------------------------------------------------------------------
   const handleFrameSeek = (direction: 'forward' | 'backward') => {
     const frameDuration = 1 / 30;
     const newTime = direction === 'forward' ? currentTime + frameDuration : currentTime - frameDuration;
     onSeek(Math.max(0, Math.min(duration, newTime)));
   };
 
-  const pct = (t: number) => duration > 0 ? `${(t / duration) * 100}%` : '0%';
-  const playheadPct = duration > 0 ? (currentTime / duration) * 100 : 0;
+  // ---------------------------------------------------------------------------
+  // Minimap drag
+  // ---------------------------------------------------------------------------
+  const handleMinimapMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const seek = (ev: MouseEvent | React.MouseEvent) => {
+      const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+      const fraction = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
+      const targetCenter = fraction * duration;
+      pan(targetCenter - viewDuration / 2 - viewStart, duration);
+    };
+    seek(e);
+    const onMove = (ev: MouseEvent) => seek(ev);
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
 
-  const inPct = trim.inPoint !== null ? trim.inPoint / duration : null;
-  const outPct = trim.outPoint !== null ? trim.outPoint / duration : null;
-  const showRegion = inPct !== null && outPct !== null;
+  // ---------------------------------------------------------------------------
+  // Computed display values
+  // ---------------------------------------------------------------------------
+  const showRegion = trim.inPoint !== null && trim.outPoint !== null;
+  const zoomLabel = TimelineStrings.labelZoom(zoom % 1 === 0 ? zoom : parseFloat(zoom.toFixed(1)));
 
+  // Waveform view fractions (0–1) for the visible window
+  const waveViewStartFrac = duration > 0 ? viewStart / duration : 0;
+  const waveViewEndFrac = duration > 0 ? viewEnd / duration : 1;
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
   return (
     <div className="w-full max-w-4xl mx-auto mt-4 tablet:mt-6 select-none" data-tour="timeline">
       <div className="pb-1">
 
-        {/* Header — only rendered when there is something to show */}
+        {/* Header */}
         {(isGenerating || trim.inPoint !== null || trim.outPoint !== null) && (
           <div className="flex items-center py-1.5 text-2xs text-fg-muted">
             {isGenerating ? (
@@ -185,13 +324,20 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
             }
           }}
         >
-          <div className="flex h-full gap-px bg-base">
+          {/* Thumbnail strip — scaled to zoom width and translated for scroll */}
+          <div
+            className="absolute top-0 h-full flex gap-px bg-base"
+            style={zoom > 1 ? {
+              width: `${zoom * 100}%`,
+              left: `-${(viewStart / duration) * zoom * 100}%`,
+            } : { width: '100%' }}
+          >
             {thumbnails.map((thumb) => (
               <img
                 key={thumb.time}
                 src={thumb.dataUrl}
-                className="h-full shrink-0 object-cover opacity-85 hover:opacity-100 transition-opacity duration-150"
-                style={{ width: THUMB_WIDTH }}
+                className={`h-full object-cover opacity-85 hover:opacity-100 transition-opacity duration-150 ${zoom > 1 ? 'flex-1 min-w-0' : 'shrink-0'}`}
+                style={zoom <= 1 ? { width: THUMB_WIDTH } : undefined}
                 alt={TimelineStrings.thumbnailAlt(thumb.time)}
                 title={formatTime(thumb.time)}
               />
@@ -204,7 +350,11 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           </div>
 
           {/* Audio waveform overlay */}
-          <WaveformCanvas waveformData={waveformData ?? null} />
+          <WaveformCanvas
+            waveformData={waveformData ?? null}
+            viewStartFrac={waveViewStartFrac}
+            viewEndFrac={waveViewEndFrac}
+          />
 
           {/* Progress fill */}
           <div
@@ -218,7 +368,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               className="pointer-events-none absolute top-0 h-full bg-accent/20 border-x border-accent/60"
               style={{
                 left: pct(trim.inPoint!),
-                width: pct(trim.outPoint! - trim.inPoint!),
+                width: pctWidth(trim.outPoint! - trim.inPoint!),
               }}
             />
           )}
@@ -230,7 +380,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               <div
                 key={`band-${h.id}`}
                 className="pointer-events-none absolute top-0 z-[5] h-full bg-amber/15 border-x border-amber/40"
-                style={{ left: pct(h.time), width: pct(h.endTime - h.time) }}
+                style={{ left: pct(h.time), width: pctWidth(h.endTime - h.time) }}
               />
             ))}
 
@@ -332,7 +482,7 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           {hoverTime !== null && !isDragging && !draggingMarker && hoveredHighlightId === null && duration > 0 && (
             <div
               className="pointer-events-none absolute top-0 bottom-0 z-[9] w-px -translate-x-1/2 bg-white/35"
-              style={{ left: `${(hoverTime / duration) * 100}%` }}
+              style={{ left: `${((hoverTime - viewStart) / viewDuration) * 100}%` }}
             >
               <span className="absolute top-0.5 left-1 whitespace-nowrap rounded bg-black/70 px-1 py-px text-2xs text-white">
                 {formatTime(hoverTime)}
@@ -341,23 +491,46 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           )}
         </div>
 
+        {/* Minimap — only shown when zoomed in */}
+        {zoom > 1 && duration > 0 && (
+          <div
+            className="relative h-1.5 mt-1 rounded-full bg-base overflow-hidden cursor-pointer"
+            role="scrollbar"
+            aria-label={TimelineStrings.ariaMinimapScroll}
+            aria-valuenow={Math.round((viewStart / duration) * 100)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            onMouseDown={handleMinimapMouseDown}
+          >
+            <div
+              className="absolute top-0 h-full rounded-full bg-accent/60"
+              style={{
+                left: `${(viewStart / duration) * 100}%`,
+                width: `${(viewDuration / duration) * 100}%`,
+              }}
+            />
+          </div>
+        )}
+
         {/* Tick marks */}
         {thumbnails.length > 0 && (
-          <div className="relative h-[18px] mt-0.5 hidden mobile-landscape:block">
-            {thumbnails.map((thumb) => (
-              <span
-                key={thumb.time}
-                className="absolute -translate-x-1/2 text-2xs text-fg-muted whitespace-nowrap"
-                style={{ left: `${(thumb.time / duration) * 100}%` }}
-              >
-                {formatTime(thumb.time)}
-              </span>
-            ))}
+          <div className="relative h-[18px] mt-0.5 hidden mobile-landscape:block overflow-hidden">
+            {thumbnails
+              .filter((t) => t.time >= viewStart && t.time <= viewEnd)
+              .map((thumb) => (
+                <span
+                  key={thumb.time}
+                  className="absolute -translate-x-1/2 text-2xs text-fg-muted whitespace-nowrap"
+                  style={{ left: pct(thumb.time) }}
+                >
+                  {formatTime(thumb.time)}
+                </span>
+              ))}
           </div>
         )}
       </div>
 
-      {/* Frame controls + time labels */}
+      {/* Frame controls + zoom + time labels */}
       <div className="mt-2 flex flex-col tablet:flex-row items-stretch tablet:items-center justify-between gap-2">
         <div className="flex gap-1 tablet:gap-2 flex-wrap">
           <button
@@ -405,6 +578,41 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
             >
               {SharedStrings.btnClear}
             </button>
+          )}
+
+          {/* Zoom controls */}
+          {duration > 0 && (
+            <div className="flex items-center gap-1 ml-1">
+              <button
+                onClick={() => zoomBy(0.5, currentTime, duration)}
+                className="min-h-[44px] tablet:min-h-0 rounded border border-edge-strong bg-control px-2.5 py-1 text-sm text-fg-1 hover:bg-control-hover transition-colors cursor-pointer leading-none"
+                title={TimelineStrings.titleZoomOut}
+                aria-label={TimelineStrings.ariaZoomOut}
+              >
+                {TimelineStrings.btnZoomOut}
+              </button>
+              <span className="text-xs font-mono text-fg-muted min-w-[2.5rem] text-center tabular-nums">
+                {zoomLabel}
+              </span>
+              <button
+                onClick={() => zoomBy(2, currentTime, duration)}
+                className="min-h-[44px] tablet:min-h-0 rounded border border-edge-strong bg-control px-2.5 py-1 text-sm text-fg-1 hover:bg-control-hover transition-colors cursor-pointer leading-none"
+                title={TimelineStrings.titleZoomIn}
+                aria-label={TimelineStrings.ariaZoomIn}
+              >
+                {TimelineStrings.btnZoomIn}
+              </button>
+              {zoom > 1 && (
+                <button
+                  onClick={resetZoom}
+                  className="min-h-[44px] tablet:min-h-0 rounded border border-edge-strong bg-control px-2 py-1 text-xs text-fg-2 hover:bg-control-hover transition-colors cursor-pointer"
+                  title={TimelineStrings.titleZoomReset}
+                  aria-label={TimelineStrings.ariaZoomReset}
+                >
+                  {TimelineStrings.btnZoomReset}
+                </button>
+              )}
+            </div>
           )}
         </div>
         <div className="flex gap-4 font-mono text-xs tablet:text-sm text-fg-muted justify-end">

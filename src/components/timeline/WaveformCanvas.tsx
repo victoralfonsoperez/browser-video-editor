@@ -2,9 +2,13 @@ import { useEffect, useRef } from 'react'
 
 interface WaveformCanvasProps {
   waveformData: Float32Array | null
+  /** Fraction of the full video at the left edge of the viewport (0–1). Default 0. */
+  viewStartFrac?: number
+  /** Fraction of the full video at the right edge of the viewport (0–1). Default 1. */
+  viewEndFrac?: number
 }
 
-export function WaveformCanvas({ waveformData }: WaveformCanvasProps) {
+export function WaveformCanvas({ waveformData, viewStartFrac = 0, viewEndFrac = 1 }: WaveformCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -20,29 +24,36 @@ export function WaveformCanvas({ waveformData }: WaveformCanvasProps) {
 
       if (!waveformData || waveformData.length === 0) return
 
+      // Slice to the visible view window
+      const startIdx = Math.floor(viewStartFrac * waveformData.length)
+      const endIdx = Math.ceil(viewEndFrac * waveformData.length)
+      const slice = waveformData.subarray(
+        Math.max(0, startIdx),
+        Math.min(waveformData.length, endIdx),
+      )
+      if (slice.length === 0) return
+
       // Normalize to peak amplitude
       let peak = 0
-      for (let i = 0; i < waveformData.length; i++) {
-        if (waveformData[i] > peak) peak = waveformData[i]
+      for (let i = 0; i < slice.length; i++) {
+        if (slice[i] > peak) peak = slice[i]
       }
       if (peak === 0) return
 
       const midY = height / 2
       const maxBarHalf = midY * 0.85
-      const barW = width / waveformData.length
+      const barW = width / slice.length
 
       ctx.fillStyle = 'rgba(255, 255, 255, 0.28)'
 
-      for (let i = 0; i < waveformData.length; i++) {
-        const amplitude = (waveformData[i] / peak) * maxBarHalf
-        const x = (i / waveformData.length) * width
-        // Draw 1px gap between bars when wide enough
+      for (let i = 0; i < slice.length; i++) {
+        const amplitude = (slice[i] / peak) * maxBarHalf
+        const x = (i / slice.length) * width
         const w = Math.max(1, barW - (barW > 1.5 ? 0.5 : 0))
         ctx.fillRect(x, midY - amplitude, w, amplitude * 2)
       }
     }
 
-    // Sync canvas pixel size to its CSS layout size and redraw
     const syncAndDraw = (entries?: ResizeObserverEntry[]) => {
       const entry = entries?.[0]
       if (entry) {
@@ -60,7 +71,7 @@ export function WaveformCanvas({ waveformData }: WaveformCanvasProps) {
     syncAndDraw()
 
     return () => observer.disconnect()
-  }, [waveformData])
+  }, [waveformData, viewStartFrac, viewEndFrac])
 
   return (
     <canvas

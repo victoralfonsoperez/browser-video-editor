@@ -114,6 +114,10 @@ export const TimelineStrings = {
   ariaZoomReset: 'Reset zoom to 1×',
   ariaMinimapScroll: 'Timeline overview — click to navigate',
   labelZoom: (z: number) => `${z % 1 === 0 ? z : z.toFixed(1)}×`,
+  timecodeTitle: 'Click to seek to a timecode (mm:ss.f)',
+  timecodeAriaLabel: (t: string) => `Current time ${t} — click to edit`,
+  timecodeInputAriaLabel: 'Seek to timecode',
+  timecodePlaceholder: '0:00.0',
 } as const;
 
 // ---------------------------------------------------------------------------

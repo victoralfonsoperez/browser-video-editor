@@ -8,7 +8,7 @@ BrowserCut is a client-side video editor. This document tracks planned features 
 
 Features that make the timeline richer and more precise.
 
-### Audio waveform visualizer
+### ✅ Audio waveform visualizer
 
 Decode the audio track using the Web Audio API (`AudioContext.decodeAudioData`) and render the waveform directly on the timeline canvas alongside the thumbnail strip. This gives users a visual reference for cuts — especially useful for interview footage, podcasts, or any audio-driven content.
 
@@ -16,15 +16,16 @@ Decode the audio track using the Web Audio API (`AudioContext.decodeAudioData`) 
 - Respect the current zoom level and scroll position
 - Subtle color that does not compete with trim markers
 
-### Timeline zoom and scroll
+### ✅ Timeline zoom and scroll
 
 For long videos the current fixed-width timeline loses precision. Add horizontal zoom (pinch-to-zoom / scroll wheel + modifier) and a scrollable viewport so users can scrub frame-accurately.
 
-- Zoom range: 1× (full video) → ~60× (≈1 s visible)
+- Zoom range: 1× (full video) → ~64× (≈1 s visible)
 - Keyboard: `+` / `-` or `Ctrl + scroll`
 - Minimap / scroll thumb showing the visible window
+- Thumbnail pool (4× density) generated once — no re-capture on zoom
 
-### Precise timecode input
+### ✅ Precise timecode input
 
 Let users type an exact time (`mm:ss.fff`) to jump to or set in/out points — useful when timestamps come from an external source (e.g. a transcript).
 

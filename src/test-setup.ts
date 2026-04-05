@@ -23,3 +23,16 @@ Object.defineProperty(globalThis, 'Worker', {
   configurable: true,
   value: MockWorker,
 })
+
+// ResizeObserver is not available in jsdom — provide a no-op stub.
+class MockResizeObserver {
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+}
+
+Object.defineProperty(globalThis, 'ResizeObserver', {
+  writable: true,
+  configurable: true,
+  value: MockResizeObserver,
+})

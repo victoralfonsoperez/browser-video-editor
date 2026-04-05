@@ -4,6 +4,7 @@ import { formatTime } from '../../utils/formatTime';
 import { isInputFocused } from '../../utils/isInputFocused';
 import { THUMB_WIDTH } from '../../utils/thumbnails';
 import { useVideoThumbnails } from '../../hooks/useVideoThumbnails';
+import { WaveformCanvas } from './WaveformCanvas';
 import type { useTrimMarkers } from '../../hooks/useTrimMarkers';
 import type { Highlight } from '../../types/highlights';
 
@@ -17,9 +18,10 @@ interface TimelineProps {
   onMark: () => void;
   trim: TrimMarkers;
   highlights?: Highlight[];
+  waveformData?: Float32Array | null;
 }
 
-export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim, highlights = [] }: TimelineProps) {
+export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim, highlights = [], waveformData }: TimelineProps) {
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [draggingMarker, setDraggingMarker] = useState<'in' | 'out' | null>(null);
@@ -200,6 +202,9 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
               </div>
             )}
           </div>
+
+          {/* Audio waveform overlay */}
+          <WaveformCanvas waveformData={waveformData ?? null} />
 
           {/* Progress fill */}
           <div

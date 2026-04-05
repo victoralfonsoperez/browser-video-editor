@@ -13,6 +13,7 @@ import { useClipThumbnail } from './hooks/useClipThumbnail';
 import { useFFmpeg } from './hooks/useFFmpeg';
 import { useExportQueue } from './hooks/useExportQueue';
 import { usePreferences } from './hooks/usePreferences';
+import { useAudioWaveform } from './hooks/useAudioWaveform';
 import { ClipPreviewModal } from './components/clippreview/ClipPreviewModal';
 import { ExportQueueOverlay } from './components/exportqueue/ExportQueueOverlay';
 import { ExportOptionsPanel } from './components/exportoptions/ExportOptionsPanel';
@@ -53,6 +54,7 @@ function App() {
   const videoName = videoFile?.name ?? effectiveFilenameHint ?? null;
 
   const exportQueue = useExportQueue(videoSource, ffmpeg, effectiveFilenameHint);
+  const { waveformData } = useAudioWaveform(videoFile);
   const { tourState, startTour, nextStep, prevStep, closeTour } = useTour();
   // Declare ref BEFORE the useEffect that reads it (immutability rule)
   const hasAutoTriggeredTourRef = useRef<boolean>(false);
@@ -397,6 +399,7 @@ function App() {
               videoRef={videoRef}
               trim={trim}
               highlights={showHighlightsOnTimeline ? highlights : []}
+              waveformData={waveformData}
             />
           </>
         )}

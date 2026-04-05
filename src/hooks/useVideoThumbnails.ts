@@ -43,11 +43,16 @@ export function useVideoThumbnails() {
   }, [])
 
   const generateThumbnails = useCallback(
-    async (video: HTMLVideoElement, count: number) => {
+    async (video: HTMLVideoElement, count: number, startTime = 0, endTime?: number) => {
       if (count < 1) return
 
       const duration = video.duration
       if (!Number.isFinite(duration) || duration <= 0) return
+
+      const rangeStart = Math.max(0, startTime)
+      const rangeEnd = Math.min(duration, endTime ?? duration)
+      const rangeDuration = rangeEnd - rangeStart
+      if (rangeDuration <= 0) return
 
       const myGenId = ++generationIdRef.current
       setIsGenerating(true)
@@ -59,7 +64,7 @@ export function useVideoThumbnails() {
       const ctx = canvas.getContext('2d')!
       const times: number[] = Array.from(
         { length: count },
-        (_, i) => (i / count) * duration,
+        (_, i) => rangeStart + (i / count) * rangeDuration,
       )
 
       function encodeFrame(id: number, buffer: ArrayBuffer): Promise<string | null> {

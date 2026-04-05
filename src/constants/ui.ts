@@ -103,6 +103,17 @@ export const TimelineStrings = {
   outPointPrefix: 'End:',
   thumbnailCount: (n: number) => `${n} thumbnails`,
   thumbnailAlt: (time: number) => `t=${time}s`,
+  btnZoomIn: '+',
+  btnZoomOut: '−',
+  btnZoomReset: '1×',
+  titleZoomIn: 'Zoom in (+)',
+  titleZoomOut: 'Zoom out (−)',
+  titleZoomReset: 'Reset zoom',
+  ariaZoomIn: 'Zoom in',
+  ariaZoomOut: 'Zoom out',
+  ariaZoomReset: 'Reset zoom to 1×',
+  ariaMinimapScroll: 'Timeline overview — click to navigate',
+  labelZoom: (z: number) => `${z % 1 === 0 ? z : z.toFixed(1)}×`,
 } as const;
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { SharedStrings, TimelineStrings } from '../../constants/ui';
 import { formatTime } from '../../utils/formatTime';
 import { isInputFocused } from '../../utils/isInputFocused';
@@ -10,6 +10,10 @@ import type { useTrimMarkers } from '../../hooks/useTrimMarkers';
 import type { Highlight } from '../../types/highlights';
 
 type TrimMarkers = ReturnType<typeof useTrimMarkers>;
+
+/** Generate this many times more thumbnails than the base count so we have
+ *  enough density to fill any zoom level without per-zoom regeneration. */
+const POOL_MULTIPLIER = 4;
 
 interface TimelineProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -54,17 +58,16 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
   const prevDurationRef = useRef(duration);
 
   // ---------------------------------------------------------------------------
-  // Thumbnail generation
+  // Thumbnail generation — once per video load, for the full duration
   // ---------------------------------------------------------------------------
   const generate = useCallback(() => {
     if (!videoRef?.current || !Number.isFinite(duration) || duration <= 0 || isGenerating) return;
     const width = timelineRef.current?.getBoundingClientRect().width ?? 0;
     if (width <= 0) return;
     const count = Math.max(1, Math.floor(width / THUMB_WIDTH));
-    generateThumbnails(videoRef.current, count);
+    generateThumbnails(videoRef.current, count * POOL_MULTIPLIER);
   }, [videoRef, duration, isGenerating, generateThumbnails]);
 
-  // Generate on first load
   useEffect(() => {
     if (duration > 0 && thumbnails.length === 0 && !isGenerating) {
       generate();
@@ -267,6 +270,14 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
   const showRegion = trim.inPoint !== null && trim.outPoint !== null;
   const zoomLabel = TimelineStrings.labelZoom(zoom % 1 === 0 ? zoom : parseFloat(zoom.toFixed(1)));
 
+  // Thumbnails visible in the current viewport — subset of the full pool
+  const displayedThumbnails = useMemo(() => {
+    if (thumbnails.length === 0 || viewDuration <= 0) return [];
+    // Include one thumbnail before viewStart and one after viewEnd for edge coverage
+    const extended = thumbnails.filter((t) => t.time >= viewStart - viewDuration / thumbnails.length && t.time <= viewEnd + viewDuration / thumbnails.length);
+    return extended.length > 0 ? extended : thumbnails;
+  }, [thumbnails, viewStart, viewEnd, viewDuration]);
+
   // Waveform view fractions (0–1) for the visible window
   const waveViewStartFrac = duration > 0 ? viewStart / duration : 0;
   const waveViewEndFrac = duration > 0 ? viewEnd / duration : 1;
@@ -324,30 +335,26 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
             }
           }}
         >
-          {/* Thumbnail strip — scaled to zoom width and translated for scroll */}
-          <div
-            className="absolute top-0 h-full flex gap-px bg-base"
-            style={zoom > 1 ? {
-              width: `${zoom * 100}%`,
-              left: `-${(viewStart / duration) * zoom * 100}%`,
-            } : { width: '100%' }}
-          >
-            {thumbnails.map((thumb) => (
-              <img
-                key={thumb.time}
-                src={thumb.dataUrl}
-                className={`h-full object-cover opacity-85 hover:opacity-100 transition-opacity duration-150 ${zoom > 1 ? 'flex-1 min-w-0' : 'shrink-0'}`}
-                style={zoom <= 1 ? { width: THUMB_WIDTH } : undefined}
-                alt={TimelineStrings.thumbnailAlt(thumb.time)}
-                title={formatTime(thumb.time)}
-              />
-            ))}
-            {thumbnails.length === 0 && !isGenerating && (
-              <div className="flex w-full items-center justify-center bg-base text-xs text-fg-muted">
-                {TimelineStrings.emptyState}
-              </div>
-            )}
-          </div>
+          {/* Thumbnail strip — flex row so images fill the view at any zoom
+              level without per-zoom regeneration. Pool is generated once. */}
+          {thumbnails.length === 0 && !isGenerating && (
+            <div className="flex w-full h-full items-center justify-center bg-base text-xs text-fg-muted">
+              {TimelineStrings.emptyState}
+            </div>
+          )}
+          {displayedThumbnails.length > 0 && (
+            <div className="absolute inset-0 flex">
+              {displayedThumbnails.map((thumb) => (
+                <img
+                  key={thumb.time}
+                  src={thumb.dataUrl}
+                  className="flex-1 h-full object-cover opacity-85"
+                  alt={TimelineStrings.thumbnailAlt(thumb.time)}
+                  title={formatTime(thumb.time)}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Audio waveform overlay */}
           <WaveformCanvas
@@ -512,20 +519,18 @@ export function Timeline({ videoRef, currentTime, duration, onSeek, onMark, trim
           </div>
         )}
 
-        {/* Tick marks */}
-        {thumbnails.length > 0 && (
+        {/* Tick marks — slot-based positions matching the flex thumbnail row */}
+        {displayedThumbnails.length > 0 && (
           <div className="relative h-[18px] mt-0.5 hidden mobile-landscape:block overflow-hidden">
-            {thumbnails
-              .filter((t) => t.time >= viewStart && t.time <= viewEnd)
-              .map((thumb) => (
-                <span
-                  key={thumb.time}
-                  className="absolute -translate-x-1/2 text-2xs text-fg-muted whitespace-nowrap"
-                  style={{ left: pct(thumb.time) }}
-                >
-                  {formatTime(thumb.time)}
-                </span>
-              ))}
+            {displayedThumbnails.map((thumb, i) => (
+              <span
+                key={thumb.time}
+                className="absolute -translate-x-1/2 text-2xs text-fg-muted whitespace-nowrap"
+                style={{ left: `${((i + 0.5) / displayedThumbnails.length) * 100}%` }}
+              >
+                {formatTime(thumb.time)}
+              </span>
+            ))}
           </div>
         )}
       </div>

@@ -40,7 +40,7 @@ Object.defineProperty(globalThis, 'ResizeObserver', {
 // HTMLCanvasElement.getContext is not implemented in jsdom — stub it with a
 // no-op 2D context so canvas-drawing code (WaveformCanvas, useVideoThumbnails)
 // doesn't throw during tests.
-HTMLCanvasElement.prototype.getContext = function () {
+HTMLCanvasElement.prototype.getContext = (function () {
   return {
     clearRect: () => {},
     fillRect: () => {},
@@ -60,7 +60,7 @@ HTMLCanvasElement.prototype.getContext = function () {
     putImageData: () => {},
     createImageData: () => ({ data: new Uint8ClampedArray(0) }),
     setTransform: () => {},
-    canvas: this,
+    canvas: document.createElement('canvas'),
     fillStyle: '',
     strokeStyle: '',
     lineWidth: 1,
@@ -68,4 +68,4 @@ HTMLCanvasElement.prototype.getContext = function () {
     textAlign: 'start' as CanvasTextAlign,
     globalAlpha: 1,
   } as unknown as CanvasRenderingContext2D
-}
+}) as unknown as typeof HTMLCanvasElement.prototype.getContext

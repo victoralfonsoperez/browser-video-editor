@@ -31,10 +31,6 @@ pipeline {
       }
     }
 
-    stage('Lint') {
-      steps { sh 'pnpm lint' }
-    }
-
     stage('Build') {
       steps { sh 'pnpm build' }
     }

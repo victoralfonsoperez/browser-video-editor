@@ -7,26 +7,22 @@ pipeline {
   }
 
   environment {
-    // Adjust for your machine (Apple Silicon Homebrew path shown)
-    PATH = "/opt/homebrew/opt/node@22/bin:/opt/homebrew/bin:${env.PATH}"
     CI = 'true'   // makes Vitest run once instead of starting watch mode
   }
 
   stages {
     stage('Setup') {
       steps {
+        sh '''
+          set +x
+          export NVM_DIR="$HOME/.nvm"
+          . "$NVM_DIR/nvm.sh"
+          nvm use || nvm install
+          echo "Using node: $(command -v node)"
+          dirname "$(command -v node)" > .node-bin
+        '''
         script {
-          def nodeBin = sh(
-            script: '''
-              set +x
-              export NVM_DIR="$HOME/.nvm"
-              . "$NVM_DIR/nvm.sh" >/dev/null
-              nvm install >/dev/null 2>&1
-              dirname "$(nvm which current)"
-            ''',
-            returnStdout: true
-          ).trim()
-          env.PATH = "${nodeBin}:${env.PATH}"
+          env.PATH = "${readFile('.node-bin').trim()}:${env.PATH}"
         }
         sh 'node -v'
         sh 'corepack enable pnpm'

@@ -18,15 +18,20 @@ pipeline {
         script {
           def nodeBin = sh(
             script: '''
+              set +x
               export NVM_DIR="$HOME/.nvm"
-              . "$NVM_DIR/nvm.sh"
-              nvm install >/dev/null
+              . "$NVM_DIR/nvm.sh" >/dev/null
+              nvm install >/dev/null 2>&1
               dirname "$(nvm which current)"
             ''',
             returnStdout: true
           ).trim()
           env.PATH = "${nodeBin}:${env.PATH}"
         }
+        sh 'node -v'
+        sh 'corepack enable pnpm'
+        sh 'pnpm -v'
+        sh 'pnpm install --frozen-lockfile'
       }
     }
 
